@@ -46,6 +46,7 @@ public class UploadFundingSourceFileResearchAction extends BaseAction {
   private File file;
   private String fileContentType;
   private String fileFileName;
+  private String fundingSourceID;
 
 
   private boolean saved;
@@ -94,14 +95,20 @@ public class UploadFundingSourceFileResearchAction extends BaseAction {
   }
 
 
-  public String getFundingSourceFileResearchURL() {
-    return config.getDownloadURL() + "/" + this.getFundingSourceFileResearchPath().replace('\\', '/');
+  public String getFundingSourceID() {
+    return fundingSourceID;
   }
 
 
   private String getFundingSourceRelativePath() {
-    return config.getProjectsBaseFolder(this.getCrpSession()) + File.separator + "fundingSourceFilesResearch"
-      + File.separator;
+    String path = config.getFundingSourceFolder(this.getCrpSession()) + File.separator + fundingSourceID
+      + File.separator + "fundingSourceFilesResearch" + File.separator;
+    return path;
+  }
+
+
+  public String getPath() {
+    return config.getDownloadURL() + "/" + this.getFundingSourceRelativePath().replace('\\', '/');
   }
 
 
@@ -127,6 +134,11 @@ public class UploadFundingSourceFileResearchAction extends BaseAction {
 
   public void setFileID(long fileID) {
     this.fileID = fileID;
+  }
+
+
+  public void setFundingSourceID(String fundingSourceID) {
+    this.fundingSourceID = fundingSourceID;
   }
 
 

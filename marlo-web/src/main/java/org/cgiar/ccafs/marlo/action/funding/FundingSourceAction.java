@@ -387,6 +387,11 @@ public class FundingSourceAction extends BaseAction {
     return loggedCrp;
   }
 
+  // methos to download link file
+  public String getPath(String fsId) {
+    return config.getDownloadURL() + "/" + this.getStudyFileUrlPath(fsId).replace('\\', '/');
+  }
+
   public List<LocElement> getRegionLists() {
     return regionLists;
   }
@@ -395,8 +400,15 @@ public class FundingSourceAction extends BaseAction {
     return scopeRegionLists;
   }
 
+
   public Map<String, String> getStatus() {
     return status;
+  }
+
+
+  public String getStudyFileUrlPath(String fsId) {
+    return config.getFundingSourceFolder(this.getCrpSession()) + File.separator + fundingSourceID + File.separator
+      + "fundingSourceFilesResearch" + File.separator;
   }
 
 
@@ -512,8 +524,8 @@ public class FundingSourceAction extends BaseAction {
         if (this.hasSpecificities(APConstants.CRP_HAS_RESEARCH_HUMAN)) {
           if (fundingSource.getFundingSourceInfo().getFileResearch() != null) {
             if (fundingSource.getFundingSourceInfo().getFileResearch().getId() != null) {
-              fundingSource.getFundingSourceInfo()
-                .setFile(fileDBManager.getFileDBById(fundingSource.getFundingSourceInfo().getFileResearch().getId()));
+              fundingSource.getFundingSourceInfo().setFileResearch(
+                fileDBManager.getFileDBById(fundingSource.getFundingSourceInfo().getFileResearch().getId()));
             }
           }
         }
@@ -576,6 +588,15 @@ public class FundingSourceAction extends BaseAction {
             && pb.getPhase().equals(this.getActualPhase())
             && pb.getProject().getProjecInfoPhase(this.getActualPhase()) != null)
           .collect(Collectors.toList()));
+
+        if (this.hasSpecificities(APConstants.CRP_HAS_RESEARCH_HUMAN)) {
+          if (fundingSource.getFundingSourceInfo().getFileResearch() != null) {
+            if (fundingSource.getFundingSourceInfo().getFileResearch().getId() != null) {
+              fundingSource.getFundingSourceInfo().setFileResearch(
+                fileDBManager.getFileDBById(fundingSource.getFundingSourceInfo().getFileResearch().getId()));
+            }
+          }
+        }
 
         /*
          * Funding source Locations
@@ -780,7 +801,6 @@ public class FundingSourceAction extends BaseAction {
       return;
     }
   }
-
 
   @Override
   public String save() {
@@ -998,7 +1018,6 @@ public class FundingSourceAction extends BaseAction {
     }
   }
 
-
   /**
    * Funding Source Locations
    * 
@@ -1148,6 +1167,7 @@ public class FundingSourceAction extends BaseAction {
     }
 
   }
+
 
   public void setBudgetTypes(Map<String, String> budgetTypes) {
     this.budgetTypes = budgetTypes;

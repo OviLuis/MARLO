@@ -234,22 +234,24 @@
       [#--  Does this study involve research with human subjects? --]
       [#if action.hasSpecificities('crp_has_research_human')]
       <div class="form-group">
-        [#assign hasHumanSubjects = (fundingSource.fundingSourceInfo.hasFileResearch)!false /]
-        <label>[@s.text name="fundingSource.doesResearchHumanSubjects" /]</label>
+        [#assign hasHumanSubjects = (fundingSource.fundingSourceInfo.hasFileResearch)! /]
+        <label>[@s.text name="fundingSource.doesResearchHumanSubjects" /] [@customForm.req required=editable  /]</label>
         [#if editable]
-          [@customForm.radioFlat id="humanSubjects-yes" name="fundingSource.fundingSourceInfo.hasFileResearch" label="Yes" value="true" checked=hasHumanSubjects cssClass="humanSubjects-yes humanSubjectsRadio" cssClassLabel="radio-label-yes"/]
-          [@customForm.radioFlat id="humanSubjects-no" name="fundingSource.fundingSourceInfo.hasFileResearch" label="No" value="false" checked=!hasHumanSubjects cssClass="humanSubjects-no humanSubjectsRadio" cssClassLabel="radio-label-no"/]
+          [@customForm.radioFlat id="humanSubjects-yes" name="fundingSource.fundingSourceInfo.hasFileResearch" label="Yes" value="true" checked=((hasHumanSubjects)!false) cssClass="humanSubjects-yes humanSubjectsRadio" cssClassLabel="radio-label-yes"/]
+          [@customForm.radioFlat id="humanSubjects-no" name="fundingSource.fundingSourceInfo.hasFileResearch" label="No" value="false" checked=((!hasHumanSubjects)!false) cssClass="humanSubjects-no humanSubjectsRadio" cssClassLabel="radio-label-no"/]
         [#else]
           ${hasHumanSubjects?string('Yes', 'No')}
         [/#if]
         [#-- Upload File (Human subjects research) fileResearch --]
-        <div class="form-group humanSubjectsBlock" style="display:${hasHumanSubjects?string('block', 'none')}">
+        <div class="form-group humanSubjectsBlock" style="display:${hasHumanSubjects?string('block', 'none')}; position:relative" listname="fundingSource.fundingSourceInfo.fileResearch">
           [@customForm.fileUploadAjax 
             fileDB=(fundingSource.fundingSourceInfo.fileResearch)!{} 
             name="fundingSource.fundingSourceInfo.fileResearch.id" 
             label="fundingSource.uploadHumanSubjects" 
             dataUrl="${baseUrl}/uploadFundingSourceResearch.do" 
+            path="${action.getPath((fundingSource.fundingSourceInfo.id?string)!-1)}"
             isEditable=editable
+            required=true
           /]
         </div>
       </div>
@@ -313,7 +315,7 @@
           <div class="col-md-12 metadataElement-directDonorName">
             <label for="">[@s.text name="projectCofunded.directDonor" /]:[@customForm.req required=editable /] </label>
             <span class="description"><i>([@s.text name="projectCofunded.directDonor.helpText" /])</i></span>
-            [#if editable]
+              [#if editable]
                 [@customForm.select name="fundingSource.fundingSourceInfo.directDonor.id" i18nkey="projectCofunded.directDonor" className="donor" showTitle=false listName="institutionsDonors" keyFieldName="id"  displayFieldName="composedNameLoc" disabled=isW1W2 editable=editable /]
               [#else]
                 <input  type="hidden" name="fundingSource.fundingSourceInfo.directDonor.id" value="${(fundingSource.fundingSourceInfo.directDonor.id)!-1}" />
@@ -327,7 +329,7 @@
           <div class="col-md-12 metadataElement-originalDonorName">
             <label for="">[@s.text name="projectCofunded.donor" /]:</label>
             <span class="description"><i>([@s.text name="projectCofunded.donor.helpText" /])</i></span>
-         [#if editable]
+              [#if editable]
                 [@customForm.select name="fundingSource.fundingSourceInfo.originalDonor.id" i18nkey="projectCofunded.donor" className="donor" showTitle=false  listName="institutionsDonors" keyFieldName="id"  displayFieldName="composedNameLoc" editable=editable /]
               [#else]
                 <input  type="hidden" name="fundingSource.fundingSourceInfo.originalDonor.id" value="${(fundingSource.fundingSourceInfo.originalDonor.id)!-1}" />
@@ -347,7 +349,7 @@
         [/#if]
       </div>
     </div>
-    <h4 class="headTitle">Location information</h4> 
+    <h4 class="headTitle">Location information</h4>
     <div class="borderBox informationWrapper">
     [#-- GLOBAL DIMENSION --]
     [#if editable]
@@ -388,7 +390,7 @@
            <small style="color: #337ab7;">([@s.text name="projectLocations.standardLocations" /])</small>
          </div>
          
-          <div id="regionList" class="panel-body" listname="fundingSource.fundingRegions"> 
+          <div id="regionList" class="panel-body" listname="fundingSource.fundingRegions">
             <ul class="list">
             [#if fundingSource.fundingRegions?has_content]
               [#list fundingSource.fundingRegions as region]

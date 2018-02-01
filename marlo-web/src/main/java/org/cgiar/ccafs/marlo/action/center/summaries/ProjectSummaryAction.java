@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.pentaho.reporting.engine.classic.core.Band;
 import org.pentaho.reporting.engine.classic.core.ClassicEngineBoot;
@@ -97,8 +98,8 @@ public class ProjectSummaryAction extends BaseAction implements Summary {
     manager.registerDefaults();
     try {
 
-      final Resource reportResource =
-        manager.createDirectly(this.getClass().getResource("/pentaho/projectSummary.prpt"), MasterReport.class);
+      Resource reportResource =
+        manager.createDirectly(this.getClass().getResource("/pentaho/center/ProjectSummary.prpt"), MasterReport.class);
 
       // Get main report
       final MasterReport masterReport = (MasterReport) reportResource.getResource();

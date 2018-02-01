@@ -37,6 +37,7 @@ import java.util.HashSet;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.pentaho.reporting.engine.classic.core.Band;
 import org.pentaho.reporting.engine.classic.core.ClassicEngineBoot;
@@ -117,8 +118,8 @@ public class DeliverablesSummaryAction extends BaseAction implements Summary {
     manager.registerDefaults();
     try {
 
-      Resource reportResource =
-        manager.createDirectly(this.getClass().getResource("/pentaho/centerDeliverables.prpt"), MasterReport.class);
+      Resource reportResource = manager
+        .createDirectly(this.getClass().getResource("/pentaho/center/CenterDeliverables.prpt"), MasterReport.class);
 
       // Get main report
       MasterReport masterReport = (MasterReport) reportResource.getResource();

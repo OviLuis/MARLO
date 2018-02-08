@@ -158,11 +158,18 @@ function validateThisSection() {
     validateService = "/validateProject.do";
   }
 
-  //validate CapDev
+  // validate CapDev
   if(isCapDevSection()) {
     sectionData.capdevID = $('input[name="capdevID"]').val();
     sectionData.deliverableID = $('input[name="deliverableID"]').val();
     validateService = "/validateCenterCapdev.do";
+  }
+
+  // Validate POWB Synthesis section
+  if(isPOWBSection()) {
+    sectionData.liaisonInstitutionID = $('input[name="liaisonInstitutionID"]').val();
+    sectionData.powbSynthesisID = $('input[name="powbSynthesisID"]').val();
+    validateService = "/validatePOWB.do";
   }
 
   $.ajax({
@@ -176,11 +183,11 @@ function validateThisSection() {
         if(jQuery.isEmptyObject(data)) {
           $sectionMenu.removeClass('submitted');
         } else {
-          if(data.section.missingFields == "") {
-            $sectionMenu.addClass('submitted').removeClass('toSubmit');
-          } else {
+          var missingFields = (data.section.missingFields) || "";
+          if(!(missingFields) ){
             $sectionMenu.removeClass('submitted').addClass('toSubmit');
-
+          } else {
+            $sectionMenu.addClass('submitted').removeClass('toSubmit');
           }
         }
         $sectionMenu.removeClass('loadingSection');

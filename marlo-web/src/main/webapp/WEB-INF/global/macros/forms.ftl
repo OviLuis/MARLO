@@ -382,10 +382,14 @@
 [/#macro]
 
 [#macro radioFlat id name label="" disabled=false editable=true value="" checked=true cssClass="" cssClassLabel=""]
+  [#if editable]
   <div class="radioFlat radio-inline">
     <input id="${id}" class="radio-input ${cssClass}" type="radio" name="${name}" value="${value}" [#if checked]checked[/#if] />
     <label for="${id}" class="radio-label ${cssClassLabel}"> ${label} </label>
   </div>
+  [#elseif checked]
+    <p>${label}</p>
+  [/#if]
 [/#macro]
 
 [#macro checkBoxFlat id name label="" disabled=false editable=true value="" checked=true cssClass="" cssClassLabel=""]
@@ -403,6 +407,9 @@
     [#-- Input File --]
     [#if isEditable]
       <div class="fileUpload" style="display:${hasFile?string('none','block')}"> <input class="upload" type="file" name="file" data-url="${dataUrl}"></div>
+    [/#if]
+    [#if !isEditable && !hasFile]
+      <p>Prefilled if available</p>
     [/#if]
     [#-- Uploaded File --]
     <p class="fileUploaded textMessage" style="display:${hasFile?string('block','none')}">

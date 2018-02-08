@@ -4273,6 +4273,10 @@ li.fileUploaded span {
   background: url('../../global/images/sprite-icons-activities.png') 0 -150px;
 }
 
+.icon-neutral{
+  background: url('../../global/images/sprite-icons-activities.png') 0 -88px;
+}
+
 /*** Project next users  ***/
 
 #nextUsersBlock .nextUser {
@@ -5302,6 +5306,10 @@ table.evaluationRank thead th{
     overflow: hidden;
     cursor: pointer;
     /* margin: 0 10px !important; */
+}
+
+.radio-label.fieldError {
+  color:red;
 }
 
 .radio-label .onoffswitch-radio:checked + label{ 

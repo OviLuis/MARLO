@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN" "http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+   
+  <!-- CRP Plan of Work and Budget (POWB) -->
+  <package name="powb" namespace="/powb" extends="marlo-default">
+    
+    
+    <!--  1.1 Adjustments/ Changes to Your Theories of Change -->
+    <action name="{crp}/adjustmentsChanges" class="org.cgiar.ccafs.marlo.action.powb.ToCAdjustmentsAction">
+      <interceptor-ref name="editPowbStack" />
+      <result name="input">/WEB-INF/crp/views/powb/powb_adjustmentsChanges.ftl</result>
+      <result name="success" type="redirectAction">
+        <param name="actionName">${crpSession}/adjustmentsChanges</param>
+        <param name="liaisonInstitutionID">${liaisonInstitutionID}</param>
+        <param name="powbSynthesisID">${powbSynthesisID}</param>
+        <param name="phaseID">${phaseID}</param>
+        <param name="edit">true</param>        
+      </result>
+    </action>
+    
+    
+    <!--  1.2 Expected CRP Progress Towards Intermediate Outcomes and SLOs -->
+    <action name="{crp}/expectedProgress" class="org.cgiar.ccafs.marlo.action.powb.ExpectedCRPProgressAction">
+      <interceptor-ref name="editPowbStack" />
+      <result name="input">/WEB-INF/crp/views/powb/powb_expectedProgress.ftl</result>
+      <result name="success" type="redirectAction">
+        <param name="actionName">${crpSession}/expectedProgress</param>
+        <param name="liaisonInstitutionID">${liaisonInstitutionID}</param>
+        <param name="powbSynthesisID">${powbSynthesisID}</param>
+        <param name="edit">true</param>
+        <param name="phaseID">${phaseID}</param>
+      </result>
+    </action>
+    
+    <!--  1.3 Obtaining Evidence on Relevant Outcomes and Impacts -->
+    <action name="{crp}/evidenceRelevant" class="org.cgiar.ccafs.marlo.action.powb.EvidencesAction">
+      <interceptor-ref name="editPowbStack" />
+      <result name="input">/WEB-INF/crp/views/powb/powb_evidenceRelevant.ftl</result>
+      <result name="success" type="redirectAction">
+        <param name="actionName">${crpSession}/evidenceRelevant</param>
+        <param name="liaisonInstitutionID">${liaisonInstitutionID}</param>
+        <param name="powbSynthesisID">${powbSynthesisID}</param>
+        <param name="edit">true</param>
+        <param name="phaseID">${phaseID}</param>
+      </result>
+    </action>
+    
+    <!--  1.4 Plans by CRP Flagships -->
+    <action name="{crp}/plansByFlagship" class="org.cgiar.ccafs.marlo.action.powb.FlagshipPlansAction">
+      <interceptor-ref name="editPowbStack" />
+      <result name="input">/WEB-INF/crp/views/powb/powb_plansByFlagship.ftl</result>
+      <result name="success" type="redirectAction">
+        <param name="actionName">${crpSession}/plansByFlagship</param>
+        <param name="liaisonInstitutionID">${liaisonInstitutionID}</param>
+        <param name="powbSynthesisID">${powbSynthesisID}</param>
+        <param name="edit">true</param>
+        <param name="phaseID">${phaseID}</param>
+      </result>
+    </action>
+    
+    <!--  1.5 Cross Cutting Dimensions -->
+    <!-- 
+    <action name="{crp}/crossCuttingDimensions" class="org.cgiar.ccafs.marlo.action.powb.DefaultPOWBAction">
+      <interceptor-ref name="editPowbStack" />
+      <result name="input">/WEB-INF/crp/views/powb/powb_crossCuttingDimensions.ftl</result>
+      <result name="success" type="redirectAction">
+        <param name="actionName">${crpSession}/crossCuttingDimensions</param>
+        <param name="liaisonInstitutionID">${liaisonInstitutionID}</param>
+        <param name="powbSynthesisID">${powbSynthesisID}</param>
+        <param name="edit">true</param>
+        <param name="phaseID">${phaseID}</param>
+      </result>
+    </action> -->
+    
+     <action name="{crp}/crossCuttingDimensions" class="org.cgiar.ccafs.marlo.action.powb.CrossCuttingDimensionsAction">
+      <interceptor-ref name="editPowbStack" />
+      <result name="input">/WEB-INF/crp/views/powb/powb_crossCuttingDimensions.ftl</result>
+      <result name="success" type="redirectAction">
+         <param name="actionName">${crpSession}/crossCuttingDimensions</param>
+        <param name="liaisonInstitutionID">${liaisonInstitutionID}</param>
+        <param name="powbSynthesisID">${powbSynthesisID}</param>
+        <param name="edit">true</param>
+        <param name="phaseID">${phaseID}</param>
+      </result>
+    </action>
+    
+    
+    <!--  2.1 CRP Staffing in 2018 -->
+    
+    <!--  2.2 Financial Plan for 2018, including use of W1/3 -->
+    
+    <!--  2.3 Collaboration and Integration -->
+    
+    <!--  2.4 Monitoring, Evaluation, and Learning -->
+    
+    <!--  3.1 Management of Risks to Your CRP -->
+    
+    <!--  3.2 CRP Management and Governance -->
+    
+    
+
+    
+  </package>
+</struts>

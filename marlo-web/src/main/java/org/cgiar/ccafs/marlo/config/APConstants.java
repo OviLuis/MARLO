@@ -188,6 +188,7 @@ public final class APConstants {
   public static final String LIAISON_INSTITUTION_REQUEST_ID = "liaisonInstitutionID";
   public static final String LIASON_INSTITUTION_ID = "liasonInstitutionID";
   public static final String PHASE_ID = "phaseID";
+  public static final String POWB_SYNTHESIS_ID = "powbSynthesisID";
 
   public static final String LOC_ELEMENT_ID = "locElementID";
   public static final String LOCATION_PARENT_ID_PARAMETER = "parentId";
@@ -357,6 +358,11 @@ public final class APConstants {
   public static final String PROJECT_INFO_RELATION =
     "java.util.Set(org.cgiar.ccafs.marlo.data.model.Project.projectInfos)";
 
+  public static final String SYNTHESIS_EXPECTED_RELATION =
+    "java.util.Set(org.cgiar.ccafs.marlo.data.model.PowbSynthesis.powbExpectedCrpProgresses)";
+
+  public static final String SYNTHESIS_EVIDENCE_RELATION =
+    "java.util.Set(org.cgiar.ccafs.marlo.data.model.PowbEvidence.powbEvidencePlannedStudies)";
 
   // Query parameter
   public static final String QUERY_PARAMETER = "q";
@@ -451,6 +457,9 @@ public final class APConstants {
   public static final String HOSTNAME_AD = "ciatroot1.ciat.cgiarad.org";
   public static final String PORT_AD = "3268";
 
+  // POWB Synthesis
+  public static final String POWB_FOLDER = "powbSynthesis";
+
 
   // Relations Name
   public static final String RESEARCH_PROGRAM_IMPACT_RELATION =
@@ -500,7 +509,7 @@ public final class APConstants {
   public static final String SUMMARY_FORMAT_EXCEL = "Excel";
   public static final String SUMMARY_FORMAT_PDF = "PDF";
 
-	public static final String CRP_HAS_SPECIFIC_MANAGEMENT_DELIVERABLE_TYPES =
+  public static final String CRP_HAS_SPECIFIC_MANAGEMENT_DELIVERABLE_TYPES =
     "crp_has_specific_management_deliverable_type";
 
   // Cap-Dev Relations

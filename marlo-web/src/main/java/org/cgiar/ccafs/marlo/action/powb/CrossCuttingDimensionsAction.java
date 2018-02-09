@@ -34,10 +34,9 @@ import org.cgiar.ccafs.marlo.data.model.Phase;
 import org.cgiar.ccafs.marlo.data.model.PowbSynthesis;
 import org.cgiar.ccafs.marlo.data.model.ProgramType;
 import org.cgiar.ccafs.marlo.data.model.User;
-import org.cgiar.ccafs.marlo.security.Permission;
 import org.cgiar.ccafs.marlo.utils.APConfig;
 import org.cgiar.ccafs.marlo.utils.AutoSaveReader;
-import org.cgiar.ccafs.marlo.validation.sythesis.CrpIndicatorsValidator;
+import org.cgiar.ccafs.marlo.validation.powb.CrossCuttingValidator;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -71,24 +70,24 @@ public class CrossCuttingDimensionsAction extends BaseAction {
   private CrpProgramManager crpProgramManager;
   private PowbSynthesisManager powbSynthesisManager;
   private CrossCuttingDimensionManager crossCuttingManager;
+  private CrossCuttingValidator validator;
 
 
   private List<LiaisonInstitution> liaisonInstitutions;
   private UserManager userManager;
   private LiaisonInstitution liaisonInstitution;
-  private CrpIndicatorsValidator validator;
   private String transaction;
   private CrossCuttingDimensions crossCutting;
   private Long crossCuttingId;
   private Long liaisonInstitutionID;
   private GlobalUnit loggedCrp;
   private PowbSynthesis powbSynthesis;
-  private Long powbSynthesisID;
 
+  private Long powbSynthesisID;
 
   @Inject
   public CrossCuttingDimensionsAction(APConfig config, GlobalUnitManager crpManager, AuditLogManager auditLogManager,
-    LiaisonInstitutionManager liaisonInstitutionManager, CrpIndicatorsValidator validator,
+    LiaisonInstitutionManager liaisonInstitutionManager, CrossCuttingValidator validator,
     CrpProgramManager crpProgramManager, UserManager userManager, PowbSynthesisManager powbSynthesisManager,
     CrossCuttingDimensionManager crossCuttingManager) {
     super(config);
@@ -97,10 +96,31 @@ public class CrossCuttingDimensionsAction extends BaseAction {
     this.liaisonInstitutionManager = liaisonInstitutionManager;
     this.crpProgramManager = crpProgramManager;
     this.userManager = userManager;
-    this.validator = validator;
     this.powbSynthesisManager = powbSynthesisManager;
+    this.crossCuttingManager = crossCuttingManager;
+    this.validator = validator;
 
   }
+
+  @Override
+  public String cancel() {
+    Path path = this.getAutoSaveFilePath();
+    if (path.toFile().exists()) {
+      boolean fileDeleted = path.toFile().delete();
+    }
+    this.setDraft(false);
+    Collection<String> messages = this.getActionMessages();
+    if (!messages.isEmpty()) {
+      String validationMessage = messages.iterator().next();
+      this.setActionMessages(null);
+      this.addActionMessage("draft:" + this.getText("cancel.autoSave"));
+    } else {
+      this.addActionMessage("draft:" + this.getText("cancel.autoSave"));
+    }
+    messages = this.getActionMessages();
+    return SUCCESS;
+  }
+
 
   public Long firstFlagship() {
     List<LiaisonInstitution> liaisonInstitutions = new ArrayList<>(loggedCrp.getLiaisonInstitutions().stream()
@@ -112,18 +132,18 @@ public class CrossCuttingDimensionsAction extends BaseAction {
     return liaisonInstitutionId;
   }
 
+
   private Path getAutoSaveFilePath() {
-    String composedClassName = liaisonInstitution.getClass().getSimpleName();
+    String composedClassName = powbSynthesis.getClass().getSimpleName();
     String actionFile = this.getActionName().replace("/", "_");
-    String autoSaveFile = liaisonInstitution.getId() + "_" + composedClassName + "_" + loggedCrp.getAcronym() + "_powb_"
-      + actionFile + ".json";
+    String autoSaveFile =
+      powbSynthesis.getId() + "_" + composedClassName + "_" + loggedCrp.getAcronym() + "_powb_" + actionFile + ".json";
     return Paths.get(config.getAutoSaveFolder() + autoSaveFile);
   }
 
   public CrossCuttingDimensions getCrossCutting() {
     return crossCutting;
   }
-
 
   public Long getCrossCuttingId() {
     return crossCuttingId;
@@ -134,10 +154,10 @@ public class CrossCuttingDimensionsAction extends BaseAction {
     return liaisonInstitution;
   }
 
+
   public Long getLiaisonInstitutionID() {
     return liaisonInstitutionID;
   }
-
 
   public List<LiaisonInstitution> getLiaisonInstitutions() {
     return liaisonInstitutions;
@@ -147,6 +167,12 @@ public class CrossCuttingDimensionsAction extends BaseAction {
   public GlobalUnit getLoggedCrp() {
     return loggedCrp;
   }
+
+
+  public PowbSynthesis getPowbSynthesis() {
+    return powbSynthesis;
+  }
+
 
   public String getTransaction() {
     return transaction;
@@ -257,6 +283,7 @@ public class CrossCuttingDimensionsAction extends BaseAction {
       PowbSynthesis powbSynthesisDB = powbSynthesisManager.getPowbSynthesisById(powbSynthesisID);
       powbSynthesisID = powbSynthesisDB.getId();
       liaisonInstitutionID = powbSynthesisDB.getLiaisonInstitution().getId();
+      liaisonInstitution = liaisonInstitutionManager.getLiaisonInstitutionById(liaisonInstitutionID);
 
       Path path = this.getAutoSaveFilePath();
 
@@ -309,7 +336,7 @@ public class CrossCuttingDimensionsAction extends BaseAction {
 
     // Base Permission
     String params[] = {loggedCrp.getAcronym(), powbSynthesis.getId() + ""};
-    this.setBasePermission(this.getText(Permission.POWB_SYNTHESIS_TOC_BASE_PERMISSION, params));
+    // this.setBasePermission(this.getText(Permission.POWB_SYNTHESIS_TOC_BASE_PERMISSION, params));
 
     if (this.isHttpPost()) {
 
@@ -368,7 +395,6 @@ public class CrossCuttingDimensionsAction extends BaseAction {
 
   }
 
-
   public void setCrossCutting(CrossCuttingDimensions crossCutting) {
     this.crossCutting = crossCutting;
   }
@@ -399,6 +425,10 @@ public class CrossCuttingDimensionsAction extends BaseAction {
   }
 
 
+  public void setPowbSynthesis(PowbSynthesis powbSynthesis) {
+    this.powbSynthesis = powbSynthesis;
+  }
+
   public void setTransaction(String transaction) {
     this.transaction = transaction;
   }
@@ -411,6 +441,9 @@ public class CrossCuttingDimensionsAction extends BaseAction {
   @Override
   public void validate() {
     if (save) {
+
+      validator.validate(this, powbSynthesis, powbSynthesis.getCrossCutting().getSummarize(),
+        powbSynthesis.getCrossCutting().getAssets(), true);
 
     }
   }

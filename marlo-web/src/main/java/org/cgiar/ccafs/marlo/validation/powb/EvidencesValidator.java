@@ -89,14 +89,16 @@ public class EvidencesValidator extends BaseValidator {
         }
       }
 
-      this.validateEvidence(action, powbSynthesis);
+      if (this.isPMU(this.getLiaisonInstitution(action, powbSynthesis.getId()))) {
+        this.validateEvidence(action, powbSynthesis);
+      }
 
       if (!this.isPMU(this.getLiaisonInstitution(action, powbSynthesis.getId()))) {
         if (powbSynthesis.getPowbEvidence() != null) {
           if (powbSynthesis.getPowbEvidence().getPlannedStudies() != null) {
             if (powbSynthesis.getPowbEvidence().getPlannedStudies().size() == 0) {
 
-              action.addMessage(action.getText("programImpact.action.beneficiary"));
+              action.addMessage(action.getText("evidenceRelevant.plannedStudies.projectPlannedStudies"));
               action.getInvalidFields().put("list-powbSynthesis.powbEvidence.plannedStudies",
                 action.getText(InvalidFieldsMessages.EMPTYLIST, new String[] {"list-plannedStudies"}));
 
@@ -144,7 +146,7 @@ public class EvidencesValidator extends BaseValidator {
         InvalidFieldsMessages.EMPTYFIELD);
     }
 
-    if (!(this.isValidString(plannedStudy.getComments()) && this.wordCount(plannedStudy.getComments()) <= 300)) {
+    if (!(this.isValidString(plannedStudy.getComments()) && this.wordCount(plannedStudy.getComments()) <= 100)) {
       action.addMessage(action.getText("evidenceRelevant.pannedStudies.validator.comments", params));
       action.getInvalidFields().put("input-powbSynthesis.powbEvidence.plannedStudies[" + i + "].comments",
         InvalidFieldsMessages.EMPTYFIELD);

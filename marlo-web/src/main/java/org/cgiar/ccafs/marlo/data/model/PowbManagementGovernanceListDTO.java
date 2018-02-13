@@ -20,36 +20,40 @@ import java.io.Serializable;
 /**
  * @author Hermes Jiménez - CIAT/CCAFS
  */
-public class PowbTocList implements Serializable {
+public class PowbManagementGovernanceListDTO implements Serializable {
 
-
-  private static final long serialVersionUID = -3990241163829321362L;
+  private static final long serialVersionUID = -2177574215343193880L;
 
 
   private LiaisonInstitution liaisonInstitution;
 
 
-  private String overall;
+  private String description;
 
 
-  public PowbTocList() {
+  public PowbManagementGovernanceListDTO() {
 
   }
+
+
+  public String getDescription() {
+    return description;
+  }
+
 
   public LiaisonInstitution getLiaisonInstitution() {
     return liaisonInstitution;
   }
 
-  public String getOverall() {
-    return overall;
+
+  public void setDescription(String description) {
+    this.description = description;
   }
+
 
   public void setLiaisonInstitution(LiaisonInstitution liaisonInstitution) {
     this.liaisonInstitution = liaisonInstitution;
   }
 
-  public void setOverall(String overall) {
-    this.overall = overall;
-  }
 
 }

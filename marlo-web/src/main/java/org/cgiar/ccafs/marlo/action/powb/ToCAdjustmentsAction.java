@@ -32,7 +32,7 @@ import org.cgiar.ccafs.marlo.data.model.LiaisonUser;
 import org.cgiar.ccafs.marlo.data.model.Phase;
 import org.cgiar.ccafs.marlo.data.model.PowbSynthesis;
 import org.cgiar.ccafs.marlo.data.model.PowbToc;
-import org.cgiar.ccafs.marlo.data.model.PowbTocList;
+import org.cgiar.ccafs.marlo.data.model.PowbTocListDTO;
 import org.cgiar.ccafs.marlo.data.model.ProgramType;
 import org.cgiar.ccafs.marlo.data.model.User;
 import org.cgiar.ccafs.marlo.security.Permission;
@@ -106,7 +106,7 @@ public class ToCAdjustmentsAction extends BaseAction {
 
   private List<LiaisonInstitution> liaisonInstitutions;
 
-  private List<PowbTocList> tocList;
+  private List<PowbTocListDTO> tocList;
 
   @Inject
   public ToCAdjustmentsAction(APConfig config, GlobalUnitManager crpManager,
@@ -198,7 +198,7 @@ public class ToCAdjustmentsAction extends BaseAction {
     return powbSynthesisID;
   }
 
-  public List<PowbTocList> getTocList() {
+  public List<PowbTocListDTO> getTocList() {
     return tocList;
   }
 
@@ -469,7 +469,7 @@ public class ToCAdjustmentsAction extends BaseAction {
     this.powbSynthesisID = powbSynthesisID;
   }
 
-  public void setTocList(List<PowbTocList> tocList) {
+  public void setTocList(List<PowbTocListDTO> tocList) {
     this.tocList = tocList;
   }
 
@@ -481,7 +481,7 @@ public class ToCAdjustmentsAction extends BaseAction {
   public void tocList(long phaseID) {
     tocList = new ArrayList<>();
     for (LiaisonInstitution liaisonInstitution : liaisonInstitutions) {
-      PowbTocList powbTocList = new PowbTocList();
+      PowbTocListDTO powbTocList = new PowbTocListDTO();
       powbTocList.setLiaisonInstitution(liaisonInstitution);
       powbTocList.setOverall("");
       PowbSynthesis powbSynthesis = powbSynthesisManager.findSynthesis(phaseID, liaisonInstitution.getId());

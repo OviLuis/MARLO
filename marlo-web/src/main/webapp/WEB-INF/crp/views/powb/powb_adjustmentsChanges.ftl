@@ -56,7 +56,6 @@
                   dataUrl="${baseUrl}/uploadPowbSynthesis.do" 
                   path="${action.path}"
                   isEditable=editable
-                  required=true
                 /]
               </div>
             </div>
@@ -103,19 +102,14 @@
           
           [#-- Narrative--]
           <td class="left narrative">
-            [#if element.overall!='']
-            ${element.overall!'None'}
-            [#else]
-            <i>Prefilled when available</i>
-            [/#if]
+            [#if (element.overall?has_content)!false]${element.overall?replace('\n', '<br>')}[#else]<i style="opacity:0.5">[@s.text name="global.prefilledWhenAvailable"/]</i>[/#if]
           </td>
-          
         </tr>
       [/#list]
     [#else]
       <tr>
         <td colspan="2" class="text-center">
-          There is not data to show
+          <i style="opacity:0.5">[@s.text name="global.prefilledWhenAvailable"/]</i>
         </td>
       </tr>
     [/#if]

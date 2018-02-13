@@ -56,8 +56,10 @@ public class PowbSynthesis implements java.io.Serializable, IAuditLog {
   @Expose
   private PowbFlagshipPlans powbFlagshipPlans;
 
+
   @Expose
   private PowbEvidence powbEvidence;
+
 
   @Expose
   private CrossCuttingDimensions crossCutting;
@@ -65,13 +67,35 @@ public class PowbSynthesis implements java.io.Serializable, IAuditLog {
 
   private Set<SectionStatus> sectionStatuses = new HashSet<SectionStatus>(0);
 
+
   private Set<PowbExpectedCrpProgress> powbExpectedCrpProgresses = new HashSet<PowbExpectedCrpProgress>(0);
+
+
   private List<PowbExpectedCrpProgress> expectedCrpProgresses;
+
+
+  @Expose
+  private PowbMonitoringEvaluationLearning powbMonitoringEvaluationLearning;
+
+  @Expose
+  private PowbCrpStaffing crpStaffing;
+
+  private Set<PowbSynthesisCrpStaffingCategory> powbSynthesisCrpStaffingCategory =
+    new HashSet<PowbSynthesisCrpStaffingCategory>(0);
+
+
+  private List<PowbSynthesisCrpStaffingCategory> powbSynthesisCrpStaffingCategoryList;
+
+  @Expose
+  private PowbManagementRisk powbManagementRisk;
+
+
+  @Expose
+  private PowbManagementGovernance powbManagementGovernance;
 
 
   public PowbSynthesis() {
   }
-
 
   public PowbSynthesis(Long id, Phase phase, boolean active, Date activeSince, User modifiedBy,
     LiaisonInstitution liaisonInstitution) {
@@ -83,7 +107,6 @@ public class PowbSynthesis implements java.io.Serializable, IAuditLog {
     this.liaisonInstitution = liaisonInstitution;
   }
 
-
   public PowbSynthesis(Long id, Phase phase, boolean active, User createdBy, Date activeSince, User modifiedBy,
     LiaisonInstitution liaisonInstitution) {
     this.id = id;
@@ -94,7 +117,6 @@ public class PowbSynthesis implements java.io.Serializable, IAuditLog {
     this.modifiedBy = modifiedBy;
     this.liaisonInstitution = liaisonInstitution;
   }
-
 
   @Override
   public boolean equals(Object obj) {
@@ -118,11 +140,9 @@ public class PowbSynthesis implements java.io.Serializable, IAuditLog {
     return true;
   }
 
-
   public Date getActiveSince() {
     return activeSince;
   }
-
 
   public User getCreatedBy() {
     return createdBy;
@@ -133,6 +153,10 @@ public class PowbSynthesis implements java.io.Serializable, IAuditLog {
     return crossCutting;
   }
 
+  public PowbCrpStaffing getCrpStaffing() {
+    return crpStaffing;
+  }
+
   public List<PowbExpectedCrpProgress> getExpectedCrpProgresses() {
     return expectedCrpProgresses;
   }
@@ -141,6 +165,7 @@ public class PowbSynthesis implements java.io.Serializable, IAuditLog {
   public Long getId() {
     return id;
   }
+
 
   public LiaisonInstitution getLiaisonInstitution() {
     return liaisonInstitution;
@@ -154,11 +179,11 @@ public class PowbSynthesis implements java.io.Serializable, IAuditLog {
     return sb.toString();
   }
 
+
   @Override
   public String getModificationJustification() {
     return "";
   }
-
 
   @Override
   public User getModifiedBy() {
@@ -174,15 +199,36 @@ public class PowbSynthesis implements java.io.Serializable, IAuditLog {
     return powbEvidence;
   }
 
+
   public Set<PowbExpectedCrpProgress> getPowbExpectedCrpProgresses() {
     return powbExpectedCrpProgresses;
   }
-
 
   public PowbFlagshipPlans getPowbFlagshipPlans() {
     return powbFlagshipPlans;
   }
 
+  public PowbManagementGovernance getPowbManagementGovernance() {
+    return powbManagementGovernance;
+  }
+
+  public PowbManagementRisk getPowbManagementRisk() {
+    return powbManagementRisk;
+  }
+
+
+  public PowbMonitoringEvaluationLearning getPowbMonitoringEvaluationLearning() {
+    return powbMonitoringEvaluationLearning;
+  }
+
+  public Set<PowbSynthesisCrpStaffingCategory> getPowbSynthesisCrpStaffingCategory() {
+    return powbSynthesisCrpStaffingCategory;
+  }
+
+
+  public List<PowbSynthesisCrpStaffingCategory> getPowbSynthesisCrpStaffingCategoryList() {
+    return powbSynthesisCrpStaffingCategoryList;
+  }
 
   public PowbToc getPowbToc() {
     return powbToc;
@@ -191,6 +237,7 @@ public class PowbSynthesis implements java.io.Serializable, IAuditLog {
   public Set<SectionStatus> getSectionStatuses() {
     return sectionStatuses;
   }
+
 
   @Override
   public int hashCode() {
@@ -204,6 +251,7 @@ public class PowbSynthesis implements java.io.Serializable, IAuditLog {
   public boolean isActive() {
     return true;
   }
+
 
   public void setActive(boolean active) {
     this.active = active;
@@ -222,9 +270,15 @@ public class PowbSynthesis implements java.io.Serializable, IAuditLog {
     this.crossCutting = crossCutting;
   }
 
+  public void setCrpStaffing(PowbCrpStaffing crpStaffing) {
+    this.crpStaffing = crpStaffing;
+  }
+
+
   public void setExpectedCrpProgresses(List<PowbExpectedCrpProgress> expectedCrpProgresses) {
     this.expectedCrpProgresses = expectedCrpProgresses;
   }
+
 
   public void setId(Long id) {
     this.id = id;
@@ -234,11 +288,9 @@ public class PowbSynthesis implements java.io.Serializable, IAuditLog {
     this.liaisonInstitution = liaisonInstitution;
   }
 
-
   public void setModifiedBy(User modifiedBy) {
     this.modifiedBy = modifiedBy;
   }
-
 
   public void setPhase(Phase phase) {
     this.phase = phase;
@@ -248,13 +300,38 @@ public class PowbSynthesis implements java.io.Serializable, IAuditLog {
     this.powbEvidence = powbEvidence;
   }
 
-
   public void setPowbExpectedCrpProgresses(Set<PowbExpectedCrpProgress> powbExpectedCrpProgresses) {
     this.powbExpectedCrpProgresses = powbExpectedCrpProgresses;
   }
 
+
   public void setPowbFlagshipPlans(PowbFlagshipPlans powbFlagshipPlans) {
     this.powbFlagshipPlans = powbFlagshipPlans;
+  }
+
+
+  public void setPowbManagementGovernance(PowbManagementGovernance powbManagementGovernance) {
+    this.powbManagementGovernance = powbManagementGovernance;
+  }
+
+  public void setPowbManagementRisk(PowbManagementRisk powbManagementRisk) {
+    this.powbManagementRisk = powbManagementRisk;
+  }
+
+
+  public void setPowbMonitoringEvaluationLearning(PowbMonitoringEvaluationLearning powbMonitoringEvaluationLearning) {
+    this.powbMonitoringEvaluationLearning = powbMonitoringEvaluationLearning;
+  }
+
+
+  public void
+    setPowbSynthesisCrpStaffingCategory(Set<PowbSynthesisCrpStaffingCategory> powbSynthesisCrpStaffingCategory) {
+    this.powbSynthesisCrpStaffingCategory = powbSynthesisCrpStaffingCategory;
+  }
+
+  public void setPowbSynthesisCrpStaffingCategoryList(
+    List<PowbSynthesisCrpStaffingCategory> powbSynthesisCrpStaffingCategoryList) {
+    this.powbSynthesisCrpStaffingCategoryList = powbSynthesisCrpStaffingCategoryList;
   }
 
 

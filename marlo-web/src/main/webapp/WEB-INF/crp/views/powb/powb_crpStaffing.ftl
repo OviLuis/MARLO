@@ -41,7 +41,8 @@
           
           [#-- Briefly summarize any staffing issues or constraints relevant to CRP capacity --] 
           <div class="form-group">
-            [@customForm.textArea  name="powbSynthesis.powbFlagshipPlans.planSummary" i18nkey="powbSynthesis.crpStaffing.staffingIssues" help="powbSynthesis.crpStaffing.staffingIssues.help" paramText="${actualPhase.year}" required=true className="limitWords-100" editable=editable /]
+            <input type="hidden" name="powbSynthesis.crpStaffing.id" value="${(powbSynthesis.crpStaffing.id)!}" />
+            [@customForm.textArea  name="powbSynthesis.crpStaffing.staffingIssues" i18nkey="powbSynthesis.crpStaffing.staffingIssues" help="powbSynthesis.crpStaffing.staffingIssues.help" paramText="${actualPhase.year}" required=true className="limitWords-100" editable=editable && PMU /]
           </div>
           
           [#-- Table D: CRP Staffing (OPTIONAL IN POWB 2018)  --]
@@ -53,7 +54,7 @@
         </div>
         
         [#-- Section Buttons & hidden inputs--]
-        [#if flagship]
+        [#if PMU]
           [#include "/WEB-INF/crp/views/powb/buttons-powb.ftl" /]
         [/#if]
         
@@ -79,19 +80,19 @@
       </thead>
       <tbody>
         [#if powbCrpStaffingCategories??]
-          Exists
           [#list powbCrpStaffingCategories  as crpStaffingCategory]
-            [#assign customName = "powbSynthesis.crpStaffing[${crpStaffingCategory_index}]" /]
+            [#assign customName = "powbSynthesis.powbSynthesisCrpStaffingCategoryList[${crpStaffingCategory_index}]" /]
+            [#assign element = (action.getSynthesisCrpStaffingCategory(crpStaffingCategory.id))!{}]
             <tr>
               <td>
                 <span>${crpStaffingCategory.category}</span>
-                <input type="hidden" name="${customName}.id" value="" />
-                <input type="hidden" name="${customName}.powbCrpStaffingCategory.id" value="" />
+                <input type="hidden" name="${customName}.id" value="${(element.id)!}" />
+                <input type="hidden" name="${customName}.powbCrpStaffingCategory.id" value="${(crpStaffingCategory.id)!}" />
               </td>
-              <td> [@customForm.input name="${customName}.female" i18nkey="" showTitle=false className="currencyInput text-center type-female category-${crpStaffingCategory_index}" required=true /]  </td>
-              <td> [@customForm.input name="${customName}.male" i18nkey="" showTitle=false className="currencyInput text-center type-male category-${crpStaffingCategory_index}" required=true /] </td>
-              <td class="text-center"> <span class="type-total category-${crpStaffingCategory_index}">0</span> </td>
-              <td class="text-center"> <span class="type-percFemale category-${crpStaffingCategory_index}">0</span>% </td>
+              <td> [@customForm.input name="${customName}.female" value="${(element.female)!}" i18nkey="" showTitle=false className="currencyInput text-center type-female category-${crpStaffingCategory_index}" required=true editable=editable && PMU /]  </td>
+              <td> [@customForm.input name="${customName}.male" value="${(element.male)!}" i18nkey="" showTitle=false className="currencyInput text-center type-male category-${crpStaffingCategory_index}" required=true editable=editable && PMU /] </td>
+              <td class="text-center"> <span class="label-total category-${crpStaffingCategory_index}">${(element.totalFTE)!"0"}</span> </td>
+              <td class="text-center"> <span class="label-percFemale category-${crpStaffingCategory_index}">${(element.femalePercentage)!"0"}</span>% </td>
             </tr>
           [/#list]
         [/#if]

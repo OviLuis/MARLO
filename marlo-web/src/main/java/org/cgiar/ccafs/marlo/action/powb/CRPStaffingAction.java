@@ -82,12 +82,8 @@ public class CRPStaffingAction extends BaseAction {
   private Long powbSynthesisID;
   private List<LiaisonInstitution> liaisonInstitutions;
   private List<PowbCrpStaffingCategories> powbCrpStaffingCategories;
-
   private String transaction;
-
-
   private LiaisonInstitution liaisonInstitution;
-
   private Long liaisonInstitutionID;
   private GlobalUnit loggedCrp;
   private CrpStaffingValidator validator;
@@ -215,11 +211,9 @@ public class CRPStaffingAction extends BaseAction {
 
   public PowbSynthesisCrpStaffingCategory getSynthesisCrpStaffingCategory(Long crpStaffingcategory) {
     if (crpStaffingcategory != null) {
-      PowbCrpStaffingCategories powbCrpStaffingCategories =
-        powbCrpStaffingCategoriesManager.getPowbCrpStaffingCategoriesById(crpStaffingcategory);
       List<PowbSynthesisCrpStaffingCategory> PowbSynthesisCrpStaffingCategory =
-        powbCrpStaffingCategories.getPowbSynthesisCrpStaffingCategory().stream()
-          .filter(cc -> cc.isActive() && cc.getPowbSynthesis().equals(powbSynthesis)).collect(Collectors.toList());
+        powbSynthesis.getPowbSynthesisCrpStaffingCategoryList().stream()
+          .filter(c -> c.getPowbCrpStaffingCategory().getId().equals(crpStaffingcategory)).collect(Collectors.toList());
       if (PowbSynthesisCrpStaffingCategory != null && !PowbSynthesisCrpStaffingCategory.isEmpty()) {
         return PowbSynthesisCrpStaffingCategory.get(0);
       } else {
@@ -299,8 +293,6 @@ public class CRPStaffingAction extends BaseAction {
     powbCrpStaffingCategories = new ArrayList<>();
     powbCrpStaffingCategories =
       powbCrpStaffingCategoriesManager.findAll().stream().filter(c -> c.isActive()).collect(Collectors.toList());
-    PowbSynthesisCrpStaffingCategory powbSynthesisCrpStaffingCategory = this.getSynthesisCrpStaffingCategory(1l);
-    System.out.println(powbSynthesisCrpStaffingCategory);
     // Base Permission
     String params[] = {loggedCrp.getAcronym(), powbSynthesis.getId() + ""};
     this.setBasePermission(this.getText(Permission.POWB_SYNTHESIS_CRPSTAFFING_BASE_PERMISSION, params));
@@ -386,9 +378,13 @@ public class CRPStaffingAction extends BaseAction {
       .setPowbCrpStaffingCategory(powbSynthesisCrpStaffingCategory.getPowbCrpStaffingCategory());
     if (powbSynthesisCrpStaffingCategory.getFemale() != null) {
       newPowbCrpStaffingCategories.setFemale(powbSynthesisCrpStaffingCategory.getFemale());
+    } else {
+      newPowbCrpStaffingCategories.setFemale(0.0);
     }
     if (powbSynthesisCrpStaffingCategory.getMale() != null) {
-      newPowbCrpStaffingCategories.setFemale(powbSynthesisCrpStaffingCategory.getMale());
+      newPowbCrpStaffingCategories.setMale(powbSynthesisCrpStaffingCategory.getMale());
+    } else {
+      newPowbCrpStaffingCategories.setMale(0.0);
     }
     newPowbCrpStaffingCategories =
       powbSynthesisCrpStaffingCategoryManager.savePowbSynthesisCrpStaffingCategory(newPowbCrpStaffingCategories);
@@ -413,9 +409,13 @@ public class CRPStaffingAction extends BaseAction {
     powbCrpStaffingCategories.setActiveSince(new Date());
     if (powbSynthesisCrpStaffingCategory.getFemale() != null) {
       powbCrpStaffingCategories.setFemale(powbSynthesisCrpStaffingCategory.getFemale());
+    } else {
+      powbCrpStaffingCategories.setFemale(0.0);
     }
     if (powbSynthesisCrpStaffingCategory.getMale() != null) {
-      powbCrpStaffingCategories.setFemale(powbSynthesisCrpStaffingCategory.getMale());
+      powbCrpStaffingCategories.setMale(powbSynthesisCrpStaffingCategory.getMale());
+    } else {
+      powbCrpStaffingCategories.setMale(0.0);
     }
     powbCrpStaffingCategories =
       powbSynthesisCrpStaffingCategoryManager.savePowbSynthesisCrpStaffingCategory(powbCrpStaffingCategories);

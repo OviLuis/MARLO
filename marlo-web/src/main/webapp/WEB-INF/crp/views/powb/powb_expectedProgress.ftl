@@ -134,13 +134,13 @@
                 [#-- Milestone --]
                 <td> ${milestone.composedName} [#if allowPopups] <div class="pull-right">[@milestoneContributions element=milestone tiny=true /] [/#if]</div></td>
                 [#-- W1W2 --]
-                [#if isFlagshipRow]<td rowspan="${milestoneSize}"> US$ <span >${fp.w1?number?string(",##0.00")}</span> </td>[/#if]
+                [#if isFlagshipRow]<td rowspan="${milestoneSize}">[@projectBudgetsByFlagshipMacro element=fp type="W1W2" popupEnabled=allowPopups/] </td>[/#if]
                 [#-- W3/Bilateral --]
-                [#if isFlagshipRow]<td rowspan="${milestoneSize}"> US$ <span >${fp.w3?number?string(",##0.00")}</span> </td>[/#if]
+                [#if isFlagshipRow]<td rowspan="${milestoneSize}">[@projectBudgetsByFlagshipMacro element=fp type="W3BILATERAL" popupEnabled=allowPopups/]  </td>[/#if]
                 [#-- Assessment --]
                 <td>[#if (milestoneProgress.assesmentName?has_content)!false]${milestoneProgress.assesmentName}[#else]<i style="opacity:0.5">[@s.text name="global.prefilledWhenAvailable"/]</i>[/#if]</td>
                 [#-- Means Verification --]
-                <td>[#if (milestoneProgress.means?has_content)!false]${milestoneProgress.means}[#else]<i style="opacity:0.5">[@s.text name="global.prefilledWhenAvailable"/]</i>[/#if]</td>
+                <td class="col-md-3">[#if (milestoneProgress.means?has_content)!false]${milestoneProgress.means}[#else]<i style="opacity:0.5">[@s.text name="global.prefilledWhenAvailable"/]</i>[/#if]</td>
               </tr>
             [/#list]
           [/#list]
@@ -148,29 +148,7 @@
       </tbody>
     </table>
   </div>
-  
-  [#-- 
-  <h5>TEST</h5>
-  <ul>
-    [#list flagships as fp]
-      [#assign milestoneSize = fp.milestones?size]
-      <li> ${fp.acronym} - <strong>Milestones Size: ${milestoneSize}</strong>
-        <ul>
-          [#list fp.outcomes as outcome]
-            [#assign outcomesSize = outcome.milestones?size]
-            <li> ${outcome.composedName} - <strong>Milestones Size: ${outcomesSize}</strong>
-              <ul>
-                [#list outcome.milestones as milestone]
-                  <li>${milestone.composedName}</li>
-                [/#list]
-              </ul>
-            </li>
-          [/#list]
-        </ul>
-      </li>
-    [/#list]
-  </ul>
-   --]
+
 [/#macro]
 
 
@@ -244,17 +222,21 @@
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
         <h4 class="modal-title" id="myModalLabel">[@s.text name="expectedProgress.milestonesContributions" /]</h4>
+        <hr />
+        <p><strong>Milestone for ${actualPhase.year}</strong> - ${(element.title!)}</p>
+        [#assign hasTarget = element.srfTargetUnit?? && (element.srfTargetUnit.id != -1) /]
+        [#if hasTarget]
+          <p><strong>Target unit:</strong> ${(element.srfTargetUnit.name!)} <br /> <strong>Target value:</strong> ${(element.value!)}</p>
+        [/#if]
       </div>
       <div class="modal-body">
-        <p><strong>Milestone for ${actualPhase.year}</strong> - ${(element.title!)}</p>
-        [#if element.srfTargetUnit??]<strong>Target unit:</strong> ${(element.srfTargetUnit.name!)}[/#if]
         <div class="">
           <table class="table table-bordered">
             <thead>
               <tr>
                 <th class="col-md-1"> Project ID </th>
                 <th class="col-md-4"> Project Title </th>
-                [#if element.srfTargetUnit??]<th class="col-md-1"> ${(element.srfTargetUnit.name!)} </th>[/#if]
+                [#if hasTarget]<th class="col-md-1"> ${(element.srfTargetUnit.name!)} </th>[/#if]
                 <th class="col-md-6"> Narrative of the  expected target </th>
                 <th> </th>
               </tr>
@@ -266,12 +248,12 @@
                 <tr>
                   <td> <a href="${pURL}" target="_blank"> P${contribution.projectOutcome.project.id} </a> </td>
                   <td> <a href="${pURL}" target="_blank"> ${contribution.projectOutcome.project.projectInfo.title} </a></td>
-                  [#if element.srfTargetUnit??]
+                  [#if hasTarget]
                   <td class="text-center">
                     [#if (contribution.expectedUnit.name??)!false]${(contribution.expectedValue)!}[#else]<i>N/A</i>[/#if]
                   </td>
                   [/#if]
-                  <td> ${contribution.narrativeTarget} </td>
+                  <td> ${contribution.narrativeTarget?replace('\n', '<br>')} </td>
                   <td> <a href="${poURL}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>  </td>
                 </tr>
               [/#list]
@@ -285,4 +267,79 @@
   </div>
 </div>
 [/#if]
+[/#macro]
+
+
+[#macro projectBudgetsByFlagshipMacro element type tiny=false popupEnabled=true]
+  
+  
+  [#if !popupEnabled]
+    <nobr>US$ <span >[#if type == "W1W2"]${element.w1?number?string(",##0.00")}[#elseif type == "W3BILATERAL"]${element.w3?number?string(",##0.00")}[/#if]</span></nobr>
+  [#else]
+    [#local projects = action.loadFlagShipBudgetInfoProgram(element.id) ]
+    [#if projects?size > 0]
+    <a class=" btn btn-default btn-xs" data-toggle="modal" data-target="#projectBudgets-${type}-${element.id}">
+       US$ <span >[#if type == "W1W2"]${element.w1?number?string(",##0.00")}[#elseif type == "W3BILATERAL"]${element.w3?number?string(",##0.00")}[/#if]</span>
+    </a>
+    
+  
+    <!-- Modal -->
+    <div class="modal fade" id="projectBudgets-${type}-${element.id}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">
+              [#if type == "W1W2"]
+                [@s.text name="expectedProgress.projectBudgetsW1w2" /]
+              [#elseif type == "W3BILATERAL"]
+                [@s.text name="expectedProgress.projectBudgetsW3Bilateral" /]
+              [/#if]
+            </h4>
+            <span class="programTag" style="border-color:${(element.color)!'#fff'}">${element.composedName}</span> 
+          </div>
+          <div class="modal-body">
+            <div class="">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th rowspan="2">[@s.text name="project.title" /]</th>
+                    [#if type == "W1W2"] <th colspan="2" class="text-center">[@s.text name="project.coreBudget" /]</th>[/#if]
+                    [#if type == "W3BILATERAL"] <th colspan="2" class="text-center">W3</th>[/#if]
+                    [#if type == "W3BILATERAL"] <th colspan="2" class="text-center">Bilateral</th>[/#if]
+                  </tr>
+                  <tr>
+                    [#if type == "W1W2"]<th class="text-center">[@s.text name="project.coreBudget" /]  Total Amount</th>[/#if]
+                    [#if type == "W1W2"]<th class="text-center">  ${element.acronym} % (Amount) </th>[/#if]
+                    [#if type == "W3BILATERAL"]<th class="text-center"> [@s.text name="project.w3Budget" /] Total Amount</th>[/#if]
+                    [#if type == "W3BILATERAL"]<th class="text-center"> ${element.acronym} % (Amount)</th>[/#if]
+                    [#if type == "W3BILATERAL"]<th class="text-center"> [@s.text name="project.bilateralBudget" /] Total Amount</th>[/#if]
+                    [#if type == "W3BILATERAL"]<th class="text-center"> ${element.acronym} % (Amount)</th>[/#if]
+                  </tr>
+                </thead>
+                <tbody>
+                  [#list projects as project]
+                    [#local pURL][@s.url namespace="/projects" action="${(crpSession)!}/budgetByPartners"][@s.param name='projectID']${project.id}[/@s.param][#include "/WEB-INF/global/pages/urlGlobalParams.ftl" /][/@s.url][/#local]
+                    <tr>
+                      <td class="col-md-6"> <a href="${pURL}" target="_blank">${(project.composedName)!}</a></td>
+                      [#if type == "W1W2"]<td class="text-right"> <nobr>US$ ${(project.coreBudget?number?string(",##0.00"))!}</nobr></td>[/#if]
+                      [#if type == "W1W2"]<td class="text-right"> <nobr>${(project.percentageW1)!}% (US$ ${(project.totalW1?number?string(",##0.00"))!})</nobr></td>[/#if]
+                      [#if type == "W3BILATERAL"]<td class="text-right"> <nobr>US$ ${(project.w3Budget?number?string(",##0.00"))!}</nobr></td>[/#if]
+                      [#if type == "W3BILATERAL"]<td class="text-right"> <nobr>${(project.percentageW3)!}% (US$ ${(project.totalW3?number?string(",##0.00"))!})</nobr></td>[/#if]
+                      [#if type == "W3BILATERAL"]<td class="text-right"> <nobr>US$ ${(project.bilateralBudget?number?string(",##0.00"))!}</nobr></td>[/#if]
+                      [#if type == "W3BILATERAL"]<td class="text-right"> <nobr>${(project.percentageBilateral)!}%  (US$ ${(project.totalBilateral?number?string(",##0.00"))!})</nobr></td>[/#if]
+                    </tr>
+                  [/#list]
+                </tbody>
+              </table>
+              <div class="text-right">Total: US$ US$ <span >[#if type == "W1W2"]${element.w1?number?string(",##0.00")}[#elseif type == "W3BILATERAL"]${element.w3?number?string(",##0.00")}[/#if]</span></div>
+            </div>
+            
+          </div>
+          <div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">Close</button></div>
+        </div>
+      </div>
+    </div>
+    [/#if]
+  [/#if]
 [/#macro]

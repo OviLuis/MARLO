@@ -361,19 +361,16 @@ public class OutputsAction extends BaseAction {
     if (this.hasPermissionCenter("*")) {
 
       outputDb.setTitle(output.getTitle());
-
       outputDb.setShortName(output.getShortName());
-
-      outputDb = outputService.saveResearchOutput(outputDb);
 
       this.saveNextUser(outputDb);
 
+
       List<String> relationsName = new ArrayList<>();
       relationsName.add(APConstants.RESEARCH_OUTPUT_NEXTUSER_RELATION);
-      output = outputService.getResearchOutputById(outputID);
-      output.setActiveSince(new Date());
-      output.setModifiedBy(this.getCurrentUser());
-      outputService.saveResearchOutput(output, this.getActionName(), relationsName);
+      outputDb.setActiveSince(new Date());
+      outputDb.setModifiedBy(this.getCurrentUser());
+      outputService.saveResearchOutput(outputDb, this.getActionName(), relationsName);
 
       Path path = this.getAutoSaveFilePath();
 

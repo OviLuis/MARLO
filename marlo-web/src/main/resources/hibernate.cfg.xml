@@ -236,5 +236,6 @@
     <mapping resource="xmls/PowbExpenditureAreas.hbm.xml" />
     <mapping resource="xmls/PowbFinancialExpenditure.hbm.xml" />
     <mapping resource="xmls/PowbFinancialPlannedBudget.hbm.xml" />
+    <mapping resource="xmls/CenterOutputsOutcomes.hbm.xml" />
 	</session-factory>
 </hibernate-configuration>

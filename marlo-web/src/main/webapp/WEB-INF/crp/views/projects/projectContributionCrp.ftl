@@ -361,7 +361,7 @@
         
         <div class="row form-group milestoneTargetValue" style="display:${showMilestoneValue?string('block', 'none')}">
           <div class="col-md-4">
-            [@customForm.input name="${customName}.expectedValue" i18nkey="projectOutcomeMilestone.expectedValue" type="text"  placeholder="" className="targetValue" required=isYearRequired(year) editable=editable && !reportingActive /]
+            [@customForm.input name="${customName}.expectedValue" i18nkey="projectOutcomeMilestone.expectedValue" type="text"  placeholder="" className="targetValue" required=isYearRequired(year) editable=editable && !reportingActive &&( projectMilestone.crpMilestone.year gte action.getActualPhase().year)!true /]
           </div>
           <div class="col-md-4">
             <div class="select">
@@ -466,11 +466,11 @@
     <input type="hidden" name="${customName}.crpProgramOutcomeIndicator.id" value="${(projectOutcomeIndicator.crpProgramOutcomeIndicator.id)!}" >
     <div class="form-group row">
       <div class="col-md-3">
-        [@customForm.input name="${customName}.value" i18nkey="projectOutcomeBaseline.expectedValue" className="" value="${(projectOutcomeIndicator.value)!}" required=true editable=editable && !reportingActive /]
+        [@customForm.input name="${customName}.value" i18nkey="projectOutcomeBaseline.expectedValue" className="targetValue" placeholder="Numeric Value" value="${(projectOutcomeIndicator.value)!}" required=true editable=editable && !reportingActive /]
       </div>
       <div class="col-md-3">
         [#if reportingActive]
-          [@customForm.input name="${customName}.valueReporting" i18nkey="projectOutcomeBaseline.achievedValue" className="" required=true editable=editable /]
+          [@customForm.input name="${customName}.valueReporting" i18nkey="projectOutcomeBaseline.achievedValue" className="targetValue" placeholder="Numeric Value" required=true editable=editable /]
         [/#if]
       </div>
       <div class="col-md-3"></div>

@@ -218,12 +218,13 @@
 		<mapping resource="xmls/ProjectOutcomeIndicators.hbm.xml" />
 		<mapping resource="xmls/EmailLogs.hbm.xml" />
 		<mapping resource="xmls/ExpectedStudyProjects.hbm.xml" />
+		<mapping resource="xmls/CenterOutputsOutcomes.hbm.xml" />
 		<mapping resource="xmls/PowbSynthesis.hbm.xml" />
 		<mapping resource="xmls/PowbFlagshipPlans.hbm.xml" />
 		<mapping resource="xmls/PowbToc.hbm.xml" />
 		<mapping resource="xmls/PowbEvidencePlannedStudies.hbm.xml" />
 		<mapping resource="xmls/PowbEvidences.hbm.xml" />
-		<mapping resource="xmls/CrossCuttingDimensions.hbm.xml" />
+		<mapping resource="xmls/PowbCrossCuttingDimensions.hbm.xml" />
 		<mapping resource="xmls/PowbExpectedCrpProgress.hbm.xml"/>
     <mapping resource="xmls/PowbCrpStaffing.hbm.xml" />
     <mapping resource="xmls/PowbCrpStaffingCategories.hbm.xml" />
@@ -236,6 +237,5 @@
     <mapping resource="xmls/PowbExpenditureAreas.hbm.xml" />
     <mapping resource="xmls/PowbFinancialExpenditure.hbm.xml" />
     <mapping resource="xmls/PowbFinancialPlannedBudget.hbm.xml" />
-    <mapping resource="xmls/CenterOutputsOutcomes.hbm.xml" />
 	</session-factory>
 </hibernate-configuration>

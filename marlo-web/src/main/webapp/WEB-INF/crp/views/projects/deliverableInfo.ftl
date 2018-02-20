@@ -13,7 +13,7 @@
   [#-- Type and subtype inputs --] 
   <div class="form-group row">
     <div class="col-md-6 ">
-      [@customForm.select name="deliverable.deliverableInfo.deliverableType.deliverableType.id" label=""  i18nkey="project.deliverable.generalInformation.type" listName="deliverableTypeParent" keyFieldName="id"  displayFieldName="name"  multiple=false required=true  className=" form-control input-sm typeSelect" editable=editable/]
+      [@customForm.select name="deliverable.deliverableInfo.deliverableType.deliverableCategory.id" label=""  i18nkey="project.deliverable.generalInformation.type" listName="deliverableTypeParent" keyFieldName="id"  displayFieldName="name"  multiple=false required=true  className=" form-control input-sm typeSelect" editable=editable/]
     </div>
     <div class="col-md-6 subType-select">
       [@customForm.select name="deliverable.deliverableInfo.deliverableType.id" label=""  i18nkey="project.deliverable.generalInformation.subType" listName="deliverableSubTypes" keyFieldName="id"  displayFieldName="name"  multiple=false required=true  className=" form-control input-sm subTypeSelect" editable=editable/]
@@ -239,10 +239,10 @@
   
   [#-- Cross-cutting dimensions blocks --]
   <div id="ccDimension-gender"    class="form-group ccDimension" style="display:${((deliverable.deliverableInfo.crossCuttingGender)!false)?string('block','none')}">
-    [@customForm.select name="deliverable.deliverableInfo.crossCuttingScoreGender" label="" i18nkey="deliverable.ccDimension.gender" listName="crossCuttingScoresMap" required=true header=false className="crossCuttingDimensionsSelect" editable=editable/]
+    [@customForm.select name="deliverable.deliverableInfo.crossCuttingScoreGender" label="" i18nkey="deliverable.ccDimension.gender" help="deliverable.ccDimension.gender.help" listName="crossCuttingScoresMap" required=true header=false className="crossCuttingDimensionsSelect" editable=editable/]
   </div>
   <div id="ccDimension-youth"     class="form-group ccDimension" style="display:${((deliverable.deliverableInfo.crossCuttingYouth)!false)?string('block','none')}">
-    [@customForm.select name="deliverable.deliverableInfo.crossCuttingScoreYouth" label="" i18nkey="deliverable.ccDimension.youth" listName="crossCuttingScoresMap"  required=true header=false className="crossCuttingDimensionsSelect" editable=editable/]
+    [@customForm.select name="deliverable.deliverableInfo.crossCuttingScoreYouth" label="" i18nkey="deliverable.ccDimension.youth" help="deliverable.ccDimension.youth.help" listName="crossCuttingScoresMap"  required=true header=false className="crossCuttingDimensionsSelect" editable=editable/]
   </div>
   <div id="ccDimension-capacity"  class="form-group ccDimension" style="display:${((deliverable.deliverableInfo.crossCuttingCapacity)!false)?string('block','none')}">
     [@customForm.select name="deliverable.deliverableInfo.crossCuttingScoreCapacity" label="" i18nkey="deliverable.ccDimension.capacity" listName="crossCuttingScoresMap" required=true header=false className="crossCuttingDimensionsSelect" editable=editable/]

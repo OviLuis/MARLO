@@ -26,6 +26,7 @@
 .wrongData{
   border-bottom: 1px solid red !important;
 }
+
 .loginForm input:not(#terms) {
   display: block;
   position: absolute;
@@ -227,6 +228,17 @@
   }
 }
 
+.terms-container{
+  z-index: 100;
+  margin-left: 5px;
+  margin-top: 8px;
+  position: absolute;
+}
+
+.terms-container #terms{
+  margin-right: 7px;
+}
+
 .login-button-container{
   display: flex;
   justify-content: flex-end;
@@ -398,7 +410,7 @@ p.login-description{
 }
 
 .loginForm p.invalidField{
-  position: absolute;
+  position: relative;
   font-size: 12px;
   color: red;
 }
@@ -418,7 +430,7 @@ p.login-description{
 }
 
 #loginFormContainer .loginForm.max-size{
-  height: 400px;
+  height: 410px;
 }
 
 #loginFormContainer .loginForm p {
@@ -471,7 +483,7 @@ p.login-description{
   visibility: visible;
 }
 
-.form-control {
+#loginFormContainer .form-control {
   display: block;
   width: 100%;
   padding: 8px 12px;
@@ -480,9 +492,13 @@ p.login-description{
   border: none;
   border-bottom: 2px solid #ccc;
 }
-.form-control:focus {
+#loginFormContainer .form-control:focus {
   border-color: #ccc;
   outline: none;
+}
+
+#loginFormContainer input[type=checkbox] {
+  transform: scale(1.5);
 }
 
 /*end input animation*/

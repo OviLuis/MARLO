@@ -12,6 +12,16 @@ function init() {
 
   setCrpSession();
 
+  var input = $('.form-control');
+
+  input.on('focus', function (ev) {
+    input.parent().addClass('is-focused');
+  });
+
+  input.on('blur', function (ev) {
+    input.parent().removeClass('is-focused');
+  });
+
   // Verify user email session
   if(verifyCookie("username.email")) {
     username.val(getCookie("username.email"));
@@ -60,7 +70,6 @@ function init() {
     if(email == "" ){
       wrongData("invalidEmail");
     }else if(!isSecondForm){
-      console.log("asdf");
       loadAvailableItems(email);
     }else if(inputPassword.val()==""){
       wrongData("voidPassword");
@@ -100,6 +109,7 @@ function init() {
   $('.login-back-container p.loginBack').on('click',function(){
     $(".loginForm .login-input-container.username").click();
   });
+
 }
 
 function firstForm(){
@@ -138,8 +148,6 @@ function firstForm(){
   //Change button value to Next
   $("input#login_next").val("Next");
 
-  //Reset the crp-input to init value (to preserve the crpSession in 401.ftl)
-  //$(".loginForm #crp-input").val(crpSession);
 }
 
 function initJreject() {
@@ -222,6 +230,7 @@ function loadAvailableItems(email){
     success: function(data) {
       if(data.user == null){
         wrongData("emailNotFound");
+        $("input#login_next").val("Next");
       }else{
         var crpCookie=verifyCrpCookie();
         $('.selection-bar-options ul #crp-'+data.crps[0].acronym).click();
@@ -244,18 +253,16 @@ function loadAvailableItems(email){
         });
         //If user has access to the crpSession or crpSession is void, change form style
         if(hasAccess || crpSession==""){
-          console.log("what");
           secondForm(data);
         }else{
-          console.log("deni");
           wrongData("deniedAccess");
+          $("input#login_next").val("Next");
         }
       }
     },
     complete: function(data) {
       $("input#login_next").removeClass("login-loadingBlock");
       $("input#login_next").attr("disabled",false);
-      $("input#login_next").val("Next");
     },
     error: function(data) {}
   });
@@ -329,15 +336,13 @@ function checkPassword(email,password){
       $("input#login_next").val("");
     },
     success: function(data) {
-      console.log("ajax= "+data.messageEror);
-      console.log(crpSession);
       if(!data.userFound.loginSuccess){
         if(data.messageEror=="Invalid CGIAR email or password, please try again"){
           wrongData("incorrectPassword");
         }/*else if(crpSession!=""){
           wrongData("deniedAccess",data.messageEror);
         }*/else{
-          wrongData("deniedAccess",data.messageEror);
+          wrongData("incorrectPassword",data.messageEror);
         }
         $("input#login_next").removeClass("login-loadingBlock");
         $("input#login_next").attr("disabled",false);
@@ -354,13 +359,11 @@ function checkPassword(email,password){
 function wrongData(type,customMessage){
   $('input.login-input').addClass("wrongData");
   if(customMessage != null){
-    console.log("test"+customMessage);
     $('.loginForm p.invalidField.'+type).text(customMessage);
     $('.loginForm p.invalidField.'+type).removeClass("hidden");
   }else{
     $('.loginForm p.invalidField.'+type).removeClass("hidden");
   }
-  console.log(type);
   if(type=="voidPassword" || type=="incorrectPassword"){
     inputPassword.focus();
   }else{

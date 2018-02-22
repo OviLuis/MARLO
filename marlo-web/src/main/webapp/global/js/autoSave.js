@@ -31,7 +31,7 @@ $(window).on('keydown', function(e) {
 });
 
 function autoSave() {
-  if(isChanged()) {
+  if(isChanged() && editable) {
     $.ajax({
         dataType: 'json',
         method: 'POST',
@@ -176,11 +176,11 @@ function validateThisSection() {
         if(jQuery.isEmptyObject(data)) {
           $sectionMenu.removeClass('submitted');
         } else {
-          var missingFields = (data.section.missingFields) || "";
-          if(!(missingFields) ){
-            $sectionMenu.removeClass('submitted').addClass('toSubmit');
-          } else {
+          if(data.section.missingFields == "") {
             $sectionMenu.addClass('submitted').removeClass('toSubmit');
+          } else {
+            $sectionMenu.removeClass('submitted').addClass('toSubmit');
+
           }
         }
         $sectionMenu.removeClass('loadingSection');

@@ -20,12 +20,15 @@ import org.cgiar.ccafs.marlo.action.BaseAction;
 import org.cgiar.ccafs.marlo.config.APConstants;
 import org.cgiar.ccafs.marlo.data.manager.AuditLogManager;
 import org.cgiar.ccafs.marlo.data.manager.CrpProgramManager;
+import org.cgiar.ccafs.marlo.data.manager.DeliverableManager;
 import org.cgiar.ccafs.marlo.data.manager.GlobalUnitManager;
 import org.cgiar.ccafs.marlo.data.manager.LiaisonInstitutionManager;
 import org.cgiar.ccafs.marlo.data.manager.PowbCrossCuttingDimensionManager;
 import org.cgiar.ccafs.marlo.data.manager.PowbSynthesisManager;
 import org.cgiar.ccafs.marlo.data.manager.UserManager;
 import org.cgiar.ccafs.marlo.data.model.CrpProgram;
+import org.cgiar.ccafs.marlo.data.model.Deliverable;
+import org.cgiar.ccafs.marlo.data.model.DeliverableInfo;
 import org.cgiar.ccafs.marlo.data.model.GlobalUnit;
 import org.cgiar.ccafs.marlo.data.model.LiaisonInstitution;
 import org.cgiar.ccafs.marlo.data.model.LiaisonUser;
@@ -33,6 +36,7 @@ import org.cgiar.ccafs.marlo.data.model.Phase;
 import org.cgiar.ccafs.marlo.data.model.PowbCrossCuttingDimension;
 import org.cgiar.ccafs.marlo.data.model.PowbSynthesis;
 import org.cgiar.ccafs.marlo.data.model.ProgramType;
+import org.cgiar.ccafs.marlo.data.model.ProjectStatusEnum;
 import org.cgiar.ccafs.marlo.data.model.User;
 import org.cgiar.ccafs.marlo.data.model.dto.CrossCuttingDimensionTableDTO;
 import org.cgiar.ccafs.marlo.utils.APConfig;
@@ -59,6 +63,7 @@ import org.apache.commons.lang3.StringUtils;
 
 public class CrossCuttingDimensionsAction extends BaseAction {
 
+
   /**
    * 
    */
@@ -66,16 +71,20 @@ public class CrossCuttingDimensionsAction extends BaseAction {
 
 
   private GlobalUnitManager crpManager;
+
   private AuditLogManager auditLogManager;
+
+
   private LiaisonInstitutionManager liaisonInstitutionManager;
   private CrpProgramManager crpProgramManager;
   private PowbSynthesisManager powbSynthesisManager;
   private CrossCuttingValidator validator;
   private PowbCrossCuttingDimensionManager powbCrossCuttingDimensionManager;
-
-
+  private DeliverableManager deliverableManager;
   private List<LiaisonInstitution> liaisonInstitutions;
   private UserManager userManager;
+
+
   private LiaisonInstitution liaisonInstitution;
   private String transaction;
   private Long crossCuttingId;
@@ -84,14 +93,14 @@ public class CrossCuttingDimensionsAction extends BaseAction {
   private PowbSynthesis powbSynthesis;
   private CrossCuttingDimensionTableDTO tableC;
   private LiaisonInstitution thePMU;
-
+  private List<DeliverableInfo> deliverableList;
   private Long powbSynthesisID;
 
   @Inject
   public CrossCuttingDimensionsAction(APConfig config, GlobalUnitManager crpManager, AuditLogManager auditLogManager,
     LiaisonInstitutionManager liaisonInstitutionManager, CrossCuttingValidator validator,
     CrpProgramManager crpProgramManager, UserManager userManager, PowbSynthesisManager powbSynthesisManager,
-    PowbCrossCuttingDimensionManager powbCrossCuttingDimensionManager) {
+    PowbCrossCuttingDimensionManager powbCrossCuttingDimensionManager, DeliverableManager deliverableManager) {
     super(config);
     this.crpManager = crpManager;
     this.auditLogManager = auditLogManager;
@@ -101,6 +110,7 @@ public class CrossCuttingDimensionsAction extends BaseAction {
     this.powbSynthesisManager = powbSynthesisManager;
     this.validator = validator;
     this.powbCrossCuttingDimensionManager = powbCrossCuttingDimensionManager;
+    this.deliverableManager = deliverableManager;
 
   }
 
@@ -123,7 +133,6 @@ public class CrossCuttingDimensionsAction extends BaseAction {
     return SUCCESS;
   }
 
-
   public Long firstFlagship() {
     List<LiaisonInstitution> liaisonInstitutions = new ArrayList<>(loggedCrp.getLiaisonInstitutions().stream()
       .filter(c -> c.getCrpProgram() != null
@@ -133,7 +142,6 @@ public class CrossCuttingDimensionsAction extends BaseAction {
     long liaisonInstitutionId = liaisonInstitutions.get(0).getId();
     return liaisonInstitutionId;
   }
-
 
   private Path getAutoSaveFilePath() {
     String composedClassName = powbSynthesis.getClass().getSimpleName();
@@ -148,14 +156,19 @@ public class CrossCuttingDimensionsAction extends BaseAction {
   }
 
 
+  public List<DeliverableInfo> getDeliverableList() {
+    return deliverableList;
+  }
+
+
   public LiaisonInstitution getLiaisonInstitution() {
     return liaisonInstitution;
   }
 
-
   public Long getLiaisonInstitutionID() {
     return liaisonInstitutionID;
   }
+
 
   public List<LiaisonInstitution> getLiaisonInstitutions() {
     return liaisonInstitutions;
@@ -165,7 +178,6 @@ public class CrossCuttingDimensionsAction extends BaseAction {
   public GlobalUnit getLoggedCrp() {
     return loggedCrp;
   }
-
 
   public PowbSynthesis getPowbSynthesis() {
     return powbSynthesis;
@@ -215,6 +227,7 @@ public class CrossCuttingDimensionsAction extends BaseAction {
 
   }
 
+
   public boolean isPMU(LiaisonInstitution institution) {
     if (institution.getAcronym().equals("PMU")) {
       return true;
@@ -233,7 +246,6 @@ public class CrossCuttingDimensionsAction extends BaseAction {
       return result;
     }
   }
-
 
   @Override
   public void prepare() throws Exception {
@@ -374,19 +386,19 @@ public class CrossCuttingDimensionsAction extends BaseAction {
 
     }
 
+
     // Get the list of liaison institutions Flagships and PMU.
     liaisonInstitutions = loggedCrp.getLiaisonInstitutions().stream()
-      .filter(c -> c.getCrpProgram() != null
+      .filter(c -> c.getCrpProgram() != null && c.isActive()
         && c.getCrpProgram().getProgramType() == ProgramType.FLAGSHIP_PROGRAM_TYPE.getValue())
       .collect(Collectors.toList());
     liaisonInstitutions.sort(Comparator.comparing(LiaisonInstitution::getAcronym));
-
     // ADD PMU as liasion Institutio too
     liaisonInstitutions.addAll(loggedCrp.getLiaisonInstitutions().stream()
       .filter(c -> c.getCrpProgram() == null && c.getAcronym().equals("PMU")).collect(Collectors.toList()));
 
-
-    this.tableC = powbCrossCuttingDimensionManager.loadTableByLiaisonAndPhase(thePMU.getId(), phase.getId());
+    // Get the tableC Information
+    this.tableCInfo(phase);
 
 
     // Base Permission
@@ -456,14 +468,19 @@ public class CrossCuttingDimensionsAction extends BaseAction {
   }
 
 
+  public void setDeliverableList(List<DeliverableInfo> deliverableList) {
+    this.deliverableList = deliverableList;
+  }
+
+
   public void setLiaisonInstitution(LiaisonInstitution liaisonInstitution) {
     this.liaisonInstitution = liaisonInstitution;
   }
 
+
   public void setLiaisonInstitutionID(Long liaisonInstitutionID) {
     this.liaisonInstitutionID = liaisonInstitutionID;
   }
-
 
   public void setLiaisonInstitutions(List<LiaisonInstitution> liaisonInstitutions) {
     this.liaisonInstitutions = liaisonInstitutions;
@@ -474,10 +491,10 @@ public class CrossCuttingDimensionsAction extends BaseAction {
     this.loggedCrp = loggedCrp;
   }
 
+
   public void setPowbSynthesis(PowbSynthesis powbSynthesis) {
     this.powbSynthesis = powbSynthesis;
   }
-
 
   public void setTableC(CrossCuttingDimensionTableDTO tableC) {
     this.tableC = tableC;
@@ -496,6 +513,114 @@ public class CrossCuttingDimensionsAction extends BaseAction {
 
   public void setUserManager(UserManager userManager) {
     this.userManager = userManager;
+  }
+
+  /**
+   * List all the deliverables of the Crp to make the calculations in the Cross Cutting Socores.
+   * 
+   * @param pashe - The phase that get the deliverable information.
+   */
+  public void tableCInfo(Phase pashe) {
+    List<Deliverable> deliverables = new ArrayList<>();
+    deliverableList = new ArrayList<>();
+    int iGenderPrincipal = 0;
+    int iGenderSignificant = 0;
+    int iYouthPrincipal = 0;
+    int iYouthSignificant = 0;
+    int iCapDevPrincipal = 0;
+    int iCapDevSignificant = 0;
+    int iNa = 0;
+
+    if (deliverableManager.findAll() != null) {
+      deliverables = deliverableManager.findAll().stream().filter(d -> d.isActive() && d.getPhase().equals(pashe))
+        .collect(Collectors.toList());
+      for (Deliverable deliverable : deliverables) {
+        DeliverableInfo deliverableInfo = deliverable.getDeliverableInfo(pashe);
+        if (deliverableInfo.isActive()) {
+          if (deliverableInfo.getStatus() == Integer.parseInt(ProjectStatusEnum.Ongoing.getStatusId())
+            || deliverableInfo.getStatus() == Integer.parseInt(ProjectStatusEnum.Extended.getStatusId())) {
+            deliverableList.add(deliverableInfo);
+            if (deliverableInfo.getCrossCuttingNa() != null && deliverableInfo.getCrossCuttingNa()) {
+              iNa++;
+            } else {
+              // Gender
+              if (deliverableInfo.getCrossCuttingGender() != null && deliverableInfo.getCrossCuttingGender()) {
+                if (deliverableInfo.getCrossCuttingScoreGender() != null
+                  && deliverableInfo.getCrossCuttingScoreGender() == 1) {
+                  iGenderSignificant++;
+                } else if (deliverableInfo.getCrossCuttingScoreGender() != null
+                  && deliverableInfo.getCrossCuttingScoreGender() == 2) {
+                  iGenderPrincipal++;
+                }
+              }
+
+              // Youth
+              if (deliverableInfo.getCrossCuttingYouth() != null && deliverableInfo.getCrossCuttingYouth()) {
+                if (deliverableInfo.getCrossCuttingScoreYouth() != null
+                  && deliverableInfo.getCrossCuttingScoreYouth() == 1) {
+                  iYouthSignificant++;
+                } else if (deliverableInfo.getCrossCuttingScoreYouth() != null
+                  && deliverableInfo.getCrossCuttingScoreYouth() == 2) {
+                  iYouthPrincipal++;
+                }
+              }
+
+              // CapDev
+              if (deliverableInfo.getCrossCuttingCapacity() != null && deliverableInfo.getCrossCuttingCapacity()) {
+                if (deliverableInfo.getCrossCuttingScoreCapacity() != null
+                  && deliverableInfo.getCrossCuttingScoreCapacity() == 1) {
+                  iCapDevSignificant++;
+                } else if (deliverableInfo.getCrossCuttingScoreCapacity() != null
+                  && deliverableInfo.getCrossCuttingScoreCapacity() == 2) {
+                  iCapDevPrincipal++;
+                }
+              }
+            }
+          }
+        }
+      }
+      tableC = new CrossCuttingDimensionTableDTO();
+      int iDeliverableCount = deliverableList.size();
+
+      tableC.setTotal(iDeliverableCount);
+
+      double dGenderPrincipal = (iGenderPrincipal * 100) / iDeliverableCount;
+      double dGenderSignificant = (iGenderSignificant * 100) / iDeliverableCount;
+      double dYouthPrincipal = (iYouthPrincipal * 100) / iDeliverableCount;
+      double dYouthSignificant = (iYouthSignificant * 100) / iDeliverableCount;
+      double dCapDevPrincipal = (iCapDevPrincipal * 100) / iDeliverableCount;
+      double dCapDevSignificant = (iCapDevSignificant * 100) / iDeliverableCount;
+      double dNa = (iNa * 100) / iDeliverableCount;
+
+
+      // Gender
+      tableC.setGenderPrincipal(iGenderPrincipal);
+      tableC.setGenderSignificant(iGenderSignificant);
+      tableC.setGenderScored(iNa);
+
+      tableC.setPercentageGenderPrincipal(dGenderPrincipal);
+      tableC.setPercentageGenderSignificant(dGenderSignificant);
+      tableC.setPercentageGenderNotScored(dNa);
+      // Youth
+      tableC.setYouthPrincipal(iYouthPrincipal);
+      tableC.setYouthSignificant(iYouthSignificant);
+      tableC.setYouthScored(iNa);
+
+      tableC.setPercentageYouthPrincipal(dYouthPrincipal);
+      tableC.setPercentageYouthSignificant(dYouthSignificant);
+      tableC.setPercentageYouthNotScored(dNa);
+      // CapDev
+      tableC.setCapDevPrincipal(iCapDevPrincipal);
+      tableC.setCapDevSignificant(iCapDevSignificant);
+      tableC.setCapDevScored(iNa);
+
+      tableC.setPercentageCapDevPrincipal(dCapDevPrincipal);
+      tableC.setPercentageCapDevSignificant(dCapDevSignificant);
+      tableC.setPercentageCapDevNotScored(dNa);
+
+
+    }
+
   }
 
   @Override

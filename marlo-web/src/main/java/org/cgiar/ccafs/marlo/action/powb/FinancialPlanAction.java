@@ -347,10 +347,10 @@ public class FinancialPlanAction extends BaseAction {
 
     if (this.isHttpPost()) {
       if (powbSynthesis.getPowbFinancialPlannedBudgetList() != null) {
-        powbSynthesis.setPowbFinancialPlannedBudgetList(null);
+        powbSynthesis.getPowbFinancialPlannedBudgetList().clear();
       }
       if (powbSynthesis.getPowbFinancialExpendituresList() != null) {
-        powbSynthesis.setPowbFinancialExpendituresList(null);
+        powbSynthesis.getPowbFinancialExpendituresList().clear();
       }
     }
   }
@@ -486,6 +486,9 @@ public class FinancialPlanAction extends BaseAction {
 
   private void saveUpdateFinancialPlan() {
     PowbFinancialPlan powbFinancialPlan = powbSynthesis.getFinancialPlan();
+    if (powbFinancialPlan.getId() == null) {
+      powbFinancialPlan.setId(powbSynthesisID);
+    }
     powbFinancialPlan.setActiveSince(new Date());
     powbFinancialPlan.setModifiedBy(this.getCurrentUser());
     powbFinancialPlan.setFinancialPlanIssues(powbSynthesis.getFinancialPlan().getFinancialPlanIssues());

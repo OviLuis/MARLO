@@ -55,7 +55,11 @@
             <hr />
             [@tableHMacro /]
           </div>
-        
+          
+          <div class="form-group">
+            [@tableDeliverablesMacro /]
+          </div>
+          
         </div>
         
         [#-- Section Buttons & hidden inputs--]
@@ -73,27 +77,6 @@
 [#---------------------------------------------- MACROS ----------------------------------------------]
 
 [#macro tableHMacro ]
-  [#assign crossCuttingDimesions = [ 
-    { "title": "Gender",
-      "principal": "5",
-      "significant": "10",
-      "notTargeted": "50"
-    },
-    { "title": "Youth",
-      "principal": "25",
-      "significant": "30",
-      "notTargeted": "45"
-    
-    },
-    { "title": "CapDev",
-      "principal": "18",
-      "significant": "6",
-      "notTargeted": "45"
-    
-    }
-    ]
-  /]
-
   <div class="">
     <table class="table table-bordered">
       <thead>
@@ -111,7 +94,9 @@
             <td class="text-center"> <span class="animated flipInX">${tableC.percentageGenderPrincipal}%</span> </td>
             <td class="text-center"> <span class="animated flipInX">${tableC.percentageGenderSignificant}%</span> </td>
             <td class="text-center"> <span class="animated flipInX">${tableC.percentageGenderNotScored}%</span> </td> 
-            <th rowspan="3" class="text-center"> <h3 class="animated flipInX">${tableC.total}</span> </h3>           
+            <td rowspan="3" class="text-center"> 
+              <h3 class="animated flipInX">${tableC.total}</span> </h3>
+            </td> 
           </tr>
           <tr>
             <td class="row">Youth</td>
@@ -125,6 +110,66 @@
             <td class="text-center"> <span class="animated flipInX">${tableC.percentageCapDevSignificant}%</span> </td>
             <td class="text-center"> <span class="animated flipInX">${tableC.percentageCapDevNotScored}%</span> </td>            
           </tr>
+      </tbody>
+    </table>
+  </div>
+[/#macro]
+
+
+[#macro tableDeliverablesMacro ]
+  <div class="">
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th> Deliverable </th>
+          <th>Gender</th>
+          <th>Youth</th>
+          <th>CapDev</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        [#if deliverableList?has_content]
+          [#list deliverableList as dInfo]
+          <tr>
+            <td class="row">
+              <p> <strong>D${(dInfo.deliverable.id)!}</strong> ${(dInfo.title)!'Not Defined'}</p>
+              <small>(${(dInfo.deliverableType.name)!'Not Defined'})</small>
+            </td>
+            <td>
+              <nobr>
+              [#if (dInfo.crossCuttingGender)!false]
+                [#if dInfo.genderScoreName??]${(dInfo.genderScoreName)!}[/#if]
+              [#else]
+                 0 - Not Targeted
+              [/#if]
+              </nobr>
+            </td>
+            <td>
+              <nobr>
+              [#if (dInfo.crossCuttingYouth)!false]
+                [#if dInfo.youthScoreName??]${(dInfo.youthScoreName)!}[/#if]
+              [#else]
+                 0 - Not Targeted
+              [/#if]
+              </nobr>
+            </td>
+            <td>
+              <nobr>
+              [#if (dInfo.crossCuttingCapacity)!false]
+                [#if dInfo.capDevScoreName??]${(dInfo.capDevScoreName)!}[/#if]
+              [#else]
+                 0 - Not Targeted
+              [/#if]
+              </nobr>
+            </td>
+            <td>
+              [#local dURL][@s.url namespace="/projects" action="${(crpSession)!}/deliverable"][@s.param name='deliverableID']${dInfo.deliverable.id}[/@s.param][#include "/WEB-INF/global/pages/urlGlobalParams.ftl" /][/@s.url][/#local]
+              <a href="${dURL}" target="_blank"><span class="glyphicon glyphicon-new-window"></span></a>
+            </td>
+          </tr>
+          [/#list]
+        [/#if]
       </tbody>
     </table>
   </div>

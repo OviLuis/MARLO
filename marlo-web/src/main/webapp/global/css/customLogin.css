@@ -26,7 +26,6 @@
 .wrongData{
   border-bottom: 1px solid red !important;
 }
-
 .loginForm input:not(#terms) {
   display: block;
   position: absolute;
@@ -228,17 +227,6 @@
   }
 }
 
-.terms-container{
-  z-index: 100;
-  margin-left: 5px;
-  margin-top: 8px;
-  position: absolute;
-}
-
-.terms-container #terms{
-  margin-right: 7px;
-}
-
 .login-button-container{
   display: flex;
   justify-content: flex-end;
@@ -410,7 +398,7 @@ p.login-description{
 }
 
 .loginForm p.invalidField{
-  position: relative;
+  position: absolute;
   font-size: 12px;
   color: red;
 }
@@ -430,7 +418,7 @@ p.login-description{
 }
 
 #loginFormContainer .loginForm.max-size{
-  height: 410px;
+  height: 400px;
 }
 
 #loginFormContainer .loginForm p {

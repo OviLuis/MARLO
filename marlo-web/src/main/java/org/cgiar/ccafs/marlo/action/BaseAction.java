@@ -798,21 +798,8 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
             && c.getPhase().getYear() == projectBudget.getYear() && c.getDeliverable().getProject() != null
             && c.getDeliverable().getProject().getId().longValue() == projectBudget.getProject().getId().longValue())
           .collect(Collectors.toList());
-        List<Deliverable> onDeliverables = new ArrayList<>();
-        for (DeliverableFundingSource deliverableFundingSource : deliverableFundingSources) {
-          if (deliverableFundingSource.getDeliverable().getDeliverableInfo(this.getActualPhase())
-            .getYear() < projectBudget.getYear()
-            && deliverableFundingSource.getDeliverable().getDeliverableInfo(this.getActualPhase()).getStatus()
-              .intValue() == Integer.parseInt(ProjectStatusEnum.Extended.getStatusId())) {
-            onDeliverables.add(deliverableFundingSource.getDeliverable());
-          }
-          if (deliverableFundingSource.getDeliverable().getDeliverableInfo(this.getActualPhase())
-            .getYear() >= projectBudget.getYear()
-            && deliverableFundingSource.getDeliverable().getDeliverableInfo(this.getActualPhase()).getStatus()
-              .intValue() == Integer.parseInt(ProjectStatusEnum.Ongoing.getStatusId())) {
-            onDeliverables.add(deliverableFundingSource.getDeliverable());
-          }
-        }
+        List<Deliverable> onDeliverables =
+          this.getDeliverableRelationsProject(id, ProjectBudget.class.getName(), projectBudget.getProject().getId());
         if (!onDeliverables.isEmpty()) {
           return false;
         }

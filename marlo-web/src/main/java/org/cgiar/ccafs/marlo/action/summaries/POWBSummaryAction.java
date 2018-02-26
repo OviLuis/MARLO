@@ -21,6 +21,7 @@ import org.cgiar.ccafs.marlo.data.manager.GlobalUnitManager;
 import org.cgiar.ccafs.marlo.data.manager.PhaseManager;
 import org.cgiar.ccafs.marlo.data.manager.PowbCrossCuttingDimensionManager;
 import org.cgiar.ccafs.marlo.data.manager.PowbExpectedCrpProgressManager;
+import org.cgiar.ccafs.marlo.data.manager.PowbExpenditureAreasManager;
 import org.cgiar.ccafs.marlo.data.model.CrpMilestone;
 import org.cgiar.ccafs.marlo.data.model.CrpOutcomeSubIdo;
 import org.cgiar.ccafs.marlo.data.model.CrpProgram;
@@ -31,7 +32,11 @@ import org.cgiar.ccafs.marlo.data.model.LiaisonInstitution;
 import org.cgiar.ccafs.marlo.data.model.Phase;
 import org.cgiar.ccafs.marlo.data.model.PowbCrossCuttingDimension;
 import org.cgiar.ccafs.marlo.data.model.PowbExpectedCrpProgress;
+import org.cgiar.ccafs.marlo.data.model.PowbExpenditureAreas;
+import org.cgiar.ccafs.marlo.data.model.PowbFinancialExpenditure;
+import org.cgiar.ccafs.marlo.data.model.PowbFinancialPlannedBudget;
 import org.cgiar.ccafs.marlo.data.model.PowbSynthesis;
+import org.cgiar.ccafs.marlo.data.model.PowbSynthesisCrpStaffingCategory;
 import org.cgiar.ccafs.marlo.data.model.PowbSynthesisSectionStatusEnum;
 import org.cgiar.ccafs.marlo.data.model.ProgramType;
 import org.cgiar.ccafs.marlo.data.model.Project;
@@ -47,6 +52,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -96,6 +102,7 @@ public class POWBSummaryAction extends BaseSummariesAction implements Summary {
   private PowbCrossCuttingDimensionManager crossCuttingManager;
   private PowbExpectedCrpProgressManager powbExpectedCrpProgressManager;
   private DeliverableManager deliverableManager;
+  private PowbExpenditureAreasManager powbExpenditureAreasManager;
 
   // RTF bytes
   private byte[] bytesRTF;
@@ -105,11 +112,12 @@ public class POWBSummaryAction extends BaseSummariesAction implements Summary {
   @Inject
   public POWBSummaryAction(APConfig config, GlobalUnitManager crpManager, PhaseManager phaseManager,
     PowbCrossCuttingDimensionManager crossCuttingManager, PowbExpectedCrpProgressManager powbExpectedCrpProgressManager,
-    DeliverableManager deliverableManager) {
+    DeliverableManager deliverableManager, PowbExpenditureAreasManager powbExpenditureAreasManager) {
     super(config, crpManager, phaseManager);
     this.crossCuttingManager = crossCuttingManager;
     this.powbExpectedCrpProgressManager = powbExpectedCrpProgressManager;
     this.deliverableManager = deliverableManager;
+    this.powbExpenditureAreasManager = powbExpenditureAreasManager;
   }
 
 
@@ -154,7 +162,7 @@ public class POWBSummaryAction extends BaseSummariesAction implements Summary {
       this.getAllSubreports(hm, masteritemBand);
       // TODO: Complete POWB subreports
       this.fillSubreport((SubReport) hm.get("ExpectedKeyResults"), "ExpectedKeyResults");
-      // this.fillSubreport((SubReport) hm.get("EffectivenessandEfficiency"), "EffectivenessandEfficiency");
+      this.fillSubreport((SubReport) hm.get("EffectivenessandEfficiency"), "EffectivenessandEfficiency");
       // this.fillSubreport((SubReport) hm.get("CRPManagement"), "CRPManagement");
       // // Table A
       this.fillSubreport((SubReport) hm.get("PlannedMilestones"), "PlannedMilestones");
@@ -166,13 +174,20 @@ public class POWBSummaryAction extends BaseSummariesAction implements Summary {
       this.fillSubreport((SubReport) hm.get("Crosscutting"), "Crosscutting");
       this.fillSubreport((SubReport) hm.get("TableCContent"), "TableCContent");
       // // Table D
-      // this.fillSubreport((SubReport) hm.get("CRPStaffing"), "CRPStaffing");
-      // this.fillSubreport((SubReport) hm.get("TableDContent"), "TableDContent");
+      this.fillSubreport((SubReport) hm.get("CRPStaffing"), "CRPStaffing");
+      if (powbSynthesisPMU != null) {
+        this.fillSubreport((SubReport) hm.get("TableDContent"), "TableDContent");
+      }
       // // Table E
-      // this.fillSubreport((SubReport) hm.get("CRPPlannedBudget"), "CRPPlannedBudget");
-      // this.fillSubreport((SubReport) hm.get("TableEContent"), "TableEContent");
+      this.fillSubreport((SubReport) hm.get("CRPPlannedBudget"), "CRPPlannedBudget");
+      if (powbSynthesisPMU != null) {
+        this.fillSubreport((SubReport) hm.get("TableEContent"), "TableEContent");
+      }
       // // Table F
-      // this.fillSubreport((SubReport) hm.get("MainAreas"), "MainAreas");
+      if (powbSynthesisPMU != null) {
+        this.fillSubreport((SubReport) hm.get("MainAreas"), "MainAreas");
+      }
+
       // // Table G
       // this.fillSubreport((SubReport) hm.get("CGIARCollaborations"), "CGIARCollaborations");
       // this.fillSubreport((SubReport) hm.get("TableGContent"), "TableGContent");
@@ -312,7 +327,7 @@ public class POWBSummaryAction extends BaseSummariesAction implements Summary {
   private TypedTableModel getCRPPlannedBudgetTableModel() {
     TypedTableModel model = new TypedTableModel(new String[] {"tableEDescription"}, new Class[] {String.class}, 0);
 
-    model.addRow(new Object[] {"Text"});
+    model.addRow(new Object[] {""});
     return model;
   }
 
@@ -320,7 +335,7 @@ public class POWBSummaryAction extends BaseSummariesAction implements Summary {
   private TypedTableModel getCRPStaffingTableModel() {
     TypedTableModel model = new TypedTableModel(new String[] {"tableDDescription"}, new Class[] {String.class}, 0);
 
-    model.addRow(new Object[] {"Text"});
+    model.addRow(new Object[] {""});
     return model;
   }
 
@@ -332,8 +347,29 @@ public class POWBSummaryAction extends BaseSummariesAction implements Summary {
         "expectedEffortsCountryCoordinationDescription", "monitoringEvaluationLearningDescription"},
       new Class[] {String.class, String.class, String.class, String.class, String.class, String.class, String.class},
       0);
+    String staffingDescription = "", financialPlanDescription = "", newKeyExternalPartnershipsDescription = "",
+      newContributionPlatformsDescription = "", newCrossCRPInteractionsDescription = "",
+      expectedEffortsCountryCoordinationDescription = "", monitoringEvaluationLearningDescription = "";
 
-    model.addRow(new Object[] {"Text", "Text", "Text", "Text", "Text", "Text", "Text"});
+    if (powbSynthesisPMU != null) {
+      // TOC
+      if (powbSynthesisPMU.getCrpStaffing() != null) {
+        staffingDescription = powbSynthesisPMU.getCrpStaffing().getStaffingIssues() != null
+          && !powbSynthesisPMU.getCrpStaffing().getStaffingIssues().trim().isEmpty()
+            ? powbSynthesisPMU.getCrpStaffing().getStaffingIssues() : "&lt;Not Defined&gt;";
+
+      }
+      // Financial Plan
+      if (powbSynthesisPMU.getFinancialPlan() != null) {
+        financialPlanDescription = powbSynthesisPMU.getFinancialPlan().getFinancialPlanIssues() != null
+          && !powbSynthesisPMU.getFinancialPlan().getFinancialPlanIssues().trim().isEmpty()
+            ? powbSynthesisPMU.getFinancialPlan().getFinancialPlanIssues() : "&lt;Not Defined&gt;";
+      }
+    }
+
+    model.addRow(new Object[] {staffingDescription, financialPlanDescription, newKeyExternalPartnershipsDescription,
+      newContributionPlatformsDescription, newCrossCRPInteractionsDescription,
+      expectedEffortsCountryCoordinationDescription, monitoringEvaluationLearningDescription});
     return model;
   }
 
@@ -359,7 +395,7 @@ public class POWBSummaryAction extends BaseSummariesAction implements Summary {
       if (powbSynthesisPMU.getPowbToc() != null) {
         adjustmentsDescription = powbSynthesisPMU.getPowbToc().getTocOverall() != null
           && !powbSynthesisPMU.getPowbToc().getTocOverall().trim().isEmpty()
-            ? powbSynthesisPMU.getPowbToc().getTocOverall() : "<Not Defined>";
+            ? powbSynthesisPMU.getPowbToc().getTocOverall() : "&lt;Not Defined&gt;";
 
         if (powbSynthesisPMU.getPowbToc().getFile() != null) {
           adjustmentsDescription +=
@@ -378,7 +414,7 @@ public class POWBSummaryAction extends BaseSummariesAction implements Summary {
           .filter(e -> e.isActive()).collect(Collectors.toList()).get(0);
         expectedCrpDescription = powbExpectedCrpProgress.getExpectedHighlights() != null
           && !powbExpectedCrpProgress.getExpectedHighlights().trim().isEmpty()
-            ? powbExpectedCrpProgress.getExpectedHighlights() : "<Not Defined>";
+            ? powbExpectedCrpProgress.getExpectedHighlights() : "&lt;Not Defined&gt;";
       }
 
       // Cross Cutting Dimensions Info
@@ -402,6 +438,17 @@ public class POWBSummaryAction extends BaseSummariesAction implements Summary {
       expectedCrpDescription, evidenceDescription, plansCRPFlagshipDescription, crossCuttingGenderDescription,
       crossCuttingOpenDataDescription});
     return model;
+  }
+
+
+  public List<PowbExpenditureAreas> getExpenditureAreas() {
+    List<PowbExpenditureAreas> expenditureAreaList = powbExpenditureAreasManager.findAll().stream()
+      .filter(e -> e.isActive() && e.getIsExpenditure()).collect(Collectors.toList());
+    if (expenditureAreaList != null) {
+      return expenditureAreaList;
+    } else {
+      return new ArrayList<>();
+    }
   }
 
 
@@ -452,6 +499,20 @@ public class POWBSummaryAction extends BaseSummariesAction implements Summary {
   }
 
 
+  public List<LiaisonInstitution> getFlagships() {
+    List<LiaisonInstitution> flagshipsList = this.getLoggedCrp().getLiaisonInstitutions().stream()
+      .filter(c -> c.getCrpProgram() != null
+        && c.getCrpProgram().getProgramType() == ProgramType.FLAGSHIP_PROGRAM_TYPE.getValue() && c.isActive())
+      .collect(Collectors.toList());
+    if (flagshipsList != null) {
+      flagshipsList.sort(Comparator.comparing(LiaisonInstitution::getAcronym));
+      return flagshipsList;
+    } else {
+      return new ArrayList<>();
+    }
+  }
+
+
   @Override
   public InputStream getInputStream() {
     if (inputStream == null) {
@@ -460,17 +521,37 @@ public class POWBSummaryAction extends BaseSummariesAction implements Summary {
     return inputStream;
   }
 
-
   private TypedTableModel getMainAreasTableModel() {
     TypedTableModel model =
       new TypedTableModel(new String[] {"expenditureArea", "estimatedPercentajeFS", "commentsSpace"},
         new Class[] {String.class, Double.class, String.class}, 0);
-    for (int i = 0; i < 5; i++) {
-      model.addRow(new Object[] {"Text", 0, "Text"});
+    List<PowbFinancialExpenditure> powbFinancialExpenditureList =
+      powbSynthesisPMU.getPowbFinancialExpenditures().stream().filter(p -> p.isActive()).collect(Collectors.toList());
+    // Expenditure areas
+    List<PowbExpenditureAreas> powbExpenditureAreas = this.getExpenditureAreas();
+    if (powbExpenditureAreas != null && !powbExpenditureAreas.isEmpty()) {
+      for (PowbExpenditureAreas powbExpenditureArea : powbExpenditureAreas) {
+        Double estimatedPercentajeFS = 0.0;
+        String expenditureArea = "", commentsSpace = "";
+        expenditureArea = powbExpenditureArea.getExpenditureArea();
+        if (powbFinancialExpenditureList != null && !powbFinancialExpenditureList.isEmpty()) {
+          List<PowbFinancialExpenditure> powbFinancialExpenditureAreaList = powbFinancialExpenditureList.stream()
+            .filter(f -> f.getPowbExpenditureArea() != null && f.getPowbExpenditureArea().equals(powbExpenditureArea))
+            .collect(Collectors.toList());
+          PowbFinancialExpenditure powbFinancialExpenditure = null;
+          if (powbFinancialExpenditureAreaList != null && !powbFinancialExpenditureAreaList.isEmpty()) {
+            powbFinancialExpenditure = powbFinancialExpenditureAreaList.get(0);
+            estimatedPercentajeFS = powbFinancialExpenditure.getW1w2Percentage();
+            commentsSpace =
+              powbFinancialExpenditure.getComments() == null || powbFinancialExpenditure.getComments().trim().isEmpty()
+                ? " " : powbFinancialExpenditure.getComments();
+          }
+          model.addRow(new Object[] {expenditureArea, estimatedPercentajeFS, commentsSpace});
+        }
+      }
     }
     return model;
   }
-
 
   private TypedTableModel getMasterTableModel() {
     // Initialization of Model
@@ -478,6 +559,17 @@ public class POWBSummaryAction extends BaseSummariesAction implements Summary {
       new TypedTableModel(new String[] {"unit", "year"}, new Class[] {String.class, Integer.class});
     model.addRow(new Object[] {this.getLoggedCrp().getAcronym(), this.getSelectedYear()});
     return model;
+  }
+
+
+  public List<PowbExpenditureAreas> getPlannedBudgetAreas() {
+    List<PowbExpenditureAreas> plannedBudgetAreasList = powbExpenditureAreasManager.findAll().stream()
+      .filter(e -> e.isActive() && !e.getIsExpenditure()).collect(Collectors.toList());
+    if (plannedBudgetAreasList != null) {
+      return plannedBudgetAreasList;
+    } else {
+      return new ArrayList<>();
+    }
   }
 
 
@@ -520,7 +612,6 @@ public class POWBSummaryAction extends BaseSummariesAction implements Summary {
     return null;
   }
 
-
   public PowbExpectedCrpProgress getPowbExpectedCrpProgressProgram(Long crpMilestoneID, Long crpProgramID) {
     List<PowbExpectedCrpProgress> powbExpectedCrpProgresses =
       powbExpectedCrpProgressManager.findByProgram(crpProgramID);
@@ -531,7 +622,6 @@ public class POWBSummaryAction extends BaseSummariesAction implements Summary {
     }
     return new PowbExpectedCrpProgress();
   }
-
 
   // Method to download link file
   public String getPowbPath(LiaisonInstitution liaisonInstitution, String actionName) {
@@ -648,8 +738,21 @@ public class POWBSummaryAction extends BaseSummariesAction implements Summary {
     TypedTableModel model =
       new TypedTableModel(new String[] {"category", "female", "totalFTE", "FemalePercentaje", "male"},
         new Class[] {String.class, Double.class, Double.class, Double.class, Double.class}, 0);
-    for (int i = 0; i < 5; i++) {
-      model.addRow(new Object[] {"Text", 0, 0, 0, 0});
+
+    List<PowbSynthesisCrpStaffingCategory> powbSynthesisCrpStaffingCategoryList =
+      powbSynthesisPMU.getPowbSynthesisCrpStaffingCategory().stream().filter(c -> c.isActive())
+        .sorted((c1, c2) -> c1.getId().compareTo(c2.getId())).collect(Collectors.toList());
+    if (powbSynthesisCrpStaffingCategoryList != null && !powbSynthesisCrpStaffingCategoryList.isEmpty()) {
+      for (PowbSynthesisCrpStaffingCategory powbSynthesisCrpStaffingCategory : powbSynthesisCrpStaffingCategoryList) {
+        String category = "";
+        Double female = 0.0, totalFTE = 0.0, femalePercentaje = 0.0, male = 0.0;
+        category = powbSynthesisCrpStaffingCategory.getPowbCrpStaffingCategory().getCategory();
+        female = powbSynthesisCrpStaffingCategory.getFemale();
+        totalFTE = powbSynthesisCrpStaffingCategory.getTotalFTE();
+        femalePercentaje = powbSynthesisCrpStaffingCategory.getFemalePercentage() / 100;
+        male = powbSynthesisCrpStaffingCategory.getMale();
+        model.addRow(new Object[] {category, female, totalFTE, femalePercentaje, male});
+      }
     }
     return model;
   }
@@ -657,9 +760,61 @@ public class POWBSummaryAction extends BaseSummariesAction implements Summary {
   private TypedTableModel getTableEContentTableModel() {
     TypedTableModel model = new TypedTableModel(new String[] {"category", "w1w2", "w3Bilateral", "total", "comments"},
       new Class[] {String.class, Double.class, Double.class, Double.class, String.class}, 0);
-    for (int i = 0; i < 5; i++) {
-      model.addRow(new Object[] {"Text", 0, 0, 0, "Text"});
+    List<PowbFinancialPlannedBudget> powbFinancialPlannedBudgetList =
+      powbSynthesisPMU.getPowbFinancialPlannedBudget().stream().filter(p -> p.isActive()).collect(Collectors.toList());
+    // Flagships
+    List<LiaisonInstitution> flagships = this.getFlagships();
+    if (flagships != null && !flagships.isEmpty()) {
+      for (LiaisonInstitution flagship : flagships) {
+        Double w1w2 = 0.0, w3Bilateral = 0.0, total = 0.0;
+        String category = "", comments = "";
+        category = flagship.getAcronym();
+        if (powbFinancialPlannedBudgetList != null && !powbFinancialPlannedBudgetList.isEmpty()) {
+          List<PowbFinancialPlannedBudget> powbFinancialPlannedBudgetFlagshipList = powbFinancialPlannedBudgetList
+            .stream().filter(f -> f.getLiaisonInstitution() != null && f.getLiaisonInstitution().equals(flagship))
+            .collect(Collectors.toList());
+          PowbFinancialPlannedBudget powbFinancialPlannedBudget = null;
+          if (powbFinancialPlannedBudgetFlagshipList != null && !powbFinancialPlannedBudgetFlagshipList.isEmpty()) {
+            powbFinancialPlannedBudget = powbFinancialPlannedBudgetFlagshipList.get(0);
+            w1w2 = powbFinancialPlannedBudget.getW1w2();
+            w3Bilateral = powbFinancialPlannedBudget.getW3Bilateral();
+            total = powbFinancialPlannedBudget.getTotalPlannedBudget();
+            comments = powbFinancialPlannedBudget.getComments() == null
+              || powbFinancialPlannedBudget.getComments().trim().isEmpty() ? " "
+                : powbFinancialPlannedBudget.getComments();
+          }
+        }
+        model.addRow(new Object[] {category, w1w2, w3Bilateral, total, comments});
+      }
     }
+    // Expenditure areas
+    List<PowbExpenditureAreas> powbExpenditureAreas = this.getPlannedBudgetAreas();
+    if (powbExpenditureAreas != null && !powbExpenditureAreas.isEmpty()) {
+      for (PowbExpenditureAreas powbExpenditureArea : powbExpenditureAreas) {
+        Double w1w2 = 0.0, w3Bilateral = 0.0, total = 0.0;
+        String category = "", comments = "";
+        category = powbExpenditureArea.getExpenditureArea();
+        if (powbFinancialPlannedBudgetList != null && !powbFinancialPlannedBudgetList.isEmpty()) {
+          List<PowbFinancialPlannedBudget> powbFinancialPlannedBudgetExpenditureList =
+            powbFinancialPlannedBudgetList.stream()
+              .filter(f -> f.getPowbExpenditureArea() != null && f.getPowbExpenditureArea().equals(powbExpenditureArea))
+              .collect(Collectors.toList());
+          PowbFinancialPlannedBudget powbFinancialPlannedBudget = null;
+          if (powbFinancialPlannedBudgetExpenditureList != null
+            && !powbFinancialPlannedBudgetExpenditureList.isEmpty()) {
+            powbFinancialPlannedBudget = powbFinancialPlannedBudgetExpenditureList.get(0);
+            w1w2 = powbFinancialPlannedBudget.getW1w2();
+            w3Bilateral = powbFinancialPlannedBudget.getW3Bilateral();
+            total = powbFinancialPlannedBudget.getTotalPlannedBudget();
+            comments = powbFinancialPlannedBudget.getComments() == null
+              || powbFinancialPlannedBudget.getComments().trim().isEmpty() ? " "
+                : powbFinancialPlannedBudget.getComments();
+          }
+          model.addRow(new Object[] {category, w1w2, w3Bilateral, total, comments});
+        }
+      }
+    }
+
     return model;
   }
 

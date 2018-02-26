@@ -816,6 +816,11 @@ img.icon {
   cursor: pointer;
 }
 
+.removeIcon.disable{
+  opacity:0.4;
+  cursor: not-allowed;
+}
+
 .removeLink img, .removeLink a {
   vertical-align: middle;
   text-decoration: none;
@@ -3049,6 +3054,8 @@ button.ipGraph-btn{
 }
 
 .note {
+  background-color: #FFF7CF;
+  padding: 6px;
   text-align: center;
   border-bottom: 2px solid #fff;
   font-style: italic;
@@ -6446,6 +6453,10 @@ p.dateLabel.fieldError {
 
 .elementRelations  {
   margin: 7px 0 0 15px;
+}
+
+.elementRelations.ProjectBudget  {
+  padding: 0 7px 15px 0;
 }
 /* END Radio Flat*/
 

@@ -111,9 +111,9 @@
         </div>
         [#-- Terms and conditions checkbox --]
         <div class="row">
-          <div class="col-xs-12">
-            <div class="terms-container hidden">
-              <input type="checkbox" name="terms" id="terms" class="terms"> I agree to the <a href="">Terms and Conditions</a>
+          <div class="col-xs-12 hidden">
+            <div class="terms-container">
+              <input type="checkbox" name="terms" id="terms" class="terms"> I agree to the <a target="_blank" href="[@s.url namespace="/" action='legalInformation'][/@s.url]#termsConditions">Terms and Conditions</a>
             </div>
           </div>
         </div>

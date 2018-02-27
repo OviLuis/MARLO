@@ -114,6 +114,7 @@ import org.cgiar.ccafs.marlo.data.model.PowbSynthesisSectionStatusEnum;
 import org.cgiar.ccafs.marlo.data.model.ProgramType;
 import org.cgiar.ccafs.marlo.data.model.Project;
 import org.cgiar.ccafs.marlo.data.model.ProjectBudget;
+import org.cgiar.ccafs.marlo.data.model.ProjectBudgetsFlagship;
 import org.cgiar.ccafs.marlo.data.model.ProjectClusterActivity;
 import org.cgiar.ccafs.marlo.data.model.ProjectComponentLesson;
 import org.cgiar.ccafs.marlo.data.model.ProjectFocus;
@@ -1443,7 +1444,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return allYears;
   }
 
-
   public Boolean getAutoSaveFilePath(String simpleName, String actionName, long id) {
     String composedClassName = simpleName;
     String actionFile = this.getCrpSession() + "_" + actionName;
@@ -2645,6 +2645,99 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     }
   }
 
+
+  /**
+   * TODO
+   * 
+   * @param section
+   * @return
+   */
+  public boolean getPowbSynthesisSectionStatus(String sectionName, long powbSynthesisID) {
+
+    boolean returnValue = false;
+    SectionStatus sectionStatus;
+
+    PowbSynthesis powbSynthesis = powbSynthesisManager.getPowbSynthesisById(powbSynthesisID);
+
+
+    if (PowbSynthesisSectionStatusEnum.value(sectionName.toUpperCase()) == null) {
+      return false;
+    }
+
+    switch (PowbSynthesisSectionStatusEnum.value(sectionName.toUpperCase())) {
+      case FLAGSHIP_PLANS:
+        if (this.isPowbFlagship(powbSynthesis.getLiaisonInstitution())) {
+          sectionStatus = sectionStatusManager.getSectionStatusByPowbSynthesis(powbSynthesis.getId(),
+            this.getCurrentCycle(), powbSynthesis.getPhase().getYear(), sectionName);
+
+          if (sectionStatus == null) {
+            return false;
+          }
+          if (sectionStatus.getMissingFields().length() > 0) {
+            return false;
+          }
+        }
+        returnValue = true;
+        break;
+      case CROSS_CUTTING_DIMENSIONS:
+
+        if (this.isPowbPMU(powbSynthesis.getLiaisonInstitution())) {
+          sectionStatus = sectionStatusManager.getSectionStatusByPowbSynthesis(powbSynthesis.getId(),
+            this.getCurrentCycle(), powbSynthesis.getPhase().getYear(), sectionName);
+          if (sectionStatus == null) {
+            return false;
+          }
+          if (sectionStatus.getMissingFields().length() > 0) {
+            return false;
+          }
+        }
+        returnValue = true;
+        break;
+      case STAFFING:
+
+        if (this.isPowbPMU(powbSynthesis.getLiaisonInstitution())) {
+          sectionStatus = sectionStatusManager.getSectionStatusByPowbSynthesis(powbSynthesis.getId(),
+            this.getCurrentCycle(), powbSynthesis.getPhase().getYear(), sectionName);
+          if (sectionStatus == null) {
+            return false;
+          }
+          if (sectionStatus.getMissingFields().length() > 0) {
+            return false;
+          }
+        }
+        returnValue = true;
+        break;
+      case FINANCIAL_PLAN:
+
+        if (this.isPowbPMU(powbSynthesis.getLiaisonInstitution())) {
+          sectionStatus = sectionStatusManager.getSectionStatusByPowbSynthesis(powbSynthesis.getId(),
+            this.getCurrentCycle(), powbSynthesis.getPhase().getYear(), sectionName);
+          if (sectionStatus == null) {
+            return false;
+          }
+          if (sectionStatus.getMissingFields().length() > 0) {
+            return false;
+          }
+        }
+        returnValue = true;
+        break;
+      default:
+        sectionStatus = sectionStatusManager.getSectionStatusByPowbSynthesis(powbSynthesis.getId(),
+          this.getCurrentCycle(), powbSynthesis.getPhase().getYear(), sectionName);
+        if (sectionStatus == null) {
+          return false;
+        }
+        if (sectionStatus.getMissingFields().length() > 0) {
+          return false;
+        }
+        returnValue = true;
+        break;
+    }
+
+    return returnValue;
+  }
+
+
   public SectionStatus getProjectOutcomeStatus(long projectOutcomeID) {
     ProjectOutcome projectOutcome = projectOutcomeManager.getProjectOutcomeById(projectOutcomeID);
 
@@ -2657,7 +2750,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     }
     return null;
   }
-
 
   public List<Project> getProjectRelationsImpact(Long id, String className) {
     Class<?> clazz;
@@ -2798,6 +2890,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return projects;
 
   }
+
 
   public boolean getProjectSectionStatus(String section, long projectID) {
     boolean returnValue = false;
@@ -3088,7 +3181,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return submissions;
   }
 
-
   /**
    ************************ CENTER METHOD *********************
    * return true if the user can view the impactPathway
@@ -3125,10 +3217,10 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return Integer.parseInt(this.getSession().get(APConstants.CRP_REPORTING_YEAR).toString());
   }
 
+
   public HttpServletRequest getRequest() {
     return request;
   }
-
 
   public String getRoles() {
     String roles = "";
@@ -3145,19 +3237,19 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return roles;
   }
 
-
   public BaseSecurityContext getSecurityContext() {
     return securityContext;
   }
+
 
   public Map<String, Object> getSession() {
     return session;
   }
 
+
   public Submission getSubmission() {
     return submission;
   }
-
 
   public String getTimeZone() {
     TimeZone timeZone = TimeZone.getDefault();
@@ -3165,14 +3257,15 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return display;
   }
 
-
   public String getUrl() {
     return url;
   }
 
+
   public List<UserToken> getUsersOnline() {
     return SessionCounter.users;
   }
+
 
   public List<Map<String, Object>> getUsersToActive() {
     return usersToActive;
@@ -3181,7 +3274,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
   public StringBuilder getValidationMessage() {
     return validationMessage;
   }
-
 
   /**
    * Return the artifact version of the Marlo project pom.xml
@@ -3201,7 +3293,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     }
     return version;
   }
-
 
   /**
    * Years available per CRPs (used in Summaries)
@@ -3225,6 +3316,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     }
     return years;
   }
+
 
   public int goldDataValue(long deliverableID) {
     Deliverable deliverableBD = deliverableManager.getDeliverableById(deliverableID);
@@ -3282,6 +3374,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return total;
   }
 
+
   public boolean hasPermission(String fieldName) {
 
     if (basePermission == null) {
@@ -3315,7 +3408,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     }
   }
 
-
   public boolean hasPermissionCrpIndicators(long liaisonID) {
     String params[] = {this.getCrpSession(), liaisonID + "",};
     boolean permission =
@@ -3343,6 +3435,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     boolean permissions = this.securityContext.hasPermission(permission);
     return permissions;
   }
+
 
   /**
    * TODO
@@ -3377,10 +3470,9 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return permissions;
   }
 
-
-  public boolean hasPersmissionSubmitPowb() {
-    String permission =
-      this.generatePermission(Permission.POWB_SYNTHESIS_SUBMISSION_PERMISSION, this.getCurrentCrp().getAcronym());
+  public boolean hasPersmissionSubmitPowb(long powbSynthesisID) {
+    String permission = this.generatePermission(Permission.POWB_SYNTHESIS_SUBMISSION_PERMISSION,
+      this.getCurrentCrp().getAcronym(), String.valueOf(powbSynthesisID));
     boolean permissions = this.securityContext.hasPermission(permission);
     return permissions;
   }
@@ -3402,13 +3494,13 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return permissions;
   }
 
+
   public boolean hasPersmissionUnSubmit(long projectId) {
     String permission = this.generatePermission(Permission.PROJECT_UNSUBMISSION_PERMISSION,
       this.getCurrentCrp().getAcronym(), String.valueOf(projectId));
     boolean permissions = this.securityContext.hasPermission(permission);
     return permissions;
   }
-
 
   public boolean hasPersmissionUnSubmitImpact(long programID) {
     String permission = this.generatePermission(Permission.IMPACT_PATHWAY_UNSUBMISSION_PERMISSION,
@@ -3425,6 +3517,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     }
   }
 
+
   public boolean hasSpecificities(String specificity) {
     try {
       boolean param = Boolean.parseBoolean(this.getSession().get(specificity).toString());
@@ -3434,7 +3527,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     }
 
   }
-
 
   public <T> List<T> intersection(List<T> list1, List<T> list2) {
     List<T> list = new ArrayList<T>();
@@ -3447,7 +3539,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
     return list;
   }
-
 
   public Boolean isA(long deliverableID) {
     try {
@@ -3468,6 +3559,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     }
   }
 
+
   /**
    * @param role
    * @return true if is the user role
@@ -3476,10 +3568,10 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return securityContext.hasRole("Admin");
   }
 
+
   public boolean isAvailabePhase() {
     return availabePhase;
   }
-
 
   public boolean isCanEdit() {
     return canEdit;
@@ -3489,10 +3581,10 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return canEditPhase;
   }
 
+
   public boolean isCanSwitchProject() {
     return canSwitchProject;
   }
-
 
   /**
    * ************************ CENTER METHOD *********************
@@ -3571,6 +3663,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
     return true;
   }
+
 
   public boolean isCompleteCrpIndicator(long liaisonIntitution) {
     List<SectionStatus> sectionStatus = null;
@@ -3677,19 +3770,16 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
   public boolean isCompleteLiaisonSection(String sectionName, long liaisonInstitutionID) {
     Phase phase = this.getActualPhase();
 
-    PowbSynthesis powbSynthesis = phase.getPowbSynthesis().stream()
-      .filter(powb -> powb.isActive() && powb.getLiaisonInstitution().getId() == liaisonInstitutionID)
-      .collect(Collectors.toList()).get(0);
+    PowbSynthesis powbSynthesis = powbSynthesisManager.findSynthesis(phase.getId(), liaisonInstitutionID);
 
     if (powbSynthesis != null) {
       if (powbSynthesis.getSectionStatuses() != null) {
-        List<SectionStatus> sections = new ArrayList<>(powbSynthesis.getSectionStatuses().stream()
-          .filter(ss -> ss.getCycle().equals(this.getCurrentCycle())
-            && ss.getYear().intValue() == this.getCurrentCycleYear() && ss.getSectionName().equals(sectionName))
-          .collect(Collectors.toList()));
-        if (sections.size() > 0) {
-          SectionStatus section = sections.get(0);
-          if (section.getMissingFields().length() > 0) {
+
+        SectionStatus sectionStatus = sectionStatusManager.getSectionStatusByPowbSynthesis(powbSynthesis.getId(),
+          this.getCurrentCycle(), phase.getYear(), sectionName);
+
+        if (sectionStatus != null) {
+          if (sectionStatus.getMissingFields().length() > 0) {
             return false;
           }
         } else {
@@ -3704,178 +3794,115 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return true;
   }
 
-
   /**
    * TODO
    * 
    * @param phaseID
    * @return
    */
-  public boolean isCompletePowbSynthesis() {
+  public boolean isCompletePowbSynthesis(long powbSynthesisID) {
 
-    int tocSections = 0;
-    int crpProgressSections = 0;
-    int evidenceSections = 0;
-    int flagshipplansSections = 0;
-    int crossCuttingSections = 0;
-    int staffingSections = 0;
-    int financialSections = 0;
-    int colaborationSections = 0;
-    int melSections = 0;
-    int riskSections = 0;
-    int governanceSections = 0;
-
+    int secctions = 0;
     if (sectionStatusManager.findAll() == null) {
       return false;
     }
 
-    Phase phase = this.getActualPhase();
-    phase = phaseManager.getPhaseById(phase.getId());
-    GlobalUnit crp = phase.getCrp();
-    crp = crpManager.getGlobalUnitById(crp.getId());
-    List<LiaisonInstitution> liaisonInstitutions = new ArrayList<>();
-    List<PowbSynthesis> synthesisList =
-      new ArrayList<>(phase.getPowbSynthesis().stream().filter(powb -> powb.isActive()).collect(Collectors.toList()));
+    PowbSynthesis powbSynthesis = powbSynthesisManager.getPowbSynthesisById(powbSynthesisID);
 
-    // Get the list of liaison institutions Flagships and PMU.
-    liaisonInstitutions = crp.getLiaisonInstitutions().stream()
-      .filter(c -> c.getCrpProgram() != null && c.isActive()
-        && c.getCrpProgram().getProgramType() == ProgramType.FLAGSHIP_PROGRAM_TYPE.getValue())
-      .collect(Collectors.toList());
-    int totalFlagships = liaisonInstitutions.size();
-    // ADD PMU as liasion Institutio too
-    liaisonInstitutions.addAll(crp.getLiaisonInstitutions().stream()
-      .filter(c -> c.getCrpProgram() == null && c.isActive() && c.getAcronym().equals("PMU"))
-      .collect(Collectors.toList()));
-    int totalLiaisonInstitutions = liaisonInstitutions.size();
 
-    if (synthesisList.size() == totalLiaisonInstitutions) {
-      for (PowbSynthesis powbSynthesis : synthesisList) {
-        if (powbSynthesis.getSectionStatuses() != null) {
-
-          List<SectionStatus> sections = new ArrayList<>(powbSynthesis.getSectionStatuses());
-          for (SectionStatus sectionStatus : sections) {
-            if (sectionStatus.getCycle().equals(this.getCurrentCycle())
-              && sectionStatus.getYear().intValue() == this.getCurrentCycleYear()) {
-              switch (PowbSynthesisSectionStatusEnum.value(sectionStatus.getSectionName().toUpperCase())) {
-                case TOC_ADJUSTMENTS:
-                  tocSections++;
-                  if (sectionStatus.getMissingFields().length() > 0) {
-                    return false;
-                  }
-                  break;
-                case CRP_PROGRESS:
-                  crpProgressSections++;
-                  if (sectionStatus.getMissingFields().length() > 0) {
-                    return false;
-                  }
-                  break;
-                case EVIDENCES:
-                  evidenceSections++;
-                  if (sectionStatus.getMissingFields().length() > 0) {
-                    return false;
-                  }
-                  break;
-                case FLAGSHIP_PLANS:
-                  flagshipplansSections++;
-                  if (sectionStatus.getMissingFields().length() > 0) {
-                    return false;
-                  }
-                  break;
-                case CROSS_CUTTING_DIMENSIONS:
-                  crossCuttingSections++;
-                  if (sectionStatus.getMissingFields().length() > 0) {
-                    return false;
-                  }
-                  break;
-                case STAFFING:
-                  staffingSections++;
-                  if (sectionStatus.getMissingFields().length() > 0) {
-                    return false;
-                  }
-                  break;
-                case FINANCIAL_PLAN:
-                  financialSections++;
-                  if (sectionStatus.getMissingFields().length() > 0) {
-                    return false;
-                  }
-                  break;
-                case COLABORATION_INTEGRATION:
-                  colaborationSections++;
-                  if (sectionStatus.getMissingFields().length() > 0) {
-                    return false;
-                  }
-                  break;
-                case MEL:
-                  melSections++;
-                  if (sectionStatus.getMissingFields().length() > 0) {
-                    return false;
-                  }
-                  break;
-                case MANAGEMENT_RISK:
-                  riskSections++;
-                  if (sectionStatus.getMissingFields().length() > 0) {
-                    return false;
-                  }
-                  break;
-                case MANAGEMENT_GOVERNANCE:
-                  governanceSections++;
-                  if (sectionStatus.getMissingFields().length() > 0) {
-                    return false;
-                  }
-                  break;
+    if (powbSynthesis.getSectionStatuses() != null) {
+      List<SectionStatus> sections = new ArrayList<>(powbSynthesis.getSectionStatuses());
+      for (SectionStatus sectionStatus : sections) {
+        if (sectionStatus.getCycle().equals(this.getCurrentCycle())
+          && sectionStatus.getYear().intValue() == this.getCurrentCycleYear()) {
+          switch (PowbSynthesisSectionStatusEnum.value(sectionStatus.getSectionName().toUpperCase())) {
+            case TOC_ADJUSTMENTS:
+              secctions++;
+              if (sectionStatus.getMissingFields().length() > 0) {
+                return false;
               }
-            }
+              break;
+            case CRP_PROGRESS:
+              secctions++;
+              if (sectionStatus.getMissingFields().length() > 0) {
+                return false;
+              }
+              break;
+            case EVIDENCES:
+              secctions++;
+              if (sectionStatus.getMissingFields().length() > 0) {
+                return false;
+              }
+              break;
+            case FLAGSHIP_PLANS:
+              secctions++;
+              if (sectionStatus.getMissingFields().length() > 0) {
+                return false;
+              }
+              break;
+            case CROSS_CUTTING_DIMENSIONS:
+              secctions++;
+              if (sectionStatus.getMissingFields().length() > 0) {
+                return false;
+              }
+              break;
+            case STAFFING:
+              secctions++;
+              if (sectionStatus.getMissingFields().length() > 0) {
+                return false;
+              }
+              break;
+            case FINANCIAL_PLAN:
+              secctions++;
+              if (sectionStatus.getMissingFields().length() > 0) {
+                return false;
+              }
+              break;
+            case COLABORATION_INTEGRATION:
+              secctions++;
+              if (sectionStatus.getMissingFields().length() > 0) {
+                return false;
+              }
+              break;
+            case MEL:
+              secctions++;
+              if (sectionStatus.getMissingFields().length() > 0) {
+                return false;
+              }
+              break;
+            case MANAGEMENT_RISK:
+              secctions++;
+              if (sectionStatus.getMissingFields().length() > 0) {
+                return false;
+              }
+              break;
+            case MANAGEMENT_GOVERNANCE:
+              secctions++;
+              if (sectionStatus.getMissingFields().length() > 0) {
+                return false;
+              }
+              break;
           }
-
-          if (tocSections != totalLiaisonInstitutions) {
-            return false;
-          }
-          if (crpProgressSections != totalLiaisonInstitutions) {
-            return false;
-          }
-          if (evidenceSections != totalLiaisonInstitutions) {
-            return false;
-          }
-          if (flagshipplansSections != totalFlagships) {
-            return false;
-          }
-          if (crossCuttingSections != 1) {
-            return false;
-          }
-          if (staffingSections != 1) {
-            return false;
-          }
-          if (financialSections != 1) {
-            return false;
-          }
-          if (colaborationSections != totalLiaisonInstitutions) {
-            return false;
-          }
-          if (melSections != totalLiaisonInstitutions) {
-            return false;
-          }
-          if (riskSections != totalLiaisonInstitutions) {
-            return false;
-          }
-          if (governanceSections != totalLiaisonInstitutions) {
-            return false;
-          }
-
-        } else {
-          return false;
         }
       }
-
-
     } else {
       return false;
     }
 
+    if (this.isPowbFlagship(powbSynthesis.getLiaisonInstitution())) {
+      if (secctions != 8) {
+        return false;
+      }
+    }
+
+    if (this.isPowbPMU(powbSynthesis.getLiaisonInstitution())) {
+      if (secctions != 10) {
+        return false;
+      }
+    }
     return true;
 
   }
-
 
   public boolean isCompletePreProject(long projectID) {
 
@@ -4270,6 +4297,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return true;
   }
 
+
   public boolean isCrpClosed() {
     try {
       // return Integer.parseInt(this.getSession().get(APConstants.CRP_CLOSED).toString()) == 1;
@@ -4280,6 +4308,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
       return false;
     }
   }
+
 
   public boolean isCrpRefresh() {
     try {
@@ -4295,7 +4324,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
   public boolean isDataSaved() {
     return dataSaved;
   }
-
 
   public Boolean isDeliverableNew(long deliverableID) {
     /*
@@ -4342,10 +4370,10 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return draft;
   }
 
+
   public boolean isEditable() {
     return isEditable;
   }
-
 
   public boolean isEditStatus() {
     return editStatus;
@@ -4371,6 +4399,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     }
 
   }
+
 
   public boolean isFullEditable() {
     return fullEditable;
@@ -4412,7 +4441,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
     }
   }
-
 
   protected boolean isHttpPost() {
     if (this.getRequest().getMethod().equalsIgnoreCase("post")) {
@@ -4483,6 +4511,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
   }
 
+
   public boolean isLessonsActive() {
     return Boolean.parseBoolean(this.getSession().get(APConstants.CRP_LESSONS_ACTIVE).toString());
   }
@@ -4499,7 +4528,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return true;
   }
 
-
   public boolean isPhaseOne() {
     try {
       if (this.isReportingActive() && this.getCrpSession().equals("ccafs") && (this.getCurrentCycleYear() == 2016)) {
@@ -4512,14 +4540,15 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     }
   }
 
-
   public boolean isPlanningActive() {
     return this.getActualPhase().getDescription().equals(APConstants.PLANNING);
   }
 
+
   public boolean isPlanningActiveParam() {
     return Boolean.parseBoolean(this.getSession().get(APConstants.CRP_PLANNING_ACTIVE).toString());
   }
+
 
   public boolean isPMU() {
     String roles = this.getRoles();
@@ -4529,11 +4558,35 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return false;
   }
 
+  public boolean isPowbFlagship(LiaisonInstitution liaisonInstitution) {
+    boolean isFP = false;
+    if (liaisonInstitution != null) {
+      if (liaisonInstitution.getCrpProgram() != null) {
+        CrpProgram crpProgram =
+          crpProgramManager.getCrpProgramById(liaisonInstitution.getCrpProgram().getId().longValue());
+        if (crpProgram.getProgramType() == ProgramType.FLAGSHIP_PROGRAM_TYPE.getValue()) {
+          isFP = true;
+        }
+      }
+    }
+    return isFP;
+  }
 
-  public boolean isPowbSynthesisSubmitted() {
-    GlobalUnit globalUnit = this.getCurrentCrp();
-    globalUnit = crpManager.getGlobalUnitById(globalUnit.getId());
-    List<Submission> submissions = globalUnit.getSubmissions()
+  public boolean isPowbPMU(LiaisonInstitution liaisonInstitution) {
+    boolean isFP = false;
+    if (liaisonInstitution != null) {
+      if (liaisonInstitution.getCrpProgram() == null) {
+        isFP = true;
+      }
+    }
+    return isFP;
+
+  }
+
+
+  public boolean isPowbSynthesisSubmitted(long powbSynthesisID) {
+    PowbSynthesis powbSynthesis = powbSynthesisManager.getPowbSynthesisById(powbSynthesisID);
+    List<Submission> submissions = powbSynthesis.getSubmissions()
       .stream().filter(c -> c.getCycle().equals(this.getCurrentCycle())
         && c.getYear().intValue() == this.getCurrentCycleYear() && (c.isUnSubmit() == null || !c.isUnSubmit()))
       .collect(Collectors.toList());
@@ -4834,6 +4887,89 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     }
   }
 
+  public List<Project> loadFlagShipBudgetInfoProgram(long crpProgramID) {
+    List<Project> projectsToRet = new ArrayList<>();
+    CrpProgram crpProgram = crpProgramManager.getCrpProgramById(crpProgramID);
+    List<ProjectFocus> projects = crpProgram.getProjectFocuses().stream()
+      .filter(c -> c.getProject().isActive() && c.isActive()).collect(Collectors.toList());
+    Set<Project> myProjects = new HashSet();
+    for (ProjectFocus projectFocus : projects) {
+      Project project = projectFocus.getProject();
+      if (project.isActive()) {
+        project.setProjectInfo(project.getProjecInfoPhase(this.getActualPhase()));
+        if (project.getProjectInfo() != null && project.getProjectInfo().getStatus() != null) {
+          if (project.getProjectInfo().getStatus().intValue() == Integer
+            .parseInt(ProjectStatusEnum.Ongoing.getStatusId())
+            || project.getProjectInfo().getStatus().intValue() == Integer
+              .parseInt(ProjectStatusEnum.Extended.getStatusId())) {
+            myProjects.add(project);
+          }
+        }
+
+
+      }
+    }
+    for (Project project : myProjects) {
+
+      project.setProjectInfo(project.getProjecInfoPhase(this.getActualPhase()));
+      double w1 = project.getCoreBudget(this.getActualPhase().getYear(), this.getActualPhase());
+      double w3 = project.getW3Budget(this.getActualPhase().getYear(), this.getActualPhase());
+      double bilateral = project.getBilateralBudget(this.getActualPhase().getYear(), this.getActualPhase());
+      List<ProjectBudgetsFlagship> budgetsFlagships = project.getProjectBudgetsFlagships().stream()
+        .filter(c -> c.isActive() && c.getCrpProgram().getId().longValue() == crpProgram.getId().longValue()
+          && c.getPhase().equals(this.getActualPhase()) && c.getYear() == this.getActualPhase().getYear())
+        .collect(Collectors.toList());
+      double percentageW1 = 0;
+      double percentageW3 = 0;
+      double percentageB = 0;
+
+      if (!this.getCountProjectFlagships(project.getId())) {
+        if (w1 > 0) {
+          percentageW1 = 100;
+        }
+        if (w3 > 0) {
+          percentageW3 = 100;
+        }
+        if (bilateral > 0) {
+          percentageB = 100;
+        }
+
+      }
+      for (ProjectBudgetsFlagship projectBudgetsFlagship : budgetsFlagships) {
+        switch (projectBudgetsFlagship.getBudgetType().getId().intValue()) {
+          case 1:
+            percentageW1 = percentageW1 + projectBudgetsFlagship.getAmount();
+            break;
+          case 2:
+            percentageW3 = percentageW3 + projectBudgetsFlagship.getAmount();
+            break;
+          case 3:
+            percentageB = percentageB + projectBudgetsFlagship.getAmount();
+            break;
+          default:
+            break;
+        }
+      }
+      project.setW3Budget(w3);
+      project.setCoreBudget(w1);
+      project.setBilateralBudget(bilateral);
+
+      project.setPercentageW3(percentageW3);
+      project.setPercentageW1(percentageW1);
+      project.setPercentageBilateral(percentageB);
+
+      w1 = w1 * (percentageW1) / 100;
+      w3 = w3 * (percentageW3) / 100;
+      bilateral = bilateral * (percentageB) / 100;
+
+      project.setTotalW3(w3);
+      project.setTotalW1(w1);
+      project.setTotalBilateral(bilateral);
+      projectsToRet.add(project);
+    }
+    return projectsToRet;
+  }
+
   public void loadLessons(GlobalUnit crp, Project project) {
 
     Project projectDB = projectManager.getProjectById(project.getId());
@@ -4887,6 +5023,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     }
   }
 
+
   public void loadLessonsOutcome(GlobalUnit crp, ProjectOutcome projectOutcome) {
 
     ProjectOutcome projectOutcomeDB = projectOutcomeManager.getProjectOutcomeById(projectOutcome.getId());
@@ -4920,7 +5057,6 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
       }
     }
   }
-
 
   public void loadLessonsSynthesis(GlobalUnit crp, IpProgram program) {
 
@@ -4972,11 +5108,11 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     return NEXT;
   }
 
+
   @Override
   public void prepare() throws Exception {
     // So far, do nothing here!
   }
-
 
   /* Override this method depending of the save action. */
   public String save() {

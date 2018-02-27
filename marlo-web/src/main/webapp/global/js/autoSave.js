@@ -195,12 +195,13 @@ function validateThisSection() {
           }
         }
         $sectionMenu.removeClass('loadingSection');
-      },
-      complete: function(data) {
-        $sectionMenu.addClass('animated flipInX');
-      },
-      error: function(error) {
-        console.log(error)
       }
+    },
+    complete: function(data) {
+      $sectionMenu.addClass('animated flipInX');
+    },
+    error: function(error) {
+      console.log(error)
+    }
   });
 }

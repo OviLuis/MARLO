@@ -1,7 +1,7 @@
 [#ftl]
 [#assign title = "POWB Synthesis" /]
 [#assign currentSectionString = "powb-${actionName?replace('/','-')}-${liaisonInstitutionID}" /]
-[#assign pageLibs = [ "select2", "flat-flags" ] /]
+[#assign pageLibs = [ "select2", "flat-flags", "datatables.net", "datatables.net-bs" ] /]
 [#assign customJS = [ "${baseUrlMedia}/js/powb/powb_collaborationIntegration.js" ] /]
 [#assign customCSS = [ "${baseUrlMedia}/css/powb/powbGlobal.css" ] /]
 [#assign currentSection = "synthesis" /]
@@ -44,6 +44,13 @@
             [@customForm.textArea  name="powbSynthesis.collaboration.keyExternalPartners" i18nkey="powbSynthesis.collaborationIntegration.partnerships" help="powbSynthesis.collaborationIntegration.partnerships.help" paramText="${actualPhase.year}" required=true className="limitWords-100" editable=editable /]
           </div>
           
+          [#-- Project Partnerships --]
+          [#if flagship]
+            <h4 class="subTitle headTitle">[@s.text name="collaborationIntegration.tableFlagshipPartnerships.title"][@s.param]${(actualPhase.year)!}[/@s.param][/@s.text]</h4>
+            <hr />
+            [@tableFlagshipPartnershipsMacro list=(action.loadProjects(liaisonInstitution.crpProgram.id))![]  /]
+          [/#if]
+          
           [#-- Table: New Key External Partnerships --]
           [#if PMU]
           <div class="form-group">
@@ -51,7 +58,8 @@
             [@tableFlagshipsOverallMacro list=crpPrograms item=1 /]
           </div>
           [/#if]
-          
+        </div>
+        <div class="borderBox"> 
           [#-- 2.3.2  New Contribution to and from Platforms --] 
           <div class="form-group">
             [@customForm.textArea  name="powbSynthesis.collaboration.cotributionsPlatafforms" i18nkey="powbSynthesis.collaborationIntegration.platformsContributions" help="powbSynthesis.collaborationIntegration.platformsContributions.help" paramText="${actualPhase.year}" required=true className="limitWords-100" editable=editable /]
@@ -97,10 +105,39 @@
           </div>
           [/#if]
           
+          [#-- if PMU]
+            <div class="">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th class="col-md-1"> [@s.text name="collaborationIntegration.tableFlagshipsOverall.fp" /] </th>
+                    <th> Collaboration Program </th>
+                    <th> Brief description </th>
+                  </tr>
+                </thead>
+                <tbody>
+                [#list crpPrograms as crpProgram]
+                  [#if crpProgram.synthesis.powbCollaborationGlobalUnitsList??]
+                    [#list crpProgram.synthesis.powbCollaborationGlobalUnitsList as collaboration]
+                      <tr>
+                        <td><span class="programTag" style="border-color:${(crpProgram.color)!'#fff'}" title="${crpProgram.composedName}">${crpProgram.acronym}</span></td>
+                        <td> ${(collaboration.globalUnit.composedName)!collaboration.globalUnit.acronym}</td>
+                        <td> ${(collaboration.brief)!} </td>
+                      </tr>
+                    [/#list]
+                  [/#if]
+                [/#list]
+                </tbody>
+              </table>
+            </div>
+          [/#if--]
+        </div>
+        <div class="borderBox">
           [#-- 2.3.4  Expected Efforts on Country Coordination --] 
           <div class="form-group">
             [@customForm.textArea  name="powbSynthesis.collaboration.effostornCountry" i18nkey="powbSynthesis.collaborationIntegration.expectedEfforts" help="powbSynthesis.collaborationIntegration.expectedEfforts.help" paramText="${actualPhase.year}" required=true className="limitWords-100" editable=editable /]
           </div>
+          <br />
           
           [#-- Table: Flagships - Expected Efforts on Country Coordination --]
           [#if PMU]
@@ -110,7 +147,7 @@
           </div>
           [/#if]
           
-          [#-- Table: Flagships - Expected Efforts on Country Coordination --]
+          [#-- Table: CGIAR Country Coordination--]
           [#if flagship]
           <div class="form-group">
             <h4 class="subTitle headTitle">[@s.text name="collaborationIntegration.tableCountryContribution.title"][@s.param]${(actualPhase.year)!}[/@s.param][/@s.text]</h4>
@@ -162,6 +199,36 @@
   </div>
 [/#macro]
 
+[#macro tableFlagshipPartnershipsMacro list ]
+  <div class="">
+    <table class="table table-bordered partnershipsTable">
+      <thead>
+        <tr>
+          <th class="col-md-1"> [@s.text name="collaborationIntegration.tableFlagshipPartnerships.project" /] </th>
+          <th> [@s.text name="collaborationIntegration.tableFlagshipPartnerships.narrative" /] </th>
+        </tr>
+      </thead>
+      <tbody>
+        [#if list??]
+          [#list list as project]
+            [#local pURL][@s.url namespace="/projects" action="${(crpSession)!}/partners"][@s.param name='projectID']${project.id}[/@s.param][#include "/WEB-INF/global/pages/urlGlobalParams.ftl" /][/@s.url][/#local]
+            <tr>
+              <td> <a href="${pURL}" target="_blank">P${project.id}</a> </td>              
+              <td>
+                [#if (project.projectInfo.newPartnershipsPlanned?has_content)!false]
+                  ${project.projectInfo.newPartnershipsPlanned?replace('\n', '<br>')}
+                [#else]
+                  <i style="opacity:0.5">[@s.text name="global.prefilledWhenAvailable"/]</i>
+                [/#if]
+              </td>
+            </tr>
+          [/#list]
+        [/#if]
+      </tbody>
+    </table>
+  </div>
+[/#macro]
+
 [#macro tableCountryContributionsMacro ]
 
   [#assign locElements = siteIntegrations /]
@@ -179,16 +246,22 @@
           [#list locElements as locElement]
             <tr>
               <td> <i class="flag-sm flag-sm-${(locElement.locElement.isoAlpha2?upper_case)!}"></i> ${locElement.locElement.name} </td>              
-              <td>
+              <td class="col-md-5">
                 [#if (locElement.fundingSources?has_content)!false]
-                 [#list locElement.fundingSources as fundingSource]FS${fundingSource.id}, [/#list]
+                  [#list locElement.fundingSources as fundingSource]
+                    [#local fURL][@s.url namespace="/fundingSources" action="${(crpSession)!}/fundingSource"][@s.param name='fundingSourceID']${fundingSource.id}[/@s.param][#include "/WEB-INF/global/pages/urlGlobalParams.ftl" /][/@s.url][/#local]
+                    <a href="${fURL}" target="_blanck">FS${fundingSource.id}</a>, 
+                  [/#list]
                 [#else]
                   <i style="opacity:0.5">[@s.text name="global.prefilledWhenAvailable"/]</i>
                 [/#if]
               </td>
-              <td>
+              <td class="col-md-5">
                 [#if (locElement.projects?has_content)!false]
-                  [#list locElement.projects as project]P${project.id}, [/#list]
+                  [#list locElement.projects as project]
+                    [#local pURL][@s.url namespace="/projects" action="${(crpSession)!}/locations"][@s.param name='projectID']${project.id}[/@s.param][#include "/WEB-INF/global/pages/urlGlobalParams.ftl" /][/@s.url][/#local]
+                    <a href="${pURL}" target="_blank">P${project.id}</a>,
+                  [/#list]
                 [#else]
                   <i style="opacity:0.5">[@s.text name="global.prefilledWhenAvailable"/]</i>
                 [/#if]
@@ -217,7 +290,7 @@
     <div class="form-group row"> 
       [#-- CRP/Platform --] 
       <div class="col-md-4">
-        [@customForm.select name="${customName}.globalUnit.id" label="" i18nkey="powbSynthesis.programCollaboration.globalUnit" listName="globalUnits"  required=true  className="" editable=isEditable/]
+        [@customForm.select name="${customName}.globalUnit.id" label="" keyFieldName="id"  displayFieldName="acronymValid" i18nkey="powbSynthesis.programCollaboration.globalUnit" listName="globalUnits"  required=true  className="" editable=isEditable/]
       </div>
       [#-- Flagship/Module --]
       <div class="col-md-8">

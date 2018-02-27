@@ -48,19 +48,23 @@ public class GlobalUnit implements java.io.Serializable, IAuditLog {
 
   @Expose
   private boolean login;
+
+  private String acronymValid;
+
+
   private Set<CenterLeader> centerLeaders = new HashSet<CenterLeader>(0);
+
 
   private Set<CrpProgram> crpPrograms = new HashSet<CrpProgram>(0);
 
   private Set<CrpTargetUnit> crpTargetUnits = new HashSet<CrpTargetUnit>(0);
 
-
   private Set<CenterArea> centerAreas = new HashSet<CenterArea>(0);
 
   private Set<DeliverableType> deliverableTypes = new HashSet<DeliverableType>(0);
 
-  private Set<LocElementType> locElementTypes = new HashSet<LocElementType>(0);
 
+  private Set<LocElementType> locElementTypes = new HashSet<LocElementType>(0);
 
   private Set<LocElement> locElements = new HashSet<LocElement>(0);
 
@@ -84,11 +88,11 @@ public class GlobalUnit implements java.io.Serializable, IAuditLog {
 
   private Set<CrpsSiteIntegration> crpsSitesIntegrations = new HashSet<CrpsSiteIntegration>(0);
 
-
   private Set<CrpLocElementType> crpLocElementTypes = new HashSet<CrpLocElementType>(0);
 
 
   private Set<CustomParameter> customParameters = new HashSet<CustomParameter>(0);
+
 
   private Set<LiaisonUser> liasonUsers = new HashSet<LiaisonUser>(0);
 
@@ -100,11 +104,12 @@ public class GlobalUnit implements java.io.Serializable, IAuditLog {
 
   private Set<FundingSource> fundingSources = new HashSet<FundingSource>(0);
 
-
   private Set<Deliverable> deliverables = new HashSet<Deliverable>(0);
+
 
   // Variables add for Crp Class
   private boolean hasRegions; // Used by CrpAdminManagmentAction
+
 
   private List<UserRole> programManagmenTeam; // Used by CrpAdminManagmentAction
 
@@ -196,6 +201,10 @@ public class GlobalUnit implements java.io.Serializable, IAuditLog {
     return acronym;
   }
 
+  public String getAcronymValid() {
+    return acronymValid;
+  }
+
   public Date getActiveSince() {
     return activeSince;
   }
@@ -212,9 +221,17 @@ public class GlobalUnit implements java.io.Serializable, IAuditLog {
     return centerObjectives;
   }
 
-
   public Set<CenterProjectFundingSource> getCenterProjectFundingSources() {
     return centerProjectFundingSources;
+  }
+
+
+  public String getComposedName() {
+    if (this.acronym != null || !this.acronym.trim().equals("")) {
+      return this.acronym + " - " + this.name;
+    } else {
+      return this.name;
+    }
   }
 
   public User getCreatedBy() {
@@ -391,6 +408,10 @@ public class GlobalUnit implements java.io.Serializable, IAuditLog {
     this.acronym = acronym;
   }
 
+  public void setAcronymValid(String acronymValid) {
+    this.acronymValid = acronymValid;
+  }
+
   public void setActive(boolean active) {
     this.active = active;
   }
@@ -399,10 +420,10 @@ public class GlobalUnit implements java.io.Serializable, IAuditLog {
     this.activeSince = activeSince;
   }
 
+
   public void setCenterAreas(Set<CenterArea> centerAreas) {
     this.centerAreas = centerAreas;
   }
-
 
   public void setCenterLeaders(Set<CenterLeader> centerLeaders) {
     this.centerLeaders = centerLeaders;
@@ -412,10 +433,10 @@ public class GlobalUnit implements java.io.Serializable, IAuditLog {
     this.centerObjectives = centerObjectives;
   }
 
+
   public void setCenterProjectFundingSources(Set<CenterProjectFundingSource> centerProjectFundingSources) {
     this.centerProjectFundingSources = centerProjectFundingSources;
   }
-
 
   public void setCreatedBy(User createdBy) {
     this.createdBy = createdBy;
@@ -465,10 +486,10 @@ public class GlobalUnit implements java.io.Serializable, IAuditLog {
     this.deliverables = deliverables;
   }
 
+
   public void setDeliverablesList(List<Deliverable> deliverablesList) {
     this.deliverablesList = deliverablesList;
   }
-
 
   public void setDeliverableTypes(Set<DeliverableType> deliverableTypes) {
     this.deliverableTypes = deliverableTypes;

@@ -42,6 +42,7 @@ import org.cgiar.ccafs.marlo.data.model.PowbMonitoringEvaluationLearningExercise
 import org.cgiar.ccafs.marlo.data.model.PowbSynthesis;
 import org.cgiar.ccafs.marlo.data.model.ProgramType;
 import org.cgiar.ccafs.marlo.data.model.Project;
+import org.cgiar.ccafs.marlo.data.model.ProjectFocus;
 import org.cgiar.ccafs.marlo.data.model.ProjectLocation;
 import org.cgiar.ccafs.marlo.data.model.ProjectStatusEnum;
 import org.cgiar.ccafs.marlo.data.model.User;
@@ -58,9 +59,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -108,7 +109,7 @@ public class PowbCollaborationAction extends BaseAction {
   private List<LiaisonInstitution> liaisonInstitutions;
   private LiaisonInstitution liaisonInstitution;
   private List<PowbMonitoringEvaluationLearningExercise> flagshipExercises;
-  private Map<Long, String> globalUnits;
+  private List<GlobalUnit> globalUnits;
 
 
   @Inject
@@ -181,7 +182,7 @@ public class PowbCollaborationAction extends BaseAction {
   }
 
 
-  public Map<Long, String> getGlobalUnits() {
+  public List<GlobalUnit> getGlobalUnits() {
     return globalUnits;
   }
 
@@ -316,6 +317,37 @@ public class PowbCollaborationAction extends BaseAction {
 
   }
 
+  public List<Project> loadProjects(long crpProgramID) {
+    List<Project> projectsToRet = new ArrayList<>();
+    CrpProgram crpProgram = crpProgramManager.getCrpProgramById(crpProgramID);
+    List<ProjectFocus> projects = crpProgram.getProjectFocuses().stream()
+      .filter(c -> c.getProject().isActive() && c.isActive()).collect(Collectors.toList());
+    Set<Project> myProjects = new HashSet();
+    for (ProjectFocus projectFocus : projects) {
+      Project project = projectFocus.getProject();
+      if (project.isActive()) {
+        project.setProjectInfo(project.getProjecInfoPhase(this.getActualPhase()));
+        if (project.getProjectInfo() != null && project.getProjectInfo().getStatus() != null) {
+          if (project.getProjectInfo().getStatus().intValue() == Integer
+            .parseInt(ProjectStatusEnum.Ongoing.getStatusId())
+            || project.getProjectInfo().getStatus().intValue() == Integer
+              .parseInt(ProjectStatusEnum.Extended.getStatusId())) {
+            myProjects.add(project);
+          }
+        }
+
+
+      }
+    }
+    for (Project project : myProjects) {
+
+      project.setProjectInfo(project.getProjecInfoPhase(this.getActualPhase()));
+      projectsToRet.add(project);
+    }
+    return projectsToRet;
+
+  }
+
   @Override
   public String next() {
     String result = this.save();
@@ -428,6 +460,16 @@ public class PowbCollaborationAction extends BaseAction {
         AutoSaveReader autoSaveReader = new AutoSaveReader();
         powbSynthesis = (PowbSynthesis) autoSaveReader.readFromJson(jReader);
         powbSynthesisID = powbSynthesis.getId();
+        if (powbSynthesis.getPowbCollaborationGlobalUnitsList() != null) {
+          for (PowbCollaborationGlobalUnit powbCollaborationGlobalUnit : powbSynthesis
+            .getPowbCollaborationGlobalUnitsList()) {
+            if (powbCollaborationGlobalUnit.getGlobalUnit() != null
+              && powbCollaborationGlobalUnit.getGlobalUnit().getId() != -1) {
+              powbCollaborationGlobalUnit
+                .setGlobalUnit(crpManager.getGlobalUnitById(powbCollaborationGlobalUnit.getGlobalUnit().getId()));
+            }
+          }
+        }
         this.setDraft(true);
         reader.close();
       } else {
@@ -524,7 +566,12 @@ public class PowbCollaborationAction extends BaseAction {
           PowbSynthesis powbSynthesisProgram =
             powbSynthesisManager.findSynthesis(phase.getId(), liaisonInstitutions.get(0).getId());
           if (powbSynthesisProgram != null) {
+            powbSynthesisProgram.setPowbCollaborationGlobalUnitsList(powbSynthesisProgram
+              .getPowbCollaborationGlobalUnits().stream().filter(c -> c.isActive()).collect(Collectors.toList()));
+
             crpProgram.setCollaboration(powbSynthesisProgram.getCollaboration());
+            crpProgram.setSynthesis(powbSynthesisProgram);
+
 
           }
         }
@@ -537,20 +584,23 @@ public class PowbCollaborationAction extends BaseAction {
       crpPrograms.sort((p1, p2) -> p1.getAcronym().compareTo(p2.getAcronym()));
     }
 
-    globalUnits = new HashMap<>();
-    for (GlobalUnit globalUnit : crpManager.findAll().stream()
-      .filter(c -> c.isActive() && c.getGlobalUnitType().getId() != 2).collect(Collectors.toList())) {
-      if (!globalUnit.equals(loggedCrp)) {
-        if (globalUnit.getAcronym() != null && globalUnit.getAcronym().length() > 2) {
-          globalUnits.put(globalUnit.getId(), globalUnit.getAcronym());
+    globalUnits = new ArrayList<>();
+    List<GlobalUnit> globalUnitsList = crpManager.findAll().stream()
+      .filter(c -> c.isActive() && c.getGlobalUnitType().getId() != 2).collect(Collectors.toList());
+
+    for (GlobalUnit globalUnit : globalUnitsList) {
+      if (!globalUnit.getId().equals(loggedCrp.getId())) {
+        if (globalUnit.getAcronym() != null && globalUnit.getAcronym().trim().length() == 0) {
+          globalUnit.setAcronymValid(globalUnit.getName());
         } else {
-          globalUnits.put(globalUnit.getId(), globalUnit.getName());
+          globalUnit.setAcronymValid(globalUnit.getAcronym());
+
         }
+        globalUnits.add(globalUnit);
       }
 
-
     }
-
+    globalUnits.sort((p1, p2) -> p1.getAcronymValid().compareTo(p2.getAcronymValid()));
     // Get the list of liaison institutions Flagships and PMU.
     liaisonInstitutions = loggedCrp.getLiaisonInstitutions().stream()
       .filter(c -> c.getCrpProgram() != null && c.isActive()
@@ -637,7 +687,7 @@ public class PowbCollaborationAction extends BaseAction {
     this.flagshipExercises = flagshipExercises;
   }
 
-  public void setGlobalUnits(Map<Long, String> globalUnits) {
+  public void setGlobalUnits(List<GlobalUnit> globalUnits) {
     this.globalUnits = globalUnits;
   }
 

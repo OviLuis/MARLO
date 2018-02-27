@@ -165,7 +165,6 @@ function validateThisSection() {
     validateService = "/validateCenterCapdev.do";
   }
 
-
   // Validate POWB Synthesis section
   if(isPOWBSection()) {
     sectionData.liaisonInstitutionID = $('input[name="liaisonInstitutionID"]').val();
@@ -187,21 +186,16 @@ function validateThisSection() {
           if(data.section.missingFields == "") {
             $sectionMenu.addClass('submitted').removeClass('toSubmit');
           } else {
-          var missingFields = (data.section.missingFields) || "";
-          if(!(missingFields)) {
             $sectionMenu.removeClass('submitted').addClass('toSubmit');
-          } else {
-            $sectionMenu.addClass('submitted').removeClass('toSubmit');
           }
         }
         $sectionMenu.removeClass('loadingSection');
+      },
+      complete: function(data) {
+        $sectionMenu.addClass('animated flipInX');
+      },
+      error: function(error) {
+        console.log(error)
       }
-    },
-    complete: function(data) {
-      $sectionMenu.addClass('animated flipInX');
-    },
-    error: function(error) {
-      console.log(error)
-    }
   });
 }

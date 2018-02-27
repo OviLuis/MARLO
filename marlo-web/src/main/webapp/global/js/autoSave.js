@@ -165,6 +165,14 @@ function validateThisSection() {
     validateService = "/validateCenterCapdev.do";
   }
 
+
+  // Validate POWB Synthesis section
+  if(isPOWBSection()) {
+    sectionData.liaisonInstitutionID = $('input[name="liaisonInstitutionID"]').val();
+    sectionData.powbSynthesisID = $('input[name="powbSynthesisID"]').val();
+    validateService = "/validatePowbSynthesisSection.do";
+  }
+
   $.ajax({
       url: baseURL + validateService,
       data: sectionData,
@@ -179,8 +187,11 @@ function validateThisSection() {
           if(data.section.missingFields == "") {
             $sectionMenu.addClass('submitted').removeClass('toSubmit');
           } else {
+          var missingFields = (data.section.missingFields) || "";
+          if(!(missingFields)) {
             $sectionMenu.removeClass('submitted').addClass('toSubmit');
-
+          } else {
+            $sectionMenu.addClass('submitted').removeClass('toSubmit');
           }
         }
         $sectionMenu.removeClass('loadingSection');

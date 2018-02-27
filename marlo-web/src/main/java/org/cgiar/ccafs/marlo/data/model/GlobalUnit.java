@@ -2,6 +2,8 @@ package org.cgiar.ccafs.marlo.data.model;
 // Generated Oct 30, 2017 10:01:51 AM by Hibernate Tools 3.4.0.CR1
 
 
+import org.cgiar.ccafs.marlo.data.IAuditLog;
+
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -12,13 +14,15 @@ import com.google.gson.annotations.Expose;
 /**
  * @author Hermes Jimenez
  */
-public class GlobalUnit implements java.io.Serializable {
+public class GlobalUnit implements java.io.Serializable, IAuditLog {
 
 
   private static final long serialVersionUID = -3398924354219701873L;
 
+
   @Expose
   private Long id;
+
   @Expose
   private GlobalUnitType globalUnitType;
 
@@ -44,16 +48,14 @@ public class GlobalUnit implements java.io.Serializable {
 
   @Expose
   private boolean login;
-
   private Set<CenterLeader> centerLeaders = new HashSet<CenterLeader>(0);
-
 
   private Set<CrpProgram> crpPrograms = new HashSet<CrpProgram>(0);
 
   private Set<CrpTargetUnit> crpTargetUnits = new HashSet<CrpTargetUnit>(0);
 
-  private Set<CenterArea> centerAreas = new HashSet<CenterArea>(0);
 
+  private Set<CenterArea> centerAreas = new HashSet<CenterArea>(0);
 
   private Set<DeliverableType> deliverableTypes = new HashSet<DeliverableType>(0);
 
@@ -77,11 +79,11 @@ public class GlobalUnit implements java.io.Serializable {
 
   private Set<CenterProjectFundingSource> centerProjectFundingSources = new HashSet<CenterProjectFundingSource>(0);
 
-
   private Set<CrpUser> crpUsers = new HashSet<CrpUser>(0);
 
 
   private Set<CrpsSiteIntegration> crpsSitesIntegrations = new HashSet<CrpsSiteIntegration>(0);
+
 
   private Set<CrpLocElementType> crpLocElementTypes = new HashSet<CrpLocElementType>(0);
 
@@ -93,10 +95,11 @@ public class GlobalUnit implements java.io.Serializable {
 
   private Set<Role> roles = new HashSet<Role>(0);
 
-
   private Set<GlobalUnitProject> globalUnitProjects = new HashSet<GlobalUnitProject>(0);
 
+
   private Set<FundingSource> fundingSources = new HashSet<FundingSource>(0);
+
 
   private Set<Deliverable> deliverables = new HashSet<Deliverable>(0);
 
@@ -120,6 +123,8 @@ public class GlobalUnit implements java.io.Serializable {
   private List<Deliverable> deliverablesList; // Used by PublicationListAction
 
   private List<CustomParameter> parameters; // Used by CrpParametersAction
+
+  private Set<Submission> submissions = new HashSet<Submission>(0);
 
   public GlobalUnit() {
     // Default Constructor
@@ -201,7 +206,6 @@ public class GlobalUnit implements java.io.Serializable {
     return centerAreas;
   }
 
-
   public Set<CenterLeader> getCenterLeaders() {
     return centerLeaders;
   }
@@ -210,10 +214,10 @@ public class GlobalUnit implements java.io.Serializable {
     return centerObjectives;
   }
 
+
   public Set<CenterProjectFundingSource> getCenterProjectFundingSources() {
     return centerProjectFundingSources;
   }
-
 
   public User getCreatedBy() {
     return createdBy;
@@ -222,6 +226,7 @@ public class GlobalUnit implements java.io.Serializable {
   public List<CrpPpaPartner> getCrpInstitutionsPartners() {
     return crpInstitutionsPartners;
   }
+
 
   public Set<CrpLocElementType> getCrpLocElementTypes() {
     return crpLocElementTypes;
@@ -283,6 +288,7 @@ public class GlobalUnit implements java.io.Serializable {
     return globalUnitType;
   }
 
+  @Override
   public Long getId() {
     return id;
   }
@@ -303,7 +309,6 @@ public class GlobalUnit implements java.io.Serializable {
     return locationElementTypes;
   }
 
-
   public Set<LocElement> getLocElements() {
     return locElements;
   }
@@ -312,10 +317,20 @@ public class GlobalUnit implements java.io.Serializable {
     return locElementTypes;
   }
 
+
+  @Override
+  public String getLogDeatil() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("Id : ").append(this.getId());
+    return sb.toString();
+  }
+
+  @Override
   public String getModificationJustification() {
     return modificationJustification;
   }
 
+  @Override
   public User getModifiedBy() {
     return modifiedBy;
   }
@@ -336,13 +351,17 @@ public class GlobalUnit implements java.io.Serializable {
     return programManagmenTeam;
   }
 
-
   public Set<Role> getRoles() {
     return roles;
   }
 
+
   public List<CrpsSiteIntegration> getSiteIntegrations() {
     return siteIntegrations;
+  }
+
+  public Set<Submission> getSubmissions() {
+    return submissions;
   }
 
   public List<TargetUnitSelect> getTargetUnits() {
@@ -357,6 +376,7 @@ public class GlobalUnit implements java.io.Serializable {
     return result;
   }
 
+  @Override
   public boolean isActive() {
     return active;
   }
@@ -544,6 +564,10 @@ public class GlobalUnit implements java.io.Serializable {
 
   public void setSiteIntegrations(List<CrpsSiteIntegration> siteIntegrations) {
     this.siteIntegrations = siteIntegrations;
+  }
+
+  public void setSubmissions(Set<Submission> submissions) {
+    this.submissions = submissions;
   }
 
   public void setTargetUnits(List<TargetUnitSelect> targetUnits) {

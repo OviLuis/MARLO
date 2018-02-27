@@ -58,12 +58,15 @@ public class Permission {
   public static final String POWB_SYNTHESIS_EXPECTED_BASE_PERMISSION = "crp:{0}:powbSynthesis:{1}:expectedProgress";
   public static final String POWB_SYNTHESIS_MEL_BASE_PERMISSION =
     "crp:{0}:powbSynthesis:{1}:monitoringEvaluationLearning";
+  public static final String POWB_SYNTHESIS_COLLABORATION_BASE_PERMISSION = "crp:{0}:powbSynthesis:{1}:collaboration";
   public static final String POWB_SYNTHESIS_CRPSTAFFING_BASE_PERMISSION = "crp:{0}:powbSynthesis:{1}:crpStaffing";
   public static final String POWB_SYNTHESIS_FINANCIAL_PLAN_BASE_PERMISSION = "crp:{0}:powbSynthesis:{1}:financialPlan";
   public static final String POWB_SYNTHESIS_MANAGEMENT_RISK_BASE_PERMISSION =
     "crp:{0}:powbSynthesis:{1}:managementRisk";
   public static final String POWB_SYNTHESIS_MANAGEMENT_GOVERNANCE_BASE_PERMISSION =
     "crp:{0}:powbSynthesis:{1}:managementGovernance";
+  public static final String POWB_SYNTHESIS_MANAGE_PERMISSION = "crp:{0}:powbSynthesis:manage";
+  public static final String POWB_SYNTHESIS_SUBMISSION_PERMISSION = "crp:{0}:powbSynthesis:manage:canSubmmit";
 
   public static final String CRP_INDICATORS_BASE_PERMISSION = "crp:{0}:crpIndicators:{1}";
   public static final String CRP_INDICATORS_PERMISSION = "crp:{0}:crpIndicators:{1}:*";

@@ -80,7 +80,7 @@
         <tr>
           <th rowspan="2"></th>
           <th colspan="3" class="text-center">[@s.text name="financialPlan.tableE.plannedBudget"][@s.param]${(actualPhase.year)!}[/@s.param][/@s.text]</th>
-          <th rowspan="2">[@s.text name="financialPlan.tableE.comments" /]</th>
+          <th rowspan="2">[@s.text name="financialPlan.tableE.comments" /][@customForm.req required=editable && PMU /]</th>
         </tr>
         <tr>
           <th class="text-center col-md-2">[@s.text name="financialPlan.tableE.w1w2" /]</th>
@@ -129,7 +129,7 @@
       [/#if]
     </td>
     <td class="text-right">
-      [#if editable && PMU ]
+      [#if editable && PMU && element.editBudgets  ]
         [@customForm.input name="${customName}.w1w2" value="${(element.w1w2)!'0.00'}" i18nkey="" showTitle=false className="currencyInput text-right type-w1w2 category-${index}" required=true /]
       [#else]
         <input type="hidden" name="${customName}.w1w2" value="${(element.w1w2)!'0'}" class="currencyInput type-w1w2 category-${index}"/>
@@ -137,8 +137,8 @@
       [/#if]
     </td>
     <td class="text-right">
-      [#if editable && PMU ]
-        [@customForm.input name="${customName}.w3Bilateral" value="${(element.w3Bilateral)!'0.00'}" i18nkey="" showTitle=false className="currencyInput text-right type-w3bilateral category-${index}" required=true /]
+      [#if editable && PMU && element.editBudgets ]
+        [@customForm.input name="${customName}.w3Bilateral" value="${(element.w3Bilateral)!'0.00'}" i18nkey="" showTitle=false className="currencyInput text-right type-w3bilateral category-${index}"  required=true /]
       [#else]
         <input type="hidden" name="${customName}.w3Bilateral" value="${(element.w3Bilateral)!'0'}" class="currencyInput type-w3bilateral category-${index}"/>
         <nobr>US$ ${((element.w3Bilateral)!'0')?number?string(",##0.00")}</nobr>
@@ -156,7 +156,7 @@
         <tr>
           <th>[@s.text name="financialPlan.tableF.expenditureArea" /]</th>
           <th>[@s.text name="financialPlan.tableF.estimatedPercentage"][@s.param]${(actualPhase.year)!}[/@s.param][/@s.text]</th>
-          <th>[@s.text name="financialPlan.tableF.comments" /]</th>
+          <th>[@s.text name="financialPlan.tableF.comments" /][@customForm.req required=editable && PMU /]</th>
         </tr>
       </thead>
       <tbody>

@@ -126,12 +126,13 @@
           [#if action.hasSpecificities("crp_has_regions")]
             [#assign pmuValue = ""]
             [#if regions?has_content]
+              <h4 class="sectionSubTitle">Regional Programs</h4>
               [#list regions as liaisonInstitution]
                 [#assign regionIndex = action.getIndexRegion(liaisonInstitution.id) ]
                 [#assign regionElement = action.getElemnentRegion(liaisonInstitution.id) ]
                 <div class="simpleBox regionBox">
                   [#-- Efforts Country by region--]
-                  <h4 class="sectionSubTitle">${liaisonInstitution.crpProgram.composedName}</h4>
+                  <h5 class="subTitle headTitle regionTitle"><strong>${liaisonInstitution.crpProgram.composedName}</strong></h5>
                   <div class="form-group">
                     [@customForm.textArea  name="powbSynthesis.regions[${regionIndex}].effostornCountry" i18nkey="powbSynthesis.collaborationIntegration.expectedEffortsIn" help="powbSynthesis.collaborationIntegration.expectedEfforts.help" paramText="${liaisonInstitution.crpProgram.acronym}" required=true className="updateEffostornCountry limitWords-100" editable=editable && action.canEditRegion(liaisonInstitution.id) /]
                     <input type="hidden" name="powbSynthesis.regions[${regionIndex}].liaisonInstitution.id" value="${(liaisonInstitution.id)!}" />
@@ -142,6 +143,7 @@
                   
                   [#--  Regional Table --]
                   <div class="form-group">
+                    <h4 class="subTitle headTitle">[@s.text name="collaborationIntegration.projectsRegionalTagged.title"][@s.param]${liaisonInstitution.crpProgram.acronym}[/@s.param][/@s.text]</h4>
                     <div class="viewMoreSyntesis-block" style="display:none">
                       [@tableCountryContributionsMacro locElements=(action.getLocElementsByRegion(liaisonInstitution.id))![] /]
                       <div class="viewMoreSyntesis closed"></div>
@@ -159,11 +161,11 @@ ${(regionElement.effostornCountry)!}
             [/#if]
             
             <textarea style="display:none" id="pmuValue" name="powbSynthesis.collaboration.effostornCountry" id="" cols="30" rows="10">${(pmuValue)!}</textarea>
-            
+            <br />
             <hr />
             [#-- Table: CGIAR Country Coordination--]
             <div class="form-group">
-              <h4 class="subTitle headTitle">[@s.text name="collaborationIntegration.tableCountryContribution.title"][@s.param]${(actualPhase.year)!}[/@s.param][/@s.text]</h4>
+              <h4 class="sectionSubTitle">[@s.text name="collaborationIntegration.tableCountryContribution.title"][@s.param]${(actualPhase.year)!}[/@s.param][/@s.text]</h4>
               <div class="viewMoreSyntesis-block" style="display:none">
                 [@tableCountryContributionsMacro locElements=action.getLocElementsByPMU()/]
                 <div class="viewMoreSyntesis closed"></div>
@@ -177,7 +179,7 @@ ${(regionElement.effostornCountry)!}
             
             [#-- Table: CGIAR Country Coordination--]
             <div class="form-group">
-              <h4 class="subTitle headTitle">[@s.text name="collaborationIntegration.tableCountryContribution.title"][@s.param]${(actualPhase.year)!}[/@s.param][/@s.text]</h4>
+              <h4 class="subTitle headTitle">[@s.text name="collaborationIntegration.tableCountryContributionOther.title"][@s.param]${(actualPhase.year)!}[/@s.param][/@s.text]</h4>
               <div class="viewMoreSyntesis-block" style="display:none">
                 [@tableCountryContributionsMacro locElements=action.loadLocations()/]
                 <div class="viewMoreSyntesis closed"></div>
@@ -328,11 +330,11 @@ ${(regionElement.effostornCountry)!}
     <div class="form-group row"> 
       [#-- CRP/Platform --] 
       <div class="col-md-5">
-        [@customForm.select name="${customName}.globalUnit.id" label="" keyFieldName="id"  displayFieldName="acronymValid" i18nkey="powbSynthesis.programCollaboration.globalUnit" listName="globalUnits"  required=true  className="" editable=isEditable/]
+        [@customForm.select name="${customName}.globalUnit.id" label="" keyFieldName="id"  displayFieldName="acronymValid" i18nkey="powbSynthesis.programCollaboration.globalUnit" listName="globalUnits"  required=true  className="globalUnitSelect" editable=isEditable/]
       </div>
       [#-- Flagship/Module --]
       <div class="col-md-7">
-        [@customForm.input name="${customName}.flagship" i18nkey="powbSynthesis.programCollaboration.program" required=true className="" editable=isEditable /]
+        [@customForm.input name="${customName}.flagship" i18nkey="powbSynthesis.programCollaboration.program" required=true className="globalUnitPrograms" editable=isEditable /]
       </div>
     </div>
     
@@ -374,6 +376,7 @@ ${(regionElement.effostornCountry)!}
             <td><span class="programTag" style="border-color:${(crpProgram.color)!'#fff'}" title="${crpProgram.composedName}">${crpProgram.acronym}</span></td>
             <td> 
               <strong>${(collaboration.globalUnit.acronym)!}</strong><br />
+              ${(collaboration.collaborationTypeName)!'<nobr>Not defined</nobr>'} <br />
               <i>${collaboration.globalUnit.globalUnitType.name}</i>
             </td>
             <td> ${(collaboration.flagship)!'<nobr>Not defined</nobr>'} </td>

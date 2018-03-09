@@ -1912,11 +1912,9 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
    * (TODO change the method Name after test the functionality)
    */
   public List<GlobalUnit> getCrpCategoryList(String category) {
-    List<GlobalUnit> globalUnits = crpManager.findAll().stream()
+    return crpManager.findAll().stream()
       .filter(c -> c.isMarlo() && c.getGlobalUnitType().getId().intValue() == Integer.parseInt(category))
       .collect(Collectors.toList());
-    globalUnits.sort((p1, p2) -> p1.getAcronym().compareTo(p2.getAcronym()));
-    return globalUnits;
   }
 
   /**
@@ -4129,10 +4127,9 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
         }
 
         if (expecetedSection == 0) {
-          if (!(project.getProjecInfoPhase(this.getActualPhase()).getAdministrative() != null
-            && project.getProjecInfoPhase(this.getActualPhase()).getAdministrative().booleanValue() == true)) {
-            totalSections++;
-          }
+
+          totalSections++;
+
 
         }
         if (this.getCountProjectFlagships(project.getId())) {
@@ -4178,10 +4175,13 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
 
           } else {
+            if (openA.isEmpty()) {
+              totalSections++;
+            }
             if (this.hasSpecificities(APConstants.CRP_ACTIVITES_MODULE)) {
-              return totalSections == 6;
+              return totalSections == 7;
             } else {
-              return totalSections == 5;
+              return totalSections == 6;
             }
 
           }
@@ -4267,7 +4267,9 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
           }
 
         } else {
+          if (add) {
 
+          }
           if (this.hasSpecificities(APConstants.CRP_ACTIVITES_MODULE)) {
             return totalSections == 12;
           } else {

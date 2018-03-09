@@ -110,6 +110,14 @@ function init() {
     $(".loginForm .login-input-container.username").click();
   });
 
+  $('input#terms').on('change', function(){
+/*    if($('input#terms').is(':checked')){
+      $("input#login_next").attr("disabled",false);
+    }else{
+      $("input#login_next").attr("disabled",true);
+    }*/
+  });
+
 }
 
 function firstForm(){
@@ -291,6 +299,9 @@ function secondForm(data){
       ".loginForm .welcome-message-container, " +
       ".loginForm #login-password").removeClass("hidden");
 
+  //Show terms and conditions checkbox
+  $('.terms-container').removeClass("hidden");
+
   //Change button value to Login
   $("input#login_next").val("Login");
 
@@ -331,9 +342,11 @@ function checkPassword(email,password){
       userPassword: password
     },
     beforeSend: function() {
-      $("input#login_next").addClass("login-loadingBlock");
-      $("input#login_next").attr("disabled",true);
-      $("input#login_next").val("");
+      if($('input#terms').is(':checked')){
+        $("input#login_next").addClass("login-loadingBlock");
+        $("input#login_next").attr("disabled",true);
+        $("input#login_next").val("");
+      }
     },
     success: function(data) {
       if(!data.userFound.loginSuccess){

@@ -17,11 +17,13 @@ package org.cgiar.ccafs.marlo.action.summaries;
 
 import org.cgiar.ccafs.marlo.config.APConstants;
 import org.cgiar.ccafs.marlo.data.manager.GlobalUnitManager;
+import org.cgiar.ccafs.marlo.data.manager.LiaisonInstitutionManager;
 import org.cgiar.ccafs.marlo.data.manager.PhaseManager;
 import org.cgiar.ccafs.marlo.data.manager.PowbExpectedCrpProgressManager;
 import org.cgiar.ccafs.marlo.data.manager.PowbExpenditureAreasManager;
 import org.cgiar.ccafs.marlo.data.manager.PowbSynthesisManager;
 import org.cgiar.ccafs.marlo.data.manager.ProjectExpectedStudyManager;
+import org.cgiar.ccafs.marlo.data.model.CrossCuttingDimensionTableDTO;
 import org.cgiar.ccafs.marlo.data.model.CrpMilestone;
 import org.cgiar.ccafs.marlo.data.model.CrpOutcomeSubIdo;
 import org.cgiar.ccafs.marlo.data.model.CrpPpaPartner;
@@ -32,12 +34,14 @@ import org.cgiar.ccafs.marlo.data.model.DeliverableInfo;
 import org.cgiar.ccafs.marlo.data.model.GlobalUnitProject;
 import org.cgiar.ccafs.marlo.data.model.LiaisonInstitution;
 import org.cgiar.ccafs.marlo.data.model.Phase;
+import org.cgiar.ccafs.marlo.data.model.PowbCollaborationGlobalUnit;
 import org.cgiar.ccafs.marlo.data.model.PowbCrossCuttingDimension;
 import org.cgiar.ccafs.marlo.data.model.PowbEvidence;
 import org.cgiar.ccafs.marlo.data.model.PowbEvidencePlannedStudy;
 import org.cgiar.ccafs.marlo.data.model.PowbEvidencePlannedStudyDTO;
 import org.cgiar.ccafs.marlo.data.model.PowbExpectedCrpProgress;
 import org.cgiar.ccafs.marlo.data.model.PowbExpenditureAreas;
+import org.cgiar.ccafs.marlo.data.model.PowbFinancialExpenditure;
 import org.cgiar.ccafs.marlo.data.model.PowbFinancialPlannedBudget;
 import org.cgiar.ccafs.marlo.data.model.PowbSynthesis;
 import org.cgiar.ccafs.marlo.data.model.PowbSynthesisCrpStaffingCategory;
@@ -49,8 +53,8 @@ import org.cgiar.ccafs.marlo.data.model.ProjectExpectedStudy;
 import org.cgiar.ccafs.marlo.data.model.ProjectFocus;
 import org.cgiar.ccafs.marlo.data.model.ProjectStatusEnum;
 import org.cgiar.ccafs.marlo.data.model.TypeExpectedStudiesEnum;
-import org.cgiar.ccafs.marlo.data.model.dto.CrossCuttingDimensionTableDTO;
 import org.cgiar.ccafs.marlo.utils.APConfig;
+import org.cgiar.ccafs.marlo.utils.POIField;
 import org.cgiar.ccafs.marlo.utils.POISummary;
 
 import java.io.ByteArrayInputStream;
@@ -58,10 +62,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -71,8 +78,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTBody;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTDocument1;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTP;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPPr;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPageSz;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSectPr;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STPageOrientation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,6 +111,7 @@ public class POWBPOISummaryAction extends BaseSummariesAction implements Summary
   private ProjectExpectedStudyManager projectExpectedStudyManager;
   private PowbSynthesisManager powbSynthesisManager;
   private PowbExpenditureAreasManager powbExpenditureAreasManager;
+  private LiaisonInstitutionManager liaisonInstitutionManager;
   // Parameters
   private POISummary poiSummary;
   private List<PowbSynthesis> powbSynthesisList;
@@ -110,7 +126,7 @@ public class POWBPOISummaryAction extends BaseSummariesAction implements Summary
   private DecimalFormat percentageFormat;
   private List<CrpProgram> flagships;
   // Parameter for tables E and F
-  Double totalw1w2 = 0.0, totalw3Bilateral = 0.0, grandTotal = 0.0;
+  Double totalCarry = 0.0, totalw1w2 = 0.0, totalw3Bilateral = 0.0, totalCenter = 0.0, grandTotal = 0.0;
   // Streams
   private InputStream inputStream;
 
@@ -120,7 +136,7 @@ public class POWBPOISummaryAction extends BaseSummariesAction implements Summary
   public POWBPOISummaryAction(APConfig config, GlobalUnitManager crpManager, PhaseManager phaseManager,
     PowbExpectedCrpProgressManager powbExpectedCrpProgressManager,
     ProjectExpectedStudyManager projectExpectedStudyManager, PowbSynthesisManager powbSynthesisManager,
-    PowbExpenditureAreasManager powbExpenditureAreasManager) {
+    PowbExpenditureAreasManager powbExpenditureAreasManager, LiaisonInstitutionManager liaisonInstitutionManager) {
     super(config, crpManager, phaseManager);
     document = new XWPFDocument();
     poiSummary = new POISummary();
@@ -130,6 +146,7 @@ public class POWBPOISummaryAction extends BaseSummariesAction implements Summary
     this.projectExpectedStudyManager = projectExpectedStudyManager;
     this.powbSynthesisManager = powbSynthesisManager;
     this.powbExpenditureAreasManager = powbExpenditureAreasManager;
+    this.liaisonInstitutionManager = liaisonInstitutionManager;
   }
 
   private void addAdjustmentDescription() {
@@ -146,7 +163,7 @@ public class POWBPOISummaryAction extends BaseSummariesAction implements Summary
           this.getPowbPath(powbSynthesisPMU.getLiaisonInstitution(),
             this.getLoggedCrp().getAcronym() + "_"
               + PowbSynthesisSectionStatusEnum.TOC_ADJUSTMENTS.getStatus().toString())
-            + powbSynthesisPMU.getPowbToc().getFile().getFileName(),
+            + powbSynthesisPMU.getPowbToc().getFile().getFileName().replaceAll(" ", "%20"),
           "URL: " + powbSynthesisPMU.getPowbToc().getFile().getFileName(), document.createParagraph());
       }
     }
@@ -197,12 +214,14 @@ public class POWBPOISummaryAction extends BaseSummariesAction implements Summary
       this.getText("summaries.powb.expectedKeyResults.crossCutting"));
     String crossCuttingGenderDescription = "";
     String crossCuttingOpenDataDescription = "";
-    // Cross Cutting Dimensions Info
-    if (powbSynthesisPMU.getPowbCrossCuttingDimension() != null) {
-      PowbCrossCuttingDimension crossCutting = powbSynthesisPMU.getPowbCrossCuttingDimension();
-      if (crossCutting != null) {
-        crossCuttingGenderDescription = crossCutting.getSummarize();
-        crossCuttingOpenDataDescription = crossCutting.getAssets();
+    if (powbSynthesisPMU != null) {
+      // Cross Cutting Dimensions Info
+      if (powbSynthesisPMU.getPowbCrossCuttingDimension() != null) {
+        PowbCrossCuttingDimension crossCutting = powbSynthesisPMU.getPowbCrossCuttingDimension();
+        if (crossCutting != null) {
+          crossCuttingGenderDescription = crossCutting.getSummarize();
+          crossCuttingOpenDataDescription = crossCutting.getAssets();
+        }
       }
     }
     poiSummary.textHead3Title(document.createParagraph(),
@@ -215,6 +234,7 @@ public class POWBPOISummaryAction extends BaseSummariesAction implements Summary
     if (crossCuttingOpenDataDescription != null && !crossCuttingOpenDataDescription.isEmpty()) {
       poiSummary.textParagraph(document.createParagraph(), crossCuttingOpenDataDescription);
     }
+
   }
 
   private void addCrpStaffing() {
@@ -299,7 +319,7 @@ public class POWBPOISummaryAction extends BaseSummariesAction implements Summary
             this.getPowbPath(liaisonInstitution,
               this.getLoggedCrp().getAcronym() + "_"
                 + PowbSynthesisSectionStatusEnum.FLAGSHIP_PLANS.getStatus().toString())
-              + powbSynthesis.getPowbFlagshipPlans().getFlagshipProgramFile().getFileName(),
+              + powbSynthesis.getPowbFlagshipPlans().getFlagshipProgramFile().getFileName().replaceAll(" ", "%20"),
             "URL: " + powbSynthesis.getPowbFlagshipPlans().getFlagshipProgramFile().getFileName(),
             document.createParagraph());
         }
@@ -360,32 +380,88 @@ public class POWBPOISummaryAction extends BaseSummariesAction implements Summary
       this.getText("summaries.powb.participantingCenters") + ": " + participantingCenters);
   }
 
-  public void createTableA() {
+  public void createTableA1() {
     this.loadTablePMU();
 
-    List<List<String>> headers = new ArrayList<>();
+    List<List<POIField>> headers = new ArrayList<>();
 
-    String[] sHeader = {this.getText("expectedProgress.tableA.fp"), this.getText("expectedProgress.tableA.subIDO"),
-      this.getText("expectedProgress.tableA.outcomes"), this.getText("expectedProgress.tableA.milestone") + "*",
-      "Budget  " + this.getText("expectedProgress.tableA.w1w2"),
-      "Budget  " + this.getText("expectedProgress.tableA.w3bilateral"),
-      this.getText("expectedProgress.tableA.assessment") + "**",
-      this.getText("expectedProgress.tableA.meansVerification")};
+    POIField[] sHeader = {new POIField(this.getText("expectedProgress.tableA.fp"), ParagraphAlignment.CENTER),
+      new POIField(this.getText("expectedProgress.tableA.subIDO"), ParagraphAlignment.CENTER),
+      new POIField(this.getText("summaries.powb.tableA1.outcomes"), ParagraphAlignment.CENTER),
+      new POIField(this.getSelectedYear() + " Budget  " + this.getText("expectedProgress.tableA.w1w2"),
+        ParagraphAlignment.CENTER),
+      new POIField(this.getSelectedYear() + " Budget  " + this.getText("expectedProgress.tableA.w3bilateral"),
+        ParagraphAlignment.CENTER)};
 
-    List<String> header = Arrays.asList(sHeader);
+    List<POIField> header = Arrays.asList(sHeader);
     headers.add(header);
-    String FP, subIDO = "", outcomes, milestone, assessment, meansVerifications;
-    Double w1w2, w3Bilateral;
+    String FP, subIDO = "", outcomes;
 
-    List<List<String>> datas = new ArrayList<>();
+    List<List<POIField>> datas = new ArrayList<>();
+    List<POIField> data;
+    for (CrpProgram flagship : flagships) {
+      int flagshipIndex = 0;
+      data = new ArrayList<>();
+      for (CrpProgramOutcome outcome : flagship.getOutcomes()) {
+        subIDO = "";
+        for (CrpOutcomeSubIdo subIdo : outcome.getSubIdos()) {
+          if (subIDO.isEmpty()) {
+            if (subIdo.getSrfSubIdo().getSrfIdo().isIsCrossCutting()) {
+              subIDO = "• CC: " + subIdo.getSrfSubIdo().getDescription();
+            } else {
+              subIDO = "• " + subIdo.getSrfSubIdo().getDescription();
+            }
+          } else {
+            if (subIdo.getSrfSubIdo().getSrfIdo().isIsCrossCutting()) {
+              subIDO += "\n • CC:" + subIdo.getSrfSubIdo().getDescription();
+            } else {
+              subIDO += "\n •" + subIdo.getSrfSubIdo().getDescription();
+            }
+          }
+        }
+        outcomes = outcome.getComposedName();
 
-    List<String> data;
+        if (flagshipIndex == 0) {
+          FP = flagship.getAcronym();
+        } else {
+          FP = " ";
+        }
+        POIField[] sData = {new POIField(FP, ParagraphAlignment.CENTER), new POIField(subIDO, ParagraphAlignment.LEFT),
+          new POIField(outcomes, ParagraphAlignment.LEFT), new POIField("To be completed", ParagraphAlignment.CENTER),
+          new POIField("To be completed", ParagraphAlignment.CENTER)};
+        data = Arrays.asList(sData);
+        datas.add(data);
+        flagshipIndex++;
+      }
+    }
+
+
+    poiSummary.textTable(document, headers, datas, false, "tableA");
+  }
+
+  private void createTableA2() {
+    this.loadTablePMU();
+
+    List<List<POIField>> headers = new ArrayList<>();
+
+    POIField[] sHeader = {new POIField(this.getText("expectedProgress.tableA.fp"), ParagraphAlignment.CENTER),
+      new POIField(this.getText("summaries.powb.tableA1.outcomes"), ParagraphAlignment.CENTER),
+      new POIField(this.getText("expectedProgress.tableA.milestone") + "*", ParagraphAlignment.CENTER),
+      new POIField(this.getText("expectedProgress.tableA.meansVerification"), ParagraphAlignment.CENTER),
+      new POIField(this.getText("expectedProgress.tableA.assessment"), ParagraphAlignment.CENTER)};
+
+    List<POIField> header = Arrays.asList(sHeader);
+    headers.add(header);
+    String FP, outcomes, milestone, assessment, meansVerifications;
+
+    List<List<POIField>> datas = new ArrayList<>();
+
+    List<POIField> data;
 
     for (CrpProgram flagship : flagships) {
       data = new ArrayList<>();
       int outcome_index = 0;
       for (CrpProgramOutcome outcome : flagship.getOutcomes()) {
-        subIDO = "";
         int milestone_index = 0;
         for (CrpMilestone crpMilestone : outcome.getMilestones()) {
           Boolean isFlagshipRow = (outcome_index == 0) && (milestone_index == 0);
@@ -401,28 +477,7 @@ public class POWBPOISummaryAction extends BaseSummariesAction implements Summary
             outcomes = " ";
           }
           milestone = crpMilestone.getComposedName();
-          if (isOutcomeRow) {
-            for (CrpOutcomeSubIdo subIdo : outcome.getSubIdos()) {
-              if (subIDO.isEmpty()) {
-                if (subIdo.getSrfSubIdo().getSrfIdo().isIsCrossCutting()) {
-                  subIDO = "• CC: " + subIdo.getSrfSubIdo().getDescription();
-                } else {
-                  subIDO = "• " + subIdo.getSrfSubIdo().getDescription();
-                }
-              } else {
-                if (subIdo.getSrfSubIdo().getSrfIdo().isIsCrossCutting()) {
-                  subIDO += "\n • CC:" + subIdo.getSrfSubIdo().getDescription();
-                } else {
-                  subIDO += "\n •" + subIdo.getSrfSubIdo().getDescription();
-                }
-              }
-            }
-          } else {
-            subIDO = " ";
-          }
 
-          w1w2 = flagship.getW1();
-          w3Bilateral = flagship.getW3();
           PowbExpectedCrpProgress milestoneProgress =
             this.getPowbExpectedCrpProgressProgram(crpMilestone.getId(), flagship.getId());
           assessment =
@@ -431,8 +486,10 @@ public class POWBPOISummaryAction extends BaseSummariesAction implements Summary
           meansVerifications = milestoneProgress.getMeans() != null && !milestoneProgress.getMeans().trim().isEmpty()
             ? milestoneProgress.getMeans() : " ";
 
-          String[] sData = {FP, subIDO, outcomes, milestone, "US" + currencyFormat.format(round(w1w2, 2)),
-            "US" + currencyFormat.format(round(w3Bilateral, 2)), assessment, meansVerifications};
+          POIField[] sData = {new POIField(FP, ParagraphAlignment.CENTER),
+            new POIField(outcomes, ParagraphAlignment.LEFT), new POIField(milestone, ParagraphAlignment.LEFT),
+            new POIField(meansVerifications, ParagraphAlignment.LEFT),
+            new POIField(assessment, ParagraphAlignment.CENTER)};
           data = Arrays.asList(sData);
           datas.add(data);
 
@@ -443,20 +500,20 @@ public class POWBPOISummaryAction extends BaseSummariesAction implements Summary
     }
 
 
-    poiSummary.textTable(document, headers, datas, false);
+    poiSummary.textTable(document, headers, datas, false, "tableA");
   }
 
   private void createTableB() {
-    List<List<String>> headers = new ArrayList<>();
-    String[] sHeader = {this.getText("evidenceRelevant.table.plannedTopic"),
-      this.getText("evidenceRelevant.tablePlannedStudies.geographicScope"),
-      this.getText("evidenceRelevant.tablePlannedStudies.relevant"),
-      this.getText("evidenceRelevant.tablePlannedStudies.comments")};
-    List<String> header = Arrays.asList(sHeader);
+    List<List<POIField>> headers = new ArrayList<>();
+    POIField[] sHeader = {new POIField(this.getText("evidenceRelevant.table.plannedTopic"), ParagraphAlignment.CENTER),
+      new POIField(this.getText("evidenceRelevant.tablePlannedStudies.geographicScope"), ParagraphAlignment.CENTER),
+      new POIField(this.getText("evidenceRelevant.tablePlannedStudies.relevant"), ParagraphAlignment.CENTER),
+      new POIField(this.getText("evidenceRelevant.tablePlannedStudies.comments"), ParagraphAlignment.CENTER)};
+    List<POIField> header = Arrays.asList(sHeader);
     headers.add(header);
-    List<List<String>> datas = new ArrayList<>();
+    List<List<POIField>> datas = new ArrayList<>();
 
-    List<String> data;
+    List<POIField> data;
 
     this.getFpPlannedList(this.getFlagships(), this.getSelectedPhase().getId());
     for (PowbEvidencePlannedStudyDTO powbEvidencePlannedStudyDTO : flagshipPlannedList.stream()
@@ -497,190 +554,407 @@ public class POWBPOISummaryAction extends BaseSummariesAction implements Summary
         && !powbEvidencePlannedStudyDTO.getProjectExpectedStudy().getComments().trim().isEmpty()
           ? powbEvidencePlannedStudyDTO.getProjectExpectedStudy().getComments() : " ";
 
-      String[] sData = {plannedStudy, geographicScope, revelantSubIDO, comments};
+      POIField[] sData = {new POIField(plannedStudy, ParagraphAlignment.CENTER),
+        new POIField(geographicScope, ParagraphAlignment.CENTER), new POIField(revelantSubIDO, ParagraphAlignment.LEFT),
+        new POIField(comments, ParagraphAlignment.LEFT)};
       data = Arrays.asList(sData);
-
 
       datas.add(data);
     }
-    poiSummary.textTable(document, headers, datas, false);
+    poiSummary.textTable(document, headers, datas, false, "tableB");
   }
 
   private void createTableC() {
-    List<List<String>> headers = new ArrayList<>();
-    String[] sHeader = {this.getText("crossCuttingDimensions.tableC.crossCutting"),
-      this.getText("crossCuttingDimensions.tableC.principal"),
-      this.getText("crossCuttingDimensions.tableC.significant"),
-      this.getText("crossCuttingDimensions.tableC.notTargeted"), this.getText("crossCuttingDimensions.tableC.overall")};
-    List<String> header = Arrays.asList(sHeader);
+    List<List<POIField>> headers = new ArrayList<>();
+    POIField[] sHeader =
+      {new POIField(this.getText("crossCuttingDimensions.tableC.crossCutting"), ParagraphAlignment.CENTER),
+        new POIField(this.getText("crossCuttingDimensions.tableC.principal"), ParagraphAlignment.CENTER),
+        new POIField(this.getText("crossCuttingDimensions.tableC.significant"), ParagraphAlignment.CENTER),
+        new POIField(this.getText("crossCuttingDimensions.tableC.notTargeted"), ParagraphAlignment.CENTER),
+        new POIField(this.getText("crossCuttingDimensions.tableC.overall"), ParagraphAlignment.CENTER)};
+    List<POIField> header = Arrays.asList(sHeader);
     headers.add(header);
-    List<List<String>> datas = new ArrayList<>();
+    List<List<POIField>> datas = new ArrayList<>();
 
-    List<String> data;
+    List<POIField> data;
     this.tableCInfo(this.getSelectedPhase());
 
     if (tableC != null) {
-      String[] sData = {"Gender", percentageFormat.format(tableC.getPercentageGenderPrincipal() / 100),
-        percentageFormat.format(tableC.getPercentageGenderSignificant() / 100),
-        percentageFormat.format(tableC.getPercentageGenderNotScored() / 100), String.valueOf(tableC.getTotal())};
+      POIField[] sData = {new POIField("Gender", ParagraphAlignment.CENTER),
+        new POIField(percentageFormat.format(tableC.getPercentageGenderPrincipal() / 100), ParagraphAlignment.CENTER),
+        new POIField(percentageFormat.format(tableC.getPercentageGenderSignificant() / 100), ParagraphAlignment.CENTER),
+        new POIField(percentageFormat.format(tableC.getPercentageGenderNotScored() / 100), ParagraphAlignment.CENTER),
+        new POIField(String.valueOf(tableC.getTotal()), ParagraphAlignment.CENTER)};
       data = Arrays.asList(sData);
       datas.add(data);
-      String[] sData2 = {"Youth", percentageFormat.format(tableC.getPercentageYouthPrincipal() / 100),
-        percentageFormat.format(tableC.getPercentageYouthSignificant() / 100),
-        percentageFormat.format(tableC.getPercentageYouthNotScored() / 100), String.valueOf(tableC.getTotal())};
+      POIField[] sData2 = {new POIField("Youth", ParagraphAlignment.CENTER),
+        new POIField(percentageFormat.format(tableC.getPercentageYouthPrincipal() / 100), ParagraphAlignment.CENTER),
+        new POIField(percentageFormat.format(tableC.getPercentageYouthSignificant() / 100), ParagraphAlignment.CENTER),
+        new POIField(percentageFormat.format(tableC.getPercentageYouthNotScored() / 100), ParagraphAlignment.CENTER),
+        new POIField("", ParagraphAlignment.CENTER)};
       data = Arrays.asList(sData2);
       datas.add(data);
-      String[] sData3 = {"CapDev", percentageFormat.format(tableC.getPercentageCapDevPrincipal() / 100),
-        percentageFormat.format(tableC.getPercentageCapDevSignificant() / 100),
-        percentageFormat.format(tableC.getPercentageCapDevNotScored() / 100), String.valueOf(tableC.getTotal())};
+      POIField[] sData3 = {new POIField("CapDev", ParagraphAlignment.CENTER),
+        new POIField(percentageFormat.format(tableC.getPercentageCapDevPrincipal() / 100), ParagraphAlignment.CENTER),
+        new POIField(percentageFormat.format(tableC.getPercentageCapDevSignificant() / 100), ParagraphAlignment.CENTER),
+        new POIField(percentageFormat.format(tableC.getPercentageCapDevNotScored() / 100), ParagraphAlignment.CENTER),
+        new POIField("", ParagraphAlignment.CENTER)};
       data = Arrays.asList(sData3);
       datas.add(data);
     }
 
-    poiSummary.textTable(document, headers, datas, true);
+    poiSummary.textTable(document, headers, datas, true, "tableC");
   }
 
   private void createTableD() {
-    List<List<String>> headers = new ArrayList<>();
-    String[] sHeader = {this.getText("crpStaffing.tableD.category"), this.getText("crpStaffing.tableD.female"),
-      this.getText("crpStaffing.tableD.male"), this.getText("crpStaffing.tableD.total"),
-      this.getText("crpStaffing.tableD.percFemale")};
-    List<String> header = Arrays.asList(sHeader);
+    List<List<POIField>> headers = new ArrayList<>();
+    POIField[] sHeader = {new POIField(this.getText("crpStaffing.tableD.category"), ParagraphAlignment.CENTER),
+      new POIField(this.getText("crpStaffing.tableD.female"), ParagraphAlignment.CENTER),
+      new POIField(this.getText("crpStaffing.tableD.male"), ParagraphAlignment.CENTER),
+      new POIField(this.getText("crpStaffing.tableD.total"), ParagraphAlignment.CENTER),
+      new POIField(this.getText("crpStaffing.tableD.percFemale"), ParagraphAlignment.CENTER)};
+    List<POIField> header = Arrays.asList(sHeader);
     headers.add(header);
 
-    List<List<String>> datas = new ArrayList<>();
+    List<List<POIField>> datas = new ArrayList<>();
 
-    List<String> data;
-    List<PowbSynthesisCrpStaffingCategory> powbSynthesisCrpStaffingCategoryList =
-      powbSynthesisPMU.getPowbSynthesisCrpStaffingCategory().stream().filter(c -> c.isActive())
-        .sorted((c1, c2) -> c1.getId().compareTo(c2.getId())).collect(Collectors.toList());
-    Double totalFemale = 0.0, totalMale = 0.0;
-    if (powbSynthesisCrpStaffingCategoryList != null && !powbSynthesisCrpStaffingCategoryList.isEmpty()) {
-      for (PowbSynthesisCrpStaffingCategory powbSynthesisCrpStaffingCategory : powbSynthesisCrpStaffingCategoryList) {
-        String category = "";
-        Double female = 0.0, totalFTE = 0.0, femalePercentaje = 0.0, male = 0.0;
-        category = powbSynthesisCrpStaffingCategory.getPowbCrpStaffingCategory().getCategory();
-        female = powbSynthesisCrpStaffingCategory.getFemale();
-        totalFTE = powbSynthesisCrpStaffingCategory.getTotalFTE();
-        femalePercentaje = powbSynthesisCrpStaffingCategory.getFemalePercentage() / 100.0;
-        male = powbSynthesisCrpStaffingCategory.getMale();
-        totalFemale += female;
-        totalMale += male;
-        String[] sData = {category, String.valueOf(female), String.valueOf(male), String.valueOf(totalFTE),
-          percentageFormat.format(femalePercentaje)};
-        data = Arrays.asList(sData);
-        datas.add(data);
+    List<POIField> data;
+    Double totalFemale = 0.0, totalMale = 0.0, totalFemaleNoCg = 0.0, totalMaleNoCg = 0.0;
+
+    if (powbSynthesisPMU != null) {
+      List<PowbSynthesisCrpStaffingCategory> powbSynthesisCrpStaffingCategoryList =
+        powbSynthesisPMU.getPowbSynthesisCrpStaffingCategory().stream().filter(c -> c.isActive())
+          .sorted((c1, c2) -> c1.getId().compareTo(c2.getId())).collect(Collectors.toList());
+      if (powbSynthesisCrpStaffingCategoryList != null && !powbSynthesisCrpStaffingCategoryList.isEmpty()) {
+        for (PowbSynthesisCrpStaffingCategory powbSynthesisCrpStaffingCategory : powbSynthesisCrpStaffingCategoryList) {
+          String category = "";
+          Double female = 0.0, femaleNoCg = 0.0, totalFTE = 0.0, femalePercentaje = 0.0, male = 0.0, maleNoCg = 0.0;
+          category = powbSynthesisCrpStaffingCategory.getPowbCrpStaffingCategory().getCategory();
+          female =
+            powbSynthesisCrpStaffingCategory.getFemale() != null ? powbSynthesisCrpStaffingCategory.getFemale() : 0.0;
+          femaleNoCg = powbSynthesisCrpStaffingCategory.getFemaleNoCgiar() != null
+            ? powbSynthesisCrpStaffingCategory.getFemaleNoCgiar() : 0.0;
+          femalePercentaje = powbSynthesisCrpStaffingCategory.getFemalePercentage() / 100.0;
+          male = powbSynthesisCrpStaffingCategory.getMale() != null ? powbSynthesisCrpStaffingCategory.getMale() : 0.0;
+          maleNoCg = powbSynthesisCrpStaffingCategory.getMaleNoCgiar() != null
+            ? powbSynthesisCrpStaffingCategory.getMaleNoCgiar() : 0.0;
+          totalFemale += female;
+          totalFemaleNoCg += femaleNoCg;
+          totalMale += male;
+          totalMaleNoCg += maleNoCg;
+          totalFTE = powbSynthesisCrpStaffingCategory.getTotalFTE();
+          POIField[] sData = {new POIField(category, ParagraphAlignment.LEFT),
+            new POIField(String.valueOf(female) + " (" + femaleNoCg + ")", ParagraphAlignment.CENTER),
+            new POIField(String.valueOf(male) + " (" + maleNoCg + ")", ParagraphAlignment.CENTER),
+            new POIField(String.valueOf(totalFTE), ParagraphAlignment.CENTER),
+            new POIField(percentageFormat.format(femalePercentaje), ParagraphAlignment.CENTER)};
+          data = Arrays.asList(sData);
+          datas.add(data);
+        }
       }
     }
     PowbSynthesisCrpStaffingCategory powbSynthesisCrpStaffingCategory = new PowbSynthesisCrpStaffingCategory();
     powbSynthesisCrpStaffingCategory.setMale(totalMale);
+    powbSynthesisCrpStaffingCategory.setMaleNoCgiar(totalMaleNoCg);
     powbSynthesisCrpStaffingCategory.setFemale(totalFemale);
-    String[] sData =
-      {"Total CRP", String.valueOf(totalFemale), String.valueOf(totalMale), String.valueOf(totalFemale + totalMale),
-        percentageFormat.format(powbSynthesisCrpStaffingCategory.getFemalePercentage() / 100.0)};
+    powbSynthesisCrpStaffingCategory.setFemaleNoCgiar(totalFemaleNoCg);
+    Boolean bold = true;
+    POIField[] sData = {new POIField("Total CRP", ParagraphAlignment.LEFT, bold),
+      new POIField(String.valueOf(powbSynthesisCrpStaffingCategory.getFemale()) + " ("
+        + powbSynthesisCrpStaffingCategory.getFemaleNoCgiar() + ")", ParagraphAlignment.CENTER, bold),
+      new POIField(String.valueOf(powbSynthesisCrpStaffingCategory.getMale()) + " ("
+        + powbSynthesisCrpStaffingCategory.getMaleNoCgiar() + ")", ParagraphAlignment.CENTER, bold),
+      new POIField(String.valueOf(powbSynthesisCrpStaffingCategory.getTotalFTE()), ParagraphAlignment.CENTER, bold),
+      new POIField(percentageFormat.format(powbSynthesisCrpStaffingCategory.getFemalePercentage() / 100.0),
+        ParagraphAlignment.CENTER, bold)};
 
     data = Arrays.asList(sData);
     datas.add(data);
 
-    poiSummary.textTable(document, headers, datas, false);
+    poiSummary.textTable(document, headers, datas, false, "tableD");
   }
 
   private void createTableE() {
 
-    List<List<String>> headers = new ArrayList<>();
-    String[] sHeader =
-      {"", this.getText("financialPlan.tableE.plannedBudget", new String[] {String.valueOf(this.getSelectedYear())}),
-        "", "", this.getText("financialPlan.tableE.comments")};
-    String[] sHeader2 = {"", this.getText("financialPlan.tableE.w1w2"),
-      this.getText("financialPlan.tableE.w3bilateral"), this.getText("financialPlan.tableE.total"), ""};
+    List<List<POIField>> headers = new ArrayList<>();
+    POIField[] sHeader = {new POIField("", ParagraphAlignment.CENTER),
+      new POIField(
+        this.getText("financialPlan.tableE.plannedBudget", new String[] {String.valueOf(this.getSelectedYear())}),
+        ParagraphAlignment.CENTER),
+      new POIField("", ParagraphAlignment.CENTER), new POIField("", ParagraphAlignment.CENTER),
+      new POIField("", ParagraphAlignment.CENTER), new POIField("", ParagraphAlignment.CENTER),
+      new POIField(this.getText("financialPlan.tableE.comments"), ParagraphAlignment.CENTER)};
+    POIField[] sHeader2 = {new POIField(" ", ParagraphAlignment.CENTER),
+      new POIField(
+        this.getText("financialPlan.tableE.carryOver", new String[] {String.valueOf(this.getSelectedYear() - 1)}),
+        ParagraphAlignment.CENTER),
+      new POIField(this.getText("financialPlan.tableE.w1w2"), ParagraphAlignment.CENTER),
+      new POIField(this.getText("financialPlan.tableE.w3bilateral"), ParagraphAlignment.CENTER),
+      new POIField(this.getText("financialPlan.tableE.centerFunds"), ParagraphAlignment.CENTER),
+      new POIField(this.getText("financialPlan.tableE.total"), ParagraphAlignment.CENTER),
+      new POIField(" ", ParagraphAlignment.CENTER)};
 
-    List<String> header = Arrays.asList(sHeader);
-    List<String> header2 = Arrays.asList(sHeader2);
+    List<POIField> header = Arrays.asList(sHeader);
+    List<POIField> header2 = Arrays.asList(sHeader2);
     headers.add(header);
     headers.add(header2);
 
-    List<List<String>> datas = new ArrayList<>();
-    List<String> data;
-    List<PowbFinancialPlannedBudget> powbFinancialPlannedBudgetList =
-      powbSynthesisPMU.getPowbFinancialPlannedBudget().stream().filter(p -> p.isActive()).collect(Collectors.toList());
-    // Flagships
-    List<LiaisonInstitution> flagships = this.getFlagships();
-    if (flagships != null && !flagships.isEmpty()) {
-      for (LiaisonInstitution flagship : flagships) {
-        Double w1w2 = 0.0, w3Bilateral = 0.0, total = 0.0;
-        String category = "", comments = "";
-        category = flagship.getAcronym();
-        if (powbFinancialPlannedBudgetList != null && !powbFinancialPlannedBudgetList.isEmpty()) {
-          List<PowbFinancialPlannedBudget> powbFinancialPlannedBudgetFlagshipList = powbFinancialPlannedBudgetList
-            .stream().filter(f -> f.getLiaisonInstitution() != null && f.getLiaisonInstitution().equals(flagship))
-            .collect(Collectors.toList());
-          PowbFinancialPlannedBudget powbFinancialPlannedBudget = null;
-          if (powbFinancialPlannedBudgetFlagshipList != null && !powbFinancialPlannedBudgetFlagshipList.isEmpty()) {
-            powbFinancialPlannedBudget = powbFinancialPlannedBudgetFlagshipList.get(0);
+    List<List<POIField>> datas = new ArrayList<>();
+    List<POIField> data;
+    if (powbSynthesisPMU != null) {
+      // Flagships
+      List<LiaisonInstitution> flagships = this.getFlagships();
+      if (flagships != null && !flagships.isEmpty()) {
+        for (LiaisonInstitution flagship : flagships) {
+          Double carry = 0.0, w1w2 = 0.0, w3Bilateral = 0.0, center = 0.0, total = 0.0;
+          String category = "", comments = "";
+          category = flagship.getAcronym();
+          PowbFinancialPlannedBudget powbFinancialPlannedBudget =
+            this.getPowbFinancialPlanBudget(flagship.getId(), true);
+          if (powbFinancialPlannedBudget != null) {
             w1w2 = powbFinancialPlannedBudget.getW1w2();
+            carry = powbFinancialPlannedBudget.getCarry();
             w3Bilateral = powbFinancialPlannedBudget.getW3Bilateral();
+            center = powbFinancialPlannedBudget.getCenterFunds();
             total = powbFinancialPlannedBudget.getTotalPlannedBudget();
             comments = powbFinancialPlannedBudget.getComments() == null
               || powbFinancialPlannedBudget.getComments().trim().isEmpty() ? " "
                 : powbFinancialPlannedBudget.getComments();
           }
-        }
-        totalw1w2 += w1w2;
-        totalw3Bilateral += w3Bilateral;
-        grandTotal += total;
-        String[] sData = {category, currencyFormat.format(round(w1w2, 2)), currencyFormat.format(round(w3Bilateral, 2)),
-          currencyFormat.format(round(total, 2)), comments};
-
-        data = Arrays.asList(sData);
-        datas.add(data);
-      }
-    }
-    // Expenditure areas
-    List<PowbExpenditureAreas> powbExpenditureAreas = this.getPlannedBudgetAreas();
-    if (powbExpenditureAreas != null && !powbExpenditureAreas.isEmpty()) {
-      for (PowbExpenditureAreas powbExpenditureArea : powbExpenditureAreas) {
-        Double w1w2 = 0.0, w3Bilateral = 0.0, total = 0.0;
-        String category = "", comments = "";
-        category = powbExpenditureArea.getExpenditureArea();
-        if (powbFinancialPlannedBudgetList != null && !powbFinancialPlannedBudgetList.isEmpty()) {
-          List<PowbFinancialPlannedBudget> powbFinancialPlannedBudgetExpenditureList =
-            powbFinancialPlannedBudgetList.stream()
-              .filter(f -> f.getPowbExpenditureArea() != null && f.getPowbExpenditureArea().equals(powbExpenditureArea))
-              .collect(Collectors.toList());
-          PowbFinancialPlannedBudget powbFinancialPlannedBudget = null;
-          if (powbFinancialPlannedBudgetExpenditureList != null
-            && !powbFinancialPlannedBudgetExpenditureList.isEmpty()) {
-            powbFinancialPlannedBudget = powbFinancialPlannedBudgetExpenditureList.get(0);
-            w1w2 = powbFinancialPlannedBudget.getW1w2();
-            w3Bilateral = powbFinancialPlannedBudget.getW3Bilateral();
-            total = powbFinancialPlannedBudget.getTotalPlannedBudget();
-            comments = powbFinancialPlannedBudget.getComments() == null
-              || powbFinancialPlannedBudget.getComments().trim().isEmpty() ? " "
-                : powbFinancialPlannedBudget.getComments();
-          }
+          totalCarry += carry;
           totalw1w2 += w1w2;
           totalw3Bilateral += w3Bilateral;
+          totalCenter += center;
           grandTotal += total;
-          String[] sData = {category, currencyFormat.format(round(w1w2, 2)),
-            currencyFormat.format(round(w3Bilateral, 2)), currencyFormat.format(round(total, 2)), comments};
+          POIField[] sData = {new POIField(category, ParagraphAlignment.CENTER),
+            new POIField(currencyFormat.format(round(carry, 2)), ParagraphAlignment.CENTER),
+            new POIField(currencyFormat.format(round(w1w2, 2)), ParagraphAlignment.CENTER),
+            new POIField(currencyFormat.format(round(w3Bilateral, 2)), ParagraphAlignment.CENTER),
+            new POIField(currencyFormat.format(round(center, 2)), ParagraphAlignment.CENTER),
+            new POIField(currencyFormat.format(round(total, 2)), ParagraphAlignment.CENTER),
+            new POIField(comments, ParagraphAlignment.LEFT)};
+
+          data = Arrays.asList(sData);
+          datas.add(data);
+        }
+      }
+      // Expenditure areas
+      List<PowbExpenditureAreas> powbExpenditureAreas = this.getPlannedBudgetAreas();
+      if (powbExpenditureAreas != null && !powbExpenditureAreas.isEmpty()) {
+        for (PowbExpenditureAreas powbExpenditureArea : powbExpenditureAreas) {
+          Double carry = 0.0, w1w2 = 0.0, w3Bilateral = 0.0, center = 0.0, total = 0.0;
+          String category = "", comments = "";
+          category = powbExpenditureArea.getExpenditureArea();
+          PowbFinancialPlannedBudget powbFinancialPlannedBudget =
+            this.getPowbFinancialPlanBudget(powbExpenditureArea.getId(), false);
+          if (powbFinancialPlannedBudget != null) {
+            w1w2 = powbFinancialPlannedBudget.getW1w2();
+            w3Bilateral = powbFinancialPlannedBudget.getW3Bilateral();
+            total = powbFinancialPlannedBudget.getTotalPlannedBudget();
+            comments = powbFinancialPlannedBudget.getComments() == null
+              || powbFinancialPlannedBudget.getComments().trim().isEmpty() ? " "
+                : powbFinancialPlannedBudget.getComments();
+          }
+          totalCarry += carry;
+          totalw1w2 += w1w2;
+          totalw3Bilateral += w3Bilateral;
+          totalCenter += center;
+          grandTotal += total;
+          POIField[] sData = {new POIField(category, ParagraphAlignment.CENTER),
+            new POIField(currencyFormat.format(round(carry, 2)), ParagraphAlignment.CENTER),
+            new POIField(currencyFormat.format(round(w1w2, 2)), ParagraphAlignment.CENTER),
+            new POIField(currencyFormat.format(round(w3Bilateral, 2)), ParagraphAlignment.CENTER),
+            new POIField(currencyFormat.format(round(center, 2)), ParagraphAlignment.CENTER),
+            new POIField(currencyFormat.format(round(total, 2)), ParagraphAlignment.CENTER),
+            new POIField(comments, ParagraphAlignment.LEFT)};
+
+          data = Arrays.asList(sData);
+          datas.add(data);
+
+        }
+      }
+
+    }
+    Boolean bold = true;
+    POIField[] sData = {new POIField("CRP Total", ParagraphAlignment.CENTER, bold),
+      new POIField(currencyFormat.format(round(totalCarry, 2)), ParagraphAlignment.CENTER, bold),
+      new POIField(currencyFormat.format(round(totalw1w2, 2)), ParagraphAlignment.CENTER, bold),
+      new POIField(currencyFormat.format(round(totalw3Bilateral, 2)), ParagraphAlignment.CENTER, bold),
+      new POIField(currencyFormat.format(round(totalCarry, 2)), ParagraphAlignment.CENTER, bold),
+      new POIField(currencyFormat.format(round(grandTotal, 2)), ParagraphAlignment.CENTER, bold),
+      new POIField(" ", ParagraphAlignment.LEFT, bold)};
+
+    data = Arrays.asList(sData);
+    datas.add(data);
+
+    poiSummary.textTable(document, headers, datas, false, "tableE");
+  }
+
+  private void createTableF() {
+    List<List<POIField>> headers = new ArrayList<>();
+    POIField[] sHeader =
+      {new POIField(this.getText("financialPlan.tableF.expenditureArea") + "*", ParagraphAlignment.CENTER),
+        new POIField(this.getText("financialPlan.tableF.estimatedPercentage",
+          new String[] {String.valueOf(this.getSelectedYear())}) + "**", ParagraphAlignment.CENTER),
+        new POIField(this.getText("financialPlan.tableF.comments"), ParagraphAlignment.CENTER)};
+
+    List<POIField> header = Arrays.asList(sHeader);
+    headers.add(header);
+
+    List<List<POIField>> datas = new ArrayList<>();
+    List<POIField> data;
+
+
+    Double totalEstimatedPercentajeFS = 0.0;
+    if (powbSynthesisPMU != null) {
+
+      List<PowbFinancialExpenditure> powbFinancialExpenditureList =
+        powbSynthesisPMU.getPowbFinancialExpenditures().stream().filter(p -> p.isActive()).collect(Collectors.toList());
+      // Expenditure areas
+      List<PowbExpenditureAreas> powbExpenditureAreas = this.getExpenditureAreas();
+      if (powbExpenditureAreas != null && !powbExpenditureAreas.isEmpty()) {
+        for (PowbExpenditureAreas powbExpenditureArea : powbExpenditureAreas) {
+          Double estimatedPercentajeFS = 0.0;
+          String expenditureArea = "", commentsSpace = "";
+          expenditureArea = powbExpenditureArea.getExpenditureArea();
+          if (powbFinancialExpenditureList != null && !powbFinancialExpenditureList.isEmpty()) {
+            List<PowbFinancialExpenditure> powbFinancialExpenditureAreaList = powbFinancialExpenditureList.stream()
+              .filter(f -> f.getPowbExpenditureArea() != null && f.getPowbExpenditureArea().equals(powbExpenditureArea))
+              .collect(Collectors.toList());
+            PowbFinancialExpenditure powbFinancialExpenditure = null;
+            if (powbFinancialExpenditureAreaList != null && !powbFinancialExpenditureAreaList.isEmpty()) {
+              powbFinancialExpenditure = powbFinancialExpenditureAreaList.get(0);
+              estimatedPercentajeFS = powbFinancialExpenditure.getW1w2Percentage();
+              commentsSpace = powbFinancialExpenditure.getComments() == null
+                || powbFinancialExpenditure.getComments().trim().isEmpty() ? " "
+                  : powbFinancialExpenditure.getComments();
+            }
+            totalEstimatedPercentajeFS += estimatedPercentajeFS;
+            POIField[] sData = {new POIField(expenditureArea, ParagraphAlignment.LEFT),
+              new POIField(percentageFormat.format(round(estimatedPercentajeFS / 100, 2)), ParagraphAlignment.CENTER),
+              new POIField(commentsSpace, ParagraphAlignment.LEFT)};
+
+            data = Arrays.asList(sData);
+            datas.add(data);
+          }
+        }
+      }
+    }
+    Boolean bold = true;
+    POIField[] sData = {new POIField("Total Funding (Amount)", ParagraphAlignment.LEFT, bold),
+      new POIField(currencyFormat.format(round((totalw1w2 * totalEstimatedPercentajeFS) / 100, 2)),
+        ParagraphAlignment.CENTER, bold),
+      new POIField(" ", ParagraphAlignment.LEFT, bold)};
+
+    data = Arrays.asList(sData);
+    datas.add(data);
+
+    poiSummary.textTable(document, headers, datas, true, "tableF");
+  }
+
+  private void createTableG() {
+    List<List<POIField>> headers = new ArrayList<>();
+    POIField[] sHeader = {new POIField(this.getText("summaries.powb.tableG.crpName"), ParagraphAlignment.CENTER),
+      new POIField(this.getText("summaries.powb.tableG.description"), ParagraphAlignment.CENTER),
+      new POIField(this.getText("summaries.powb.tableG.relevantFP"), ParagraphAlignment.CENTER)};
+    List<POIField> header = Arrays.asList(sHeader);
+    headers.add(header);
+
+    List<List<POIField>> datas = new ArrayList<>();
+    List<POIField> data;
+    for (PowbSynthesis powbSynthesis : powbSynthesisList) {
+      List<PowbCollaborationGlobalUnit> powbCollaborationGlobalUnitList =
+        powbSynthesis.getPowbCollaborationGlobalUnits().stream().filter(c -> c.isActive()).collect(Collectors.toList());
+      if (powbCollaborationGlobalUnitList != null && !powbCollaborationGlobalUnitList.isEmpty()) {
+        for (PowbCollaborationGlobalUnit powbCollaborationGlobalUnit : powbCollaborationGlobalUnitList) {
+          String crpPlatform = " ", descriptionCollaboration = " ", relevantFP = " ";
+          if (powbCollaborationGlobalUnit.getGlobalUnit() != null) {
+            crpPlatform = powbCollaborationGlobalUnit.getGlobalUnit().getAcronym() != null
+              && !powbCollaborationGlobalUnit.getGlobalUnit().getAcronym().isEmpty()
+                ? powbCollaborationGlobalUnit.getGlobalUnit().getAcronym()
+                : powbCollaborationGlobalUnit.getGlobalUnit().getName();
+          }
+
+          descriptionCollaboration =
+            powbCollaborationGlobalUnit.getBrief() != null && !powbCollaborationGlobalUnit.getBrief().isEmpty()
+              ? powbCollaborationGlobalUnit.getBrief() : " ";
+          relevantFP =
+            powbCollaborationGlobalUnit.getFlagship() != null && !powbCollaborationGlobalUnit.getFlagship().isEmpty()
+              ? powbCollaborationGlobalUnit.getFlagship() : " ";
+
+          POIField[] sData = {new POIField(crpPlatform, ParagraphAlignment.CENTER),
+            new POIField(descriptionCollaboration, ParagraphAlignment.LEFT),
+            new POIField(relevantFP, ParagraphAlignment.LEFT)};
 
           data = Arrays.asList(sData);
           datas.add(data);
         }
       }
     }
-    String[] sData = {"CRP Total", currencyFormat.format(round(totalw1w2, 2)),
-      currencyFormat.format(round(totalw3Bilateral, 2)), currencyFormat.format(round(grandTotal, 2)), " "};
+    poiSummary.textTable(document, headers, datas, false, "tableG");
+  }
 
-    data = Arrays.asList(sData);
-    datas.add(data);
+  private void createTableH() {
+    List<List<POIField>> headers = new ArrayList<>();
+    POIField[] sHeader = {
+      new POIField(
+        this.getText("monitoringLearning.table.plannedStudies", new String[] {String.valueOf(this.getSelectedYear())}),
+        ParagraphAlignment.CENTER),
+      new POIField(this.getText("monitoringLearning.table.comments"), ParagraphAlignment.CENTER)};
+    List<POIField> header = Arrays.asList(sHeader);
+    headers.add(header);
 
-    poiSummary.textTable(document, headers, datas, false);
+    List<List<POIField>> datas = new ArrayList<>();
+    List<POIField> data;
+
+    this.getFpPlannedList(this.getFlagships(), this.getSelectedPhase().getId());
+    for (PowbEvidencePlannedStudyDTO powbEvidencePlannedStudyDTO : flagshipPlannedList.stream()
+      .filter(p -> p.getProjectExpectedStudy() != null && p.getProjectExpectedStudy().getType() != null
+        && (p.getProjectExpectedStudy().getType() == TypeExpectedStudiesEnum.EVAULATION.getId()
+          || p.getProjectExpectedStudy().getType() == TypeExpectedStudiesEnum.IMPACTASSESMENT.getId()
+          || p.getProjectExpectedStudy().getType() == TypeExpectedStudiesEnum.LEARNING.getId()
+          || p.getProjectExpectedStudy().getType() == TypeExpectedStudiesEnum.IMPACTCASESTUDY.getId()
+          || p.getProjectExpectedStudy().getType() == TypeExpectedStudiesEnum.CRP_PTF.getId()
+          || p.getProjectExpectedStudy().getType() == TypeExpectedStudiesEnum.REVIEW.getId()))
+      .collect(Collectors.toList())) {
+      String plannedStudy = "", comments = "";
+      plannedStudy = powbEvidencePlannedStudyDTO.getProjectExpectedStudy().getTopicStudy() != null
+        && !powbEvidencePlannedStudyDTO.getProjectExpectedStudy().getTopicStudy().trim().isEmpty()
+          ? powbEvidencePlannedStudyDTO.getProjectExpectedStudy().getTopicStudy() : " ";
+      comments = powbEvidencePlannedStudyDTO.getProjectExpectedStudy().getComments() != null
+        && !powbEvidencePlannedStudyDTO.getProjectExpectedStudy().getComments().trim().isEmpty()
+          ? powbEvidencePlannedStudyDTO.getProjectExpectedStudy().getComments() : " ";
+
+      POIField[] sData =
+        {new POIField(plannedStudy, ParagraphAlignment.LEFT), new POIField(comments, ParagraphAlignment.LEFT)};
+
+      data = Arrays.asList(sData);
+      datas.add(data);
+    }
+
+    poiSummary.textTable(document, headers, datas, false, "tableH");
   }
 
   @Override
   public String execute() throws Exception {
     try {
+      /* Create a portrait text Section */
+      CTDocument1 doc = document.getDocument();
+      CTBody body = doc.getBody();
+
+      poiSummary.pageHeader(document, this.getText("summaries.powb.header"));
+      // Get datetime
+      ZonedDateTime timezone = ZonedDateTime.now();
+      DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-d 'at' HH:mm ");
+      String zone = timezone.getOffset() + "";
+      if (zone.equals("Z")) {
+        zone = "+0";
+      }
+      String currentDate = timezone.format(format) + "(GMT" + zone + ")";
+      poiSummary.pageFooter(document, "This report was generated on " + currentDate);
+      poiSummary.textLineBreak(document, 13);
+      poiSummary.textHeadCoverTitle(document.createParagraph(), this.getText("summaries.powb.mainTitle"));
+      poiSummary.textLineBreak(document, 12);
       poiSummary.textHead1Title(document.createParagraph(), this.getText("summaries.powb.mainTitle2"));
       poiSummary.textLineBreak(document, 1);
       poiSummary.textHead1Title(document.createParagraph(), this.getText("summaries.powb.cover"));
@@ -712,23 +986,54 @@ public class POWBPOISummaryAction extends BaseSummariesAction implements Summary
       poiSummary.textHead1Title(document.createParagraph(), this.getText("summaries.powb.management"));
       this.addManagement();
 
+      /* Create a landscape text Section */
+      XWPFParagraph para = document.createParagraph();
+      CTSectPr sectionTable = body.getSectPr();
+      CTPageSz pageSizeTable = sectionTable.addNewPgSz();
+      CTP ctpTable = para.getCTP();
+      CTPPr brTable = ctpTable.addNewPPr();
+      brTable.setSectPr(sectionTable);
+      /* standard Letter page size */
+      pageSizeTable.setOrient(STPageOrientation.LANDSCAPE);
+      pageSizeTable.setW(BigInteger.valueOf(842 * 20));
+      pageSizeTable.setH(BigInteger.valueOf(595 * 20));
+
       XWPFParagraph paragraph = document.createParagraph();
-      paragraph.setPageBreak(true);
       poiSummary.textHead1Title(paragraph, "TABLES");
       poiSummary.textHead2Title(document.createParagraph(), this.getText("summaries.powb.tableA.title"));
-      this.createTableA();
+      poiSummary.textHead3Title(document.createParagraph(), this.getText("summaries.powb.tableA1.title"));
+      this.createTableA1();
+      document.createParagraph().setPageBreak(true); // Fast Page Break
+      poiSummary.textHead3Title(document.createParagraph(), this.getText("summaries.powb.tableA2.title"));
+      this.createTableA2();
       poiSummary.textNotes(document.createParagraph(), "*" + this.getText("expectedProgress.tableA.milestone.help"));
-      poiSummary.textNotes(document.createParagraph(), "**" + this.getText("expectedProgress.tableA.assessment.help"));
+      document.createParagraph().setPageBreak(true); // Fast Page Break
       poiSummary.textHead2Title(document.createParagraph(), this.getText("summaries.powb.tableB.title"));
       this.createTableB();
+      document.createParagraph().setPageBreak(true); // Fast Page Break
       poiSummary.textHead2Title(document.createParagraph(), this.getText("crossCuttingDimensions.tableC.title"));
       this.createTableC();
+      document.createParagraph().setPageBreak(true); // Fast Page Break
       poiSummary.textHead2Title(document.createParagraph(), this.getText("crpStaffing.tableD.title"));
       this.createTableD();
       poiSummary.textNotes(document.createParagraph(), this.getText("crpStaffing.tableD.help"));
+      document.createParagraph().setPageBreak(true); // Fast Page Break
       poiSummary.textHead2Title(document.createParagraph(),
         this.getText("financialPlan.tableE.title", new String[] {String.valueOf(this.getSelectedYear())}));
       this.createTableE();
+      document.createParagraph().setPageBreak(true); // Fast Page Break
+      poiSummary.textHead2Title(document.createParagraph(), this.getText("financialPlan.tableF.title"));
+      this.createTableF();
+      poiSummary.textNotes(document.createParagraph(), this.getText("financialPlan.tableF.expenditureArea.help"));
+      poiSummary.textNotes(document.createParagraph(), this.getText("financialPlan.tableF.estimatedPercentage.help"));
+      document.createParagraph().setPageBreak(true); // Fast Page Break
+      poiSummary.textHead2Title(document.createParagraph(),
+        this.getText("collaborationIntegration.listCollaborations.title"));
+      this.createTableG();
+      poiSummary.textNotes(document.createParagraph(), this.getText("summaries.powb.tableG.description.help"));
+      document.createParagraph().setPageBreak(true); // Fast Page Break
+      poiSummary.textHead2Title(document.createParagraph(), this.getText("summaries.powb.tableF.title"));
+      this.createTableH();
       ByteArrayOutputStream os = new ByteArrayOutputStream();
       document.write(os);
       bytesDOC = os.toByteArray();
@@ -738,6 +1043,7 @@ public class POWBPOISummaryAction extends BaseSummariesAction implements Summary
       LOG.error("Error generating POWB Summary " + e.getMessage());
       throw e;
     }
+
     // Calculate time of generation
     long stopTime = System.currentTimeMillis();
     stopTime = stopTime - startTime;
@@ -757,10 +1063,20 @@ public class POWBPOISummaryAction extends BaseSummariesAction implements Summary
     return "application/docx";
   }
 
+  public List<PowbExpenditureAreas> getExpenditureAreas() {
+    List<PowbExpenditureAreas> expenditureAreaList = powbExpenditureAreasManager.findAll().stream()
+      .filter(e -> e.isActive() && e.getIsExpenditure()).collect(Collectors.toList());
+    if (expenditureAreaList != null) {
+      return expenditureAreaList;
+    } else {
+      return new ArrayList<>();
+    }
+  }
+
   @Override
   public String getFileName() {
     StringBuffer fileName = new StringBuffer();
-    fileName.append("POWBSummary-");
+    fileName.append(this.getLoggedCrp().getAcronym() + "-POWBSynthesis-");
     fileName.append(this.getSelectedYear() + "_");
     fileName.append(new SimpleDateFormat("yyyyMMdd-HHmm").format(new Date()));
     fileName.append(".docx");
@@ -880,7 +1196,6 @@ public class POWBPOISummaryAction extends BaseSummariesAction implements Summary
     return inputStream;
   }
 
-
   public List<PowbExpenditureAreas> getPlannedBudgetAreas() {
     List<PowbExpenditureAreas> plannedBudgetAreasList = powbExpenditureAreasManager.findAll().stream()
       .filter(e -> e.isActive() && !e.getIsExpenditure()).collect(Collectors.toList());
@@ -907,6 +1222,7 @@ public class POWBPOISummaryAction extends BaseSummariesAction implements Summary
     return null;
   }
 
+
   public PowbExpectedCrpProgress getPowbExpectedCrpProgressProgram(Long crpMilestoneID, Long crpProgramID) {
     List<PowbExpectedCrpProgress> powbExpectedCrpProgresses =
       powbExpectedCrpProgressManager.findByProgram(crpProgramID);
@@ -916,6 +1232,90 @@ public class POWBPOISummaryAction extends BaseSummariesAction implements Summary
       return powbExpectedCrpProgressMilestone.get(0);
     }
     return new PowbExpectedCrpProgress();
+  }
+
+  public PowbFinancialPlannedBudget getPowbFinancialPlanBudget(Long plannedBudgetRelationID, Boolean isLiaison) {
+    if (isLiaison) {
+      LiaisonInstitution liaisonInstitution =
+        liaisonInstitutionManager.getLiaisonInstitutionById(plannedBudgetRelationID);
+      if (liaisonInstitution != null && powbSynthesisPMU.getPowbFinancialPlannedBudgetList() != null) {
+        List<PowbFinancialPlannedBudget> powbFinancialPlannedBudgetList = powbSynthesisPMU
+          .getPowbFinancialPlannedBudgetList().stream()
+          .filter(
+            p -> p.getLiaisonInstitution() != null && p.getLiaisonInstitution().getId().equals(plannedBudgetRelationID))
+          .collect(Collectors.toList());
+        if (powbFinancialPlannedBudgetList != null && !powbFinancialPlannedBudgetList.isEmpty()) {
+          PowbFinancialPlannedBudget powbFinancialPlannedBudget = powbFinancialPlannedBudgetList.get(0);
+
+          if (liaisonInstitution.getCrpProgram() != null) {
+            this.loadFlagShipBudgetInfo(liaisonInstitution.getCrpProgram());
+            powbFinancialPlannedBudget.setW1w2(liaisonInstitution.getCrpProgram().getW1());
+            powbFinancialPlannedBudget.setW3Bilateral(liaisonInstitution.getCrpProgram().getW3());
+            powbFinancialPlannedBudget.setCenterFunds(liaisonInstitution.getCrpProgram().getCenterFunds());
+
+            powbFinancialPlannedBudget.setEditBudgets(false);
+
+          }
+
+          return powbFinancialPlannedBudget;
+        } else {
+          PowbFinancialPlannedBudget powbFinancialPlannedBudget = new PowbFinancialPlannedBudget();
+          powbFinancialPlannedBudget.setLiaisonInstitution(liaisonInstitution);
+
+          if (liaisonInstitution.getCrpProgram() != null) {
+            this.loadFlagShipBudgetInfo(liaisonInstitution.getCrpProgram());
+            powbFinancialPlannedBudget.setW1w2(new Double(liaisonInstitution.getCrpProgram().getW1()));
+            powbFinancialPlannedBudget.setW3Bilateral(liaisonInstitution.getCrpProgram().getW3());
+            powbFinancialPlannedBudget.setCenterFunds(liaisonInstitution.getCrpProgram().getCenterFunds());
+
+            powbFinancialPlannedBudget.setEditBudgets(false);
+
+          }
+
+          return powbFinancialPlannedBudget;
+        }
+      } else {
+        return null;
+      }
+    } else {
+      PowbExpenditureAreas powbExpenditureArea =
+        powbExpenditureAreasManager.getPowbExpenditureAreasById(plannedBudgetRelationID);
+
+      if (powbExpenditureArea != null && powbSynthesisPMU.getPowbFinancialPlannedBudgetList() != null) {
+        List<PowbFinancialPlannedBudget> powbFinancialPlannedBudgetList =
+          powbSynthesisPMU.getPowbFinancialPlannedBudgetList().stream().filter(p -> p.getPowbExpenditureArea() != null
+            && p.getPowbExpenditureArea().getId().equals(plannedBudgetRelationID)).collect(Collectors.toList());
+        if (powbFinancialPlannedBudgetList != null && !powbFinancialPlannedBudgetList.isEmpty()) {
+          PowbFinancialPlannedBudget powbFinancialPlannedBudget = powbFinancialPlannedBudgetList.get(0);
+          if (powbExpenditureArea.getExpenditureArea().equals("CRP Management & Support Cost")) {
+            this.loadPMU(powbExpenditureArea);
+            powbFinancialPlannedBudget.setW1w2(powbExpenditureArea.getW1());
+            powbFinancialPlannedBudget.setW3Bilateral(powbExpenditureArea.getW3());
+            powbFinancialPlannedBudget.setCenterFunds(powbExpenditureArea.getCenterFunds());
+
+            powbFinancialPlannedBudget.setEditBudgets(false);
+          }
+          return powbFinancialPlannedBudget;
+        } else {
+
+          PowbFinancialPlannedBudget powbFinancialPlannedBudget = new PowbFinancialPlannedBudget();
+          powbFinancialPlannedBudget.setPowbExpenditureArea(powbExpenditureArea);
+          if (powbExpenditureArea.getExpenditureArea().equals("CRP Management & Support Cost")) {
+            this.loadPMU(powbExpenditureArea);
+            powbFinancialPlannedBudget.setW1w2(powbExpenditureArea.getW1());
+            powbFinancialPlannedBudget.setW3Bilateral(powbExpenditureArea.getW3());
+            powbFinancialPlannedBudget.setCenterFunds(powbExpenditureArea.getCenterFunds());
+
+            powbFinancialPlannedBudget.setEditBudgets(false);
+          }
+          return powbFinancialPlannedBudget;
+
+
+        }
+      } else {
+        return null;
+      }
+    }
   }
 
   // Method to download link file
@@ -991,6 +1391,59 @@ public class POWBPOISummaryAction extends BaseSummariesAction implements Summary
       bilateral = bilateral * (percentageB) / 100;
       crpProgram.setW1(crpProgram.getW1() + w1);
       crpProgram.setW3(crpProgram.getW3() + w3 + bilateral);
+    }
+  }
+
+  public void loadPMU(PowbExpenditureAreas liaisonInstitution) {
+
+    Set<Project> myProjects = new HashSet();
+    for (GlobalUnitProject projectFocus : this.getLoggedCrp().getGlobalUnitProjects().stream()
+      .filter(c -> c.isActive() && c.isOrigin()).collect(Collectors.toList())) {
+      Project project = projectFocus.getProject();
+      if (project.isActive()) {
+        project.setProjectInfo(project.getProjecInfoPhase(this.getActualPhase()));
+        if (project.getProjectInfo() != null && project.getProjectInfo().getStatus() != null) {
+          if (project.getProjectInfo().getStatus().intValue() == Integer
+            .parseInt(ProjectStatusEnum.Ongoing.getStatusId())
+            || project.getProjectInfo().getStatus().intValue() == Integer
+              .parseInt(ProjectStatusEnum.Extended.getStatusId())) {
+            if (project.getProjecInfoPhase(this.getActualPhase()).getAdministrative() != null
+              && project.getProjecInfoPhase(this.getActualPhase()).getAdministrative().booleanValue()) {
+              myProjects.add(project);
+            }
+
+          }
+        }
+      }
+    }
+    for (Project project : myProjects) {
+
+      double w1 = project.getCoreBudget(this.getActualPhase().getYear(), this.getActualPhase());
+      double w3 = project.getW3Budget(this.getActualPhase().getYear(), this.getActualPhase());
+      double bilateral = project.getBilateralBudget(this.getActualPhase().getYear(), this.getActualPhase());
+      double centerFunds = project.getCenterBudget(this.getActualPhase().getYear(), this.getActualPhase());
+
+      double percentageW1 = 0;
+      double percentageW3 = 0;
+      double percentageB = 0;
+      double percentageCenterFunds = 0;
+
+
+      percentageW1 = 100;
+      percentageW3 = 100;
+      percentageB = 100;
+      percentageCenterFunds = 100;
+
+
+      w1 = w1 * (percentageW1) / 100;
+      w3 = w3 * (percentageW3) / 100;
+      bilateral = bilateral * (percentageB) / 100;
+      centerFunds = centerFunds * (percentageCenterFunds) / 100;
+
+      liaisonInstitution.setW1(liaisonInstitution.getW1() + w1);
+      liaisonInstitution.setW3(liaisonInstitution.getW3() + w3 + bilateral);
+      liaisonInstitution.setCenterFunds(liaisonInstitution.getCenterFunds() + centerFunds);
+
     }
   }
 

@@ -506,19 +506,6 @@ input[type="submit"], button, .addButton, a.form-button {
   text-decoration: none;
 }
 
-input[type="submit"]:hover{
-  background-color: rgb(39, 147, 173);
-}
-
-/* Accesible change on tab */
-input[type="submit"]:focus{
-  background-color: rgb(39, 147, 173);
-}
-
-a.form-button:hover {
-  background-color: rgb(40, 156, 185);
-}
-
 a.form-button.button-edit{
   background-color: #999;
   border-bottom: 3px solid #807f7f;
@@ -595,6 +582,7 @@ ul#noty_bottomRight_layout_container {
 .viewButton:hover{
   background-color: #6C6C6C;
 }
+
 
 .accordion {
     color: #fff;
@@ -673,7 +661,6 @@ input.target {
 .fullBlock .textArea, .fullBlock .input {
   width: 99%;
 }
-
 .radiosList label{
   margin-right: 20px;
 }
@@ -694,7 +681,6 @@ input.target {
 .fileUpload .upload::-webkit-file-upload-button {
   visibility: hidden;
 }
-
 .fileUpload .upload::before {
   content: 'Select a file';
   display: inline-block;
@@ -740,6 +726,7 @@ input.target {
 .grid_5 .checkboxGroup .checkboxLabel { 
   width: 92%;
 }
+
 
 div.checkboxGroup.vertical label {
    width: 96%;
@@ -854,7 +841,6 @@ img.icon {
   top: 0;
   left: 0;
 }
-
 .syncedBlock{
   background: #fff;
   width: 100%;
@@ -869,9 +855,7 @@ img.icon {
 .loadingBlock {
     width: 100%;        
     min-height: 56px;
-    background: url(../../global/images/loading.gif) #FFF no-repeat 50%;        
-    z-index: 99;    
-    opacity: 0.3;
+    background: url(../../global/images/loading.gif) #FFF no-repeat 50%;        z-index: 99;    opacity: 0.3;
 }
 
 input.input-loading {
@@ -883,6 +867,7 @@ ul.horizontalSubMenu{
   list-style: none;
   margin: 23px 0px 11px 0;
   padding: 0;
+  font-size: 0.9em;
 }
 
 ul.horizontalSubMenu li{
@@ -1031,9 +1016,9 @@ span.logType.saved {
 }
 
 a.popup-link {
-  border-radius: 2px;
-  box-shadow: 1px 1px 3px #AAAAAA;
-  padding: 1px 10px;
+border-radius: 2px;
+box-shadow: 1px 1px 3px #AAAAAA;
+padding: 1px 10px;
 }
 
 .container #autoSavingMessages{
@@ -1252,6 +1237,7 @@ select#partnerSave_activityPartner_partner_type_id {
 }
 .usersList span.link {
     text-decoration: underline;
+ 
     cursor: pointer;
 }
 
@@ -1367,6 +1353,7 @@ a#userLogOut {
 }
 #userInfo .roles span{
     background-color: #fff;
+   
     color: #444;
     padding: 0 5px;
     border-radius: 3px;
@@ -1392,6 +1379,7 @@ a#userLogOut {
 #userInfo .program {
   font-size: 0.8em; 
   float:left ;
+
 }
 
 #userInfo .logout a {
@@ -1440,7 +1428,6 @@ a#userLogOut {
 /************* 3. MAIN MENU ***************/
 #mainMenu{
   height: 65px;
-  z-index: 5000;
 }
 
 #mainMenu .menuContent{
@@ -1485,6 +1472,7 @@ a#userLogOut {
   top: 36px !important;
 }
 
+
 #mainMenu .menuContent ul{
   list-style-type: none;
   padding: 0px 0px;
@@ -1500,6 +1488,7 @@ a#userLogOut {
  font-size: 0.7em;
  position:absolute;
 } 
+
 
 #mainMenu .menuContent ul li{
   padding: 20px 0px 20px 0px;
@@ -1791,7 +1780,7 @@ a.currentReportingSection li, a.currentSection li {
 }
 
 #secondaryMenu ul p.menuTitle{
-  list-style: none; 
+  list-style: none;
   margin: 0;
   padding: 2px 0;
   font-weight: lighter;
@@ -1814,6 +1803,10 @@ a.currentReportingSection li, a.currentSection li {
   background-position-y: -2px;
   /* margin-left: -13px; */
   /* padding: 0px 0px 0px 13px; */
+}
+
+#menu-contributionsCrpList{
+  font-size: 0.88em !important;
 }
 
 #menu-contributionsCrpList.currentSection a{
@@ -1873,6 +1866,7 @@ a.currentReportingSection li, a.currentSection li {
   background-color: #F7F7F7;
 }
 
+
 #secondaryMenu ul li ul {
   /* display:none; */
   /* margin-top: 5px; */
@@ -1904,6 +1898,8 @@ a.currentReportingSection li, a.currentSection li {
     margin: 1px 0 0px 0px;
 }
 
+
+
 #secondaryMenu > ul > li.currentSection{
   /* background-image: url("../../global/images/reportingMenuMarker.png"); */
   background-repeat: no-repeat;
@@ -1916,6 +1912,7 @@ a.currentReportingSection li, a.currentSection li {
 #secondaryMenu > ul > li.currentSection ul{
   display:block;
 }
+
 
 #secondaryMenu > p{
   color: #1da5ce;
@@ -2032,6 +2029,7 @@ a#backHome {
   font-size: 15px;
 }
 
+
 .halfContent h1, .fullContent h1 {
   border-bottom: 1px solid #884809;
   color: #663300;
@@ -2097,6 +2095,7 @@ h3.contentSubTitle {
   font-size: 0.8em;   
   color: #747474;
 }
+
 
 .fullContent h6+*, .halfContent h6+* {
   margin-left: 1px;
@@ -2271,6 +2270,7 @@ h3.contentSubTitle {
   background: #d9edf7;
 }
 
+
 .helpMessage img {
   float: left;
   padding: 5px;
@@ -2342,6 +2342,7 @@ h3.contentSubTitle {
   *zoom: 1;
 }
 
+
 .helpMessage3 img {
   float: left;
   width: 18px;
@@ -2349,7 +2350,9 @@ h3.contentSubTitle {
 
 .helpMessage3 p {
   padding: 1px;
+  /* color: #636368; */
   margin-bottom: 0px;
+  /* width: 118%; */
 }
 
 .readPrivileges {
@@ -2372,6 +2375,7 @@ p.projectSubmitted {
   font-size: 1.3em;
   border-radius: 5px;
 }
+
 
 .button-blue {
   padding: 3px 8px 3px 8px;
@@ -2873,6 +2877,7 @@ width:10px;
   background-color: #B5BBA7;
 }
 
+
 #preplanningPrograms #flagships .program {
   width: 23%;
   margin: 1%;
@@ -3324,7 +3329,6 @@ padding: 0 4px 0 6px;width: 100px;}
     /* margin-bottom: -2000px; */
     /* padding-bottom: 2000px; */
 }
-
 #projectRegionsBlock .checkboxGroup label { 
    width: 42.5%;
 }
@@ -3426,6 +3430,7 @@ span.partnerTag {
     margin-right: 26px;
 }
  
+
 .projectPartner.leader .contactPerson.PL {
   border-color: #92D0AC;
   background-color: #F9FFFC;
@@ -3492,7 +3497,6 @@ span.partnerTag {
   /* padding: 5px 0 5px 8px; */
   border-left: 2px solid #FFFFFF;
 }
-
 .budget .title {
   margin-bottom: 4px;
 }
@@ -4178,6 +4182,7 @@ li.fileUploaded span {
   margin-left: 28px;
 }
 
+
 .icon-20{
   width: 20px;
   height: 20px;
@@ -4212,8 +4217,9 @@ li.fileUploaded span {
 .icon-check{
   background: url('../../global/images/sprite-icons-activities.png') 0 -150px;
 }
+
 .icon-neutral{
-  background: url('../../global/images/sprite-icons-activities.png') 0 -88px;		
+  background: url('../../global/images/sprite-icons-activities.png') 0 -88px;
 }
 
 /*** Project next users  ***/
@@ -4284,42 +4290,42 @@ li.fileUploaded span {
 
 .crossCuttingDescription{
   position: relative;
-  width: 280px;
-  height: 110px;
-  padding: 5px;
-  background: #FFFFFF;
+width: 280px;
+height: 110px;
+padding: 5px;
+background: #FFFFFF;
 
-    color: #5E5E5E;
-    -webkit-border-radius: 6px;
-  -moz-border-radius: 6px;
-  border-radius: 6px;
+  color: #5E5E5E;
+  -webkit-border-radius: 6px;
+-moz-border-radius: 6px;
+border-radius: 6px;
 
   border: #B5B5B5 solid 1px;
   text-align:justify;
 }
 .crossCuttingDescription:after{
   content: '';
-  position: absolute;
-  border-style: solid;
-  border-width: 20px 15px 20px 0;
-  border-color: transparent #FFFFFF;
-  display: block;
-  width: 0;
-  z-index: 1;
-  left: -15px;
-  top: 19px;
+position: absolute;
+border-style: solid;
+border-width: 20px 15px 20px 0;
+border-color: transparent #FFFFFF;
+display: block;
+width: 0;
+z-index: 1;
+left: -15px;
+top: 19px;
 }
 .crossCuttingDescription:before{
   content: '';
-  position: absolute;
-  border-style: solid;
-  border-width: 20px 15px 20px 0;
-  border-color: transparent #7F7F7F;
-  display: block;
-  width: 0;
-  z-index: 0;
-  left: -16px;
-  top: 19px;
+position: absolute;
+border-style: solid;
+border-width: 20px 15px 20px 0;
+border-color: transparent #7F7F7F;
+display: block;
+width: 0;
+z-index: 0;
+left: -16px;
+top: 19px;
 }
 
 .activity-title{
@@ -4330,6 +4336,7 @@ li.fileUploaded span {
 div#gender .fullBlock,div#gender .halfPartBlock {
     margin-top: 15px;
 }
+
 
 /* Project Locations */
 
@@ -4795,8 +4802,6 @@ ul#deliverablesFilesMessages > li {
   padding: 0.3em 0.5em;
 }
 
-/* Partners */
-
 #addPartnerText a:hover {
   text-decoration: underline;
 }
@@ -4842,6 +4847,8 @@ ul#deliverablesFilesMessages > li {
   font-size: 1.15em;
   color: #5A5A5A;
 }
+
+
 
 .leftHead.blue span.index{
   background: #73a9ce;
@@ -5020,6 +5027,7 @@ footer {
   padding: 30px 0;
   color: white;
 }
+
 #footerContainer p.lighter {
   font-size: 1.05em;
   font-weight:lighter;
@@ -5240,13 +5248,13 @@ table.evaluationRank thead th{
 }
 
 .radio-label {
-    overflow: hidden;
-    cursor: pointer;
-    /* margin: 0 10px !important; */
+  overflow: hidden;
+  cursor: pointer;
+  /* margin: 0 10px !important; */
 }
 
 .radio-label.fieldError {
-  color:red;		
+  color:red;
 }
 
 .radio-label .onoffswitch-radio:checked + label{ 
@@ -5279,7 +5287,8 @@ table.evaluationRank thead th{
     background: #FFFFFF;
     position: absolute; top: 0; bottom: 0;
     right: 38px;
-    border: 2px solid #FFFFFF; border-radius: 3px;
+    border: 2px solid #FFFFFF;
+    border-radius: 3px;
     transition: all 0.3s ease-in 0s; 
 }
 .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
@@ -5501,6 +5510,7 @@ h4.testEnvironment {
  border-radius: 0px 0px 3px 3px;
 }
 
+
 .color-picker {
   width: 100%;
   border-radius:2px;
@@ -5669,7 +5679,8 @@ label.checkboxLabel {
 input.checkboxInput, label.checkboxLabel{line-height: 19px;}
 
 input.checkboxInput-vertical{
-  float: left;
+ 
+float: left;
 }
 
 hr {
@@ -5943,6 +5954,7 @@ div#projectPartnersBlock {
     color: #aaa;
 }
 
+
 /** PACE - Loader **/
 
 .pace {
@@ -6027,6 +6039,7 @@ span#lastUpdateMessage {
     color: #8e8e8e;
 }
 
+
 /* Dropzone */
 .dropzone {
     min-height: 70px !important;
@@ -6059,6 +6072,7 @@ span#lastUpdateMessage {
 
 
 /* Progress bar */
+
 .bar {
     height: 18px;
     background: green;
@@ -6216,6 +6230,7 @@ img.removeInput {
   border-color: #F44336;
 }
 
+
 .inputsFlat input[type="radio"]:disabled + .radio-label:before {
   box-shadow: inset 0 0 0 4px #f4f4f4;
   border-color: #b4b4b4;
@@ -6225,7 +6240,10 @@ img.removeInput {
   margin-right: 0;
 }
 
+
 /* Checkbox */
+
+
 p.checkDisable:before {
   content: '';
   background: #f4f4f4;
@@ -6444,11 +6462,8 @@ p.dateLabel.fieldError {
   margin-right: 0;
 }
 
-.col-center {
-  float: none;
-  margin: 0 auto;
-}
 /* END Radio Flat*/
+
 
 .elementRelations  {
   margin: 7px 0 0 15px;
@@ -6457,7 +6472,7 @@ p.dateLabel.fieldError {
 .elementRelations.ProjectBudget  {
   padding: 0 7px 15px 0;
 }
-/* END Radio Flat*/
+
 
 /* Select2 show and hide animation in dropdowns*/
 .select2-results__option.loading-results,
@@ -6491,11 +6506,11 @@ p.dateLabel.fieldError {
 /* Datatables button*/
 
 a.dt-button {
-  padding: 0px 10px;
-  border: 1px solid #ccc;
-  border-radius: 2px;
-  margin-right: 3px;
-  background: #fff;
+    padding: 0px 10px;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    margin-right: 3px;
+    background: #fff;
 }
 
 i.helpLabel {

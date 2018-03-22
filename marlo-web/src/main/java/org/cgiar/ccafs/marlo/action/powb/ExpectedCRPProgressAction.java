@@ -275,7 +275,8 @@ public class ExpectedCRPProgressAction extends BaseAction {
     if (powbSynthesis.getExpectedCrpProgresses() != null) {
       int i = 0;
       for (PowbExpectedCrpProgress powbExpectedCrpProgress : powbSynthesis.getExpectedCrpProgresses()) {
-        if (powbExpectedCrpProgress != null) {
+        if (powbExpectedCrpProgress != null && powbExpectedCrpProgress.getCrpMilestone() != null
+          && powbExpectedCrpProgress.getCrpMilestone().getId() != null) {
           if (powbExpectedCrpProgress.getCrpMilestone().getId().longValue() == crpMilestoneID.longValue()) {
             return i;
           }
@@ -344,7 +345,8 @@ public class ExpectedCRPProgressAction extends BaseAction {
     List<PowbExpectedCrpProgress> powbExpectedCrpProgresses =
       powbExpectedCrpProgressManager.findByProgram(crpProgramID);
     List<PowbExpectedCrpProgress> powbExpectedCrpProgressMilestone = powbExpectedCrpProgresses.stream()
-      .filter(c -> c.getCrpMilestone().getId().longValue() == crpMilestoneID.longValue()).collect(Collectors.toList());
+      .filter(c -> c.getCrpMilestone().getId().longValue() == crpMilestoneID.longValue() && c.isActive())
+      .collect(Collectors.toList());
     if (!powbExpectedCrpProgressMilestone.isEmpty()) {
       return powbExpectedCrpProgressMilestone.get(0);
     }
@@ -615,7 +617,8 @@ public class ExpectedCRPProgressAction extends BaseAction {
         this.setDraft(false);
         powbSynthesis.setExpectedCrpProgresses(
           powbSynthesis.getPowbExpectedCrpProgresses().stream().filter(c -> c.isActive()).collect(Collectors.toList()));
-
+        powbSynthesis.getExpectedCrpProgresses()
+          .sort((p1, p2) -> p1.getCrpMilestone().getId().compareTo(p2.getCrpMilestone().getId()));
       }
     }
     outcomes = new ArrayList<>();
@@ -641,8 +644,7 @@ public class ExpectedCRPProgressAction extends BaseAction {
     }
     outcomes.addAll(outcomesSet);
     outcomes.sort((p1, p2) -> p1.getId().compareTo(p2.getId()));
-    powbSynthesis.getExpectedCrpProgresses()
-      .sort((p1, p2) -> p1.getCrpMilestone().getId().compareTo(p2.getCrpMilestone().getId()));
+
 
     // Get the list of liaison institutions Flagships and PMU.
     liaisonInstitutions = loggedCrp.getLiaisonInstitutions().stream()

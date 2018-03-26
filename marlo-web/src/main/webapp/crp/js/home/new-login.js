@@ -111,11 +111,7 @@ function init() {
   });
 
   $('input#terms').on('change', function(){
-/*    if($('input#terms').is(':checked')){
-      $("input#login_next").attr("disabled",false);
-    }else{
-      $("input#login_next").attr("disabled",true);
-    }*/
+    console.log($('input#terms').is(':checked'));
   });
 
 }
@@ -158,6 +154,9 @@ function firstForm(){
 
   //Change button value to Next
   $("input#login_next").val("Next");
+
+  //Hide terms and conditions checkbox
+  $('.loginForm').removeClass("terms-check");
 
 }
 
@@ -262,6 +261,9 @@ function loadAvailableItems(email){
             $('.selection-bar-options ul #crp-'+data.crps[i].acronym).click();
           }
         });
+        if(!data.user.agree){
+          showTermsCheckbox();
+        }
         //If user has access to the crpSession or crpSession is void, change form style
         if(hasAccess || crpSession==""){
           secondForm(data);
@@ -302,9 +304,6 @@ function secondForm(data){
       ".loginForm .welcome-message-container, " +
       ".loginForm #login-password").removeClass("hidden");
 
-  //Show terms and conditions checkbox
-  $('.terms-container').removeClass("hidden");
-
   //Change button value to Login
   $("input#login_next").val("Login");
 
@@ -342,7 +341,8 @@ function checkPassword(email,password){
     url: baseUrl+"/validateUser.do",
     data: {
       userEmail: email,
-      userPassword: password
+      userPassword: password,
+      agree: $('input#terms').is(':checked')
     },
     beforeSend: function() {
       if($('input#terms').is(':checked')){
@@ -392,6 +392,13 @@ function setCookie(cname,cvalue,mins) {
   d.setTime(d.getTime() + (mins * 60 * 1000));
   var expires = "expires=" + d.toUTCString();
   document.cookie = cname + "=" + cvalue + "; " + expires;
+}
+
+function showTermsCheckbox(){
+  //Show terms and conditions checkbox
+  $('.terms-container').removeClass("hidden");
+
+  $('.loginForm').addClass("terms-check");
 }
 
 function loadSelectedImage(selectedImageAcronym){

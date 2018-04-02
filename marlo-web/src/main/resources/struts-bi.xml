@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN" "http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+	<package name="bi" namespace="/bi" extends="marlo-default">
+    
+    <action name="{crp}/dashboard" class="org.cgiar.ccafs.marlo.action.bi.BiDashboard">
+      <interceptor-ref name="homeStack" />
+      <result name="success">/WEB-INF/crp/views/bi/dashboard.ftl</result>   
+       <param name="urlDashboard">${urlDashboard}</param>            
+    </action>
+    
+    <action name="{crp}/anaytics" class="org.cgiar.ccafs.marlo.action.bi.BiSaikuAnalytics">
+      <interceptor-ref name="homeStack" />
+      <result name="success">/WEB-INF/crp/views/bi/analytics.ftl</result>  
+      <param name="urlSaiku">${urlSaiku}</param>         
+    </action>
+    
+  </package>
+</struts>

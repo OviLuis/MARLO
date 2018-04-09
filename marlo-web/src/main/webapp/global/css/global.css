@@ -1289,13 +1289,13 @@ header {
   color: #fff;
   text-align: left;
   position: absolute;
-  right: 1em;
+  right: 0.5em;
   top: 0;
   background: #57A7B5;
   border-bottom: 6px solid #4C8D99;
   height: 100%;
   font-size: 0.9em;
-  padding: 6px 20px 17px 20px;
+  padding: 6px 30px 17px 20px;
   box-shadow: inset 0px 0px 2px rgba(0, 0, 0, 0.1);
 }
 
@@ -1355,7 +1355,7 @@ a#userLogOut {
 
 #userInfo .name {
   font-size: 0.8em;
-  margin-right: 50px;
+  margin-right: 55px;
   margin-bottom: 0;
 }
 
@@ -6325,6 +6325,10 @@ p.checkDisable:before {
   cursor:pointer;
 }
 
+.newsButton a{
+  color:#467eaf !important;
+}
+
 
 #loginFormContainer .tab-pane {
   padding: 12px 0px;
@@ -6507,4 +6511,19 @@ i.helpLabel {
   font-weight: normal;
   font-size: 0.9em;
   opacity: 0.7;
+}
+
+span.listTag {
+  background: #f1f1f1;
+  border: 1px solid #e0e0e0;
+  border-radius: 3px;
+  padding: 1px 4px;
+  margin: 0 2px 3px 0;
+  font-size: 0.95em;
+  display: inline-block;
+}
+
+a.form-button.button-history {
+  background-color: #2BA6CB;
+  border-bottom: 3px solid #1E94B8;
 }

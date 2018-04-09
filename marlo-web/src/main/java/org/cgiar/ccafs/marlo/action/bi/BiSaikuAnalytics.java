@@ -61,7 +61,7 @@ public class BiSaikuAnalytics extends BaseAction {
     // In the future, the destination will depend of the user and crp
     // create a token of the date (dd-MM-yyyy) + SomeExtraText + destination form. which understands the .jar that does
     // the bypass to Pentaho
-    String token = MD5Convert.stringToMD5(dateOut + "SomeExtraText" + "destination1");
+    String token = MD5Convert.stringToMD5(dateOut + "SomeExtraText" + "destination_1");
 
     // create the url with the bypass
     this.urlSaiku = this.getText("bi.serverurl") + token + "&dst=destination_1";

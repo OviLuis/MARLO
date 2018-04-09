@@ -60,7 +60,7 @@ public class BiDashboard extends BaseAction {
     // In the future, the destination will depend of the user and crp
     // create a token of the date (dd-MM-yyyy) + SomeExtraText + destination form. which understands the .jar that does
     // the bypass to Pentaho.
-    String token = MD5Convert.stringToMD5(dateOut + "SomeExtraText" + "destination2");
+    String token = MD5Convert.stringToMD5(dateOut + "SomeExtraText" + "destination_2");
 
     // create the url with the bypass
     this.urlDashboard = this.getText("bi.serverurl") + token + "&dst=destination_2";

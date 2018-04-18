@@ -1859,7 +1859,7 @@ public class ReportingSummaryAction extends BaseSummariesAction implements Summa
         String delivType = null;
         String delivSubType = null;
         String delivStatus =
-          deliverable.getDeliverableInfo(this.getSelectedPhase()).getStatusName(this.getActualPhase());
+          deliverable.getDeliverableInfo(this.getSelectedPhase()).getStatusName(this.getSelectedPhase());
         String delivYear = null;
         String keyOutput = "";
         String leader = null;
@@ -2371,12 +2371,12 @@ public class ReportingSummaryAction extends BaseSummariesAction implements Summa
           }
           for (DeliverableCrp deliverableCrp : deliverable.getDeliverableCrps().stream().filter(dc -> dc.isActive())
             .collect(Collectors.toList())) {
-            if (deliverableCrp.getCrpPandr() != null && deliverableCrp.getIpProgram() != null) {
-              flContrib += "● " + deliverableCrp.getCrpPandr().getAcronym().toUpperCase() + " - "
-                + deliverableCrp.getIpProgram().getAcronym().toUpperCase() + "<br>";
+            if (deliverableCrp.getCrpProgram() != null) {
+              flContrib += "● " + deliverableCrp.getCrpProgram().getCrp().getAcronym().toUpperCase() + " - "
+                + deliverableCrp.getCrpProgram().getAcronym().toUpperCase() + "<br>";
             } else {
-              if (deliverableCrp.getCrpPandr() != null) {
-                flContrib += "● " + deliverableCrp.getCrpPandr().getName().toUpperCase() + "<br>";
+              if (deliverableCrp.getGlobalUnit() != null) {
+                flContrib += "● " + deliverableCrp.getGlobalUnit().getName().toUpperCase() + "<br>";
               }
             }
           }
@@ -2426,7 +2426,7 @@ public class ReportingSummaryAction extends BaseSummariesAction implements Summa
         String delivType = null;
         String delivSubType = null;
         String delivStatus =
-          deliverable.getDeliverableInfo(this.getSelectedPhase()).getStatusName(this.getActualPhase());
+          deliverable.getDeliverableInfo(this.getSelectedPhase()).getStatusName(this.getSelectedPhase());
         String delivYear = null;
         String keyOutput = "";
         String leader = null;
@@ -2812,7 +2812,9 @@ public class ReportingSummaryAction extends BaseSummariesAction implements Summa
       new TypedTableModel(new String[] {"id", "title", "partner_name", "leverage_year", "flagship", "budget"},
         new Class[] {Long.class, String.class, String.class, String.class, String.class, String.class}, 0);
     for (ProjectLeverage projectLeverage : project.getProjectLeverages().stream()
-      .filter(pl -> pl.isActive() && pl.getYear() == this.getSelectedYear()).collect(Collectors.toList())) {
+      .filter(pl -> pl.isActive() && pl.getYear() == this.getSelectedYear() && pl.getPhase() != null
+        && pl.getPhase().equals(this.getSelectedPhase()))
+      .collect(Collectors.toList())) {
       String title = null, partnerName = null, leverageYear = null, flagship = null, budget = null;
       if (projectLeverage.getTitle() != null && !projectLeverage.getTitle().isEmpty()) {
         title = projectLeverage.getTitle();
@@ -2823,9 +2825,16 @@ public class ReportingSummaryAction extends BaseSummariesAction implements Summa
       if (projectLeverage.getYear() != null) {
         leverageYear = projectLeverage.getYear() + "";
       }
-      if (projectLeverage.getCrpProgram() != null && !projectLeverage.getCrpProgram().getComposedName().isEmpty()) {
-        flagship = projectLeverage.getCrpProgram().getComposedName();
+      if (projectLeverage.isPhaseOneLeverage()) {
+        if (projectLeverage.getIpProgram() != null && !projectLeverage.getIpProgram().getComposedName().isEmpty()) {
+          flagship = projectLeverage.getIpProgram().getComposedName();
+        }
+      } else {
+        if (projectLeverage.getCrpProgram() != null && !projectLeverage.getCrpProgram().getComposedName().isEmpty()) {
+          flagship = projectLeverage.getCrpProgram().getComposedName();
+        }
       }
+
       if (projectLeverage.getBudget() != null) {
         budget = myFormatter.format(projectLeverage.getBudget());
       }
@@ -3406,7 +3415,10 @@ public class ReportingSummaryAction extends BaseSummariesAction implements Summa
       0);
     SimpleDateFormat formatter = new SimpleDateFormat("MMM yyyy");
     for (ProjectHighlight projectHighlight : project.getProjectHighligths().stream()
-      .filter(ph -> ph.isActive() && ph.getYear() != null && ph.getYear() >= this.getSelectedYear())
+      .sorted((h1, h2) -> Long.compare(h1.getId(), h2.getId()))
+      .filter(ph -> ph.getProjectHighlightInfo(this.getSelectedPhase()) != null && ph.isActive()
+        && ph.getProjectHighlightInfo().getYear() != null
+        && ph.getProjectHighlightInfo().getYear() >= this.getSelectedYear())
       .collect(Collectors.toList())) {
       String title = null, author = null, subject = null, publisher = null, highlightsTypes = "",
         highlightsIsGlobal = null, startDate = null, endDate = null, keywords = null, countries = "", image = "",
@@ -3414,20 +3426,24 @@ public class ReportingSummaryAction extends BaseSummariesAction implements Summa
       Long yearReported = null;
       int width = 0;
       int heigth = 0;
-      if (projectHighlight.getTitle() != null && !projectHighlight.getTitle().isEmpty()) {
-        title = projectHighlight.getTitle();
+      if (projectHighlight.getProjectHighlightInfo().getTitle() != null
+        && !projectHighlight.getProjectHighlightInfo().getTitle().isEmpty()) {
+        title = projectHighlight.getProjectHighlightInfo().getTitle();
       }
-      if (projectHighlight.getAuthor() != null && !projectHighlight.getAuthor().isEmpty()) {
-        author = projectHighlight.getAuthor();
+      if (projectHighlight.getProjectHighlightInfo().getAuthor() != null
+        && !projectHighlight.getProjectHighlightInfo().getAuthor().isEmpty()) {
+        author = projectHighlight.getProjectHighlightInfo().getAuthor();
       }
-      if (projectHighlight.getSubject() != null && !projectHighlight.getSubject().isEmpty()) {
-        subject = projectHighlight.getSubject();
+      if (projectHighlight.getProjectHighlightInfo().getSubject() != null
+        && !projectHighlight.getProjectHighlightInfo().getSubject().isEmpty()) {
+        subject = projectHighlight.getProjectHighlightInfo().getSubject();
       }
-      if (projectHighlight.getPublisher() != null && !projectHighlight.getPublisher().isEmpty()) {
-        publisher = projectHighlight.getPublisher();
+      if (projectHighlight.getProjectHighlightInfo().getPublisher() != null
+        && !projectHighlight.getProjectHighlightInfo().getPublisher().isEmpty()) {
+        publisher = projectHighlight.getProjectHighlightInfo().getPublisher();
       }
-      if (projectHighlight.getYear() != null) {
-        yearReported = projectHighlight.getYear();
+      if (projectHighlight.getProjectHighlightInfo().getYear() != null) {
+        yearReported = projectHighlight.getProjectHighlightInfo().getYear();
       }
       for (ProjectHighlightType projectHighlightType : projectHighlight.getProjectHighligthsTypes().stream()
         .filter(pht -> pht.isActive()).collect(Collectors.toList())) {
@@ -3439,22 +3455,23 @@ public class ReportingSummaryAction extends BaseSummariesAction implements Summa
       if (highlightsTypes.isEmpty()) {
         highlightsTypes = null;
       }
-      if (projectHighlight.isGlobal() == true) {
+      if (projectHighlight.getProjectHighlightInfo().isGlobal() == true) {
         highlightsIsGlobal = "Yes";
       } else {
         highlightsIsGlobal = "No";
       }
-      if (projectHighlight.getStartDate() != null) {
-        startDate = formatter.format(projectHighlight.getStartDate());
+      if (projectHighlight.getProjectHighlightInfo().getStartDate() != null) {
+        startDate = formatter.format(projectHighlight.getProjectHighlightInfo().getStartDate());
       }
-      if (projectHighlight.getEndDate() != null) {
-        endDate = formatter.format(projectHighlight.getEndDate());
+      if (projectHighlight.getProjectHighlightInfo().getEndDate() != null) {
+        endDate = formatter.format(projectHighlight.getProjectHighlightInfo().getEndDate());
       }
-      if (projectHighlight.getKeywords() != null && !projectHighlight.getKeywords().isEmpty()) {
-        keywords = projectHighlight.getKeywords();
+      if (projectHighlight.getProjectHighlightInfo().getKeywords() != null
+        && !projectHighlight.getProjectHighlightInfo().getKeywords().isEmpty()) {
+        keywords = projectHighlight.getProjectHighlightInfo().getKeywords();
       }
       int countriesFlag = 0;
-      for (ProjectHighlightCountry projectHighlightCountry : projectHighlight.getProjectHighligthCountries().stream()
+      for (ProjectHighlightCountry projectHighlightCountry : projectHighlight.getProjectHighlightCountries().stream()
         .filter(phc -> phc.isActive()).collect(Collectors.toList())) {
         if (projectHighlightCountry.getLocElement() != null) {
           if (countriesFlag == 0) {
@@ -3469,13 +3486,13 @@ public class ReportingSummaryAction extends BaseSummariesAction implements Summa
       if (countries.isEmpty()) {
         countries = null;
       }
-      if (projectHighlight.getFile() != null) {
+      if (projectHighlight.getProjectHighlightInfo().getFile() != null) {
         double pageWidth = 612 * 0.4;
         double pageHeigth = 792 * 0.4;
         double imageWidth = 0;
         double imageHeigth = 0;
-        image =
-          this.getHightlightImagePath(projectHighlight.getProject().getId()) + projectHighlight.getFile().getFileName();
+        image = this.getHightlightImagePath(projectHighlight.getProject().getId())
+          + projectHighlight.getProjectHighlightInfo().getFile().getFileName();
         Image imageFile = null;
         LOG.info("Image name: " + image);
         File url;
@@ -3514,20 +3531,25 @@ public class ReportingSummaryAction extends BaseSummariesAction implements Summa
           }
         }
       }
-      if (projectHighlight.getDescription() != null && !projectHighlight.getDescription().isEmpty()) {
-        highlightDesc = projectHighlight.getDescription();
+      if (projectHighlight.getProjectHighlightInfo().getDescription() != null
+        && !projectHighlight.getProjectHighlightInfo().getDescription().isEmpty()) {
+        highlightDesc = projectHighlight.getProjectHighlightInfo().getDescription();
       }
-      if (projectHighlight.getObjectives() != null && !projectHighlight.getObjectives().isEmpty()) {
-        introduction = projectHighlight.getObjectives();
+      if (projectHighlight.getProjectHighlightInfo().getObjectives() != null
+        && !projectHighlight.getProjectHighlightInfo().getObjectives().isEmpty()) {
+        introduction = projectHighlight.getProjectHighlightInfo().getObjectives();
       }
-      if (projectHighlight.getResults() != null && !projectHighlight.getResults().isEmpty()) {
-        results = projectHighlight.getResults();
+      if (projectHighlight.getProjectHighlightInfo().getResults() != null
+        && !projectHighlight.getProjectHighlightInfo().getResults().isEmpty()) {
+        results = projectHighlight.getProjectHighlightInfo().getResults();
       }
-      if (projectHighlight.getPartners() != null && !projectHighlight.getPartners().isEmpty()) {
-        partners = projectHighlight.getPartners();
+      if (projectHighlight.getProjectHighlightInfo().getPartners() != null
+        && !projectHighlight.getProjectHighlightInfo().getPartners().isEmpty()) {
+        partners = projectHighlight.getProjectHighlightInfo().getPartners();
       }
-      if (projectHighlight.getLinks() != null && !projectHighlight.getLinks().isEmpty()) {
-        links = projectHighlight.getLinks();
+      if (projectHighlight.getProjectHighlightInfo().getLinks() != null
+        && !projectHighlight.getProjectHighlightInfo().getLinks().isEmpty()) {
+        links = projectHighlight.getProjectHighlightInfo().getLinks();
       }
       model.addRow(new Object[] {projectHighlight.getId(), title, author, subject, publisher, yearReported,
         highlightsTypes, highlightsIsGlobal, startDate, endDate, keywords, countries, image, highlightDesc,
@@ -3830,7 +3852,7 @@ public class ReportingSummaryAction extends BaseSummariesAction implements Summa
       institution = institutionManager.getInstitutionById(institution.getId());
       if (institution != null) {
         if (institution.getCrpPpaPartners().stream()
-          .filter(c -> c.isActive() && c.getPhase().equals(this.getActualPhase())).collect(Collectors.toList())
+          .filter(c -> c.isActive() && c.getPhase().equals(this.getSelectedPhase())).collect(Collectors.toList())
           .size() > 0) {
           return true;
         }

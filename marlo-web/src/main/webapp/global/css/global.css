@@ -2548,14 +2548,14 @@ input.userName {
   left: 29%;
 }
 
-#newProject{
+#newProject, #newImpactPathway{
   /* cursor: pointer; */
   background-image: url(../../global/images/decision-tree-1.png);
 }
-#updatePlanning{
+#updatePlanning, #startMonitoring{
   background-image: url(../../global/images/decision-tree-2.png);
 }
-#reportProject{
+#reportProject, #finalDes{
   background-image: url(../../global/images/decision-tree-3.png);
 }
 
@@ -5231,6 +5231,7 @@ table.evaluationRank thead th{
     -ms-user-select: none;
     padding: 2px 2px;
 }
+
 .onoffswitch-checkbox {
     display: none;
 }

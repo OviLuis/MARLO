@@ -214,11 +214,11 @@ public class ValidateProjectSectionAction extends BaseAction {
           section.put("missingFields", section.get("missingFields") + "-" + "deliveralbes");
         }
 
-        List<Deliverable> deliverables =
-          project.getDeliverables().stream().filter(d -> d.isActive()).collect(Collectors.toList());
-        List<Deliverable> openA = deliverables.stream().filter(a -> a.isActive()
-
-          && ((a.getDeliverableInfo(this.getActualPhase()).getStatus() == null
+        List<Deliverable> deliverables = project.getDeliverables().stream()
+          .filter(d -> d.isActive() && d.getDeliverableInfo(this.getActualPhase()) != null)
+          .collect(Collectors.toList());
+        List<Deliverable> openA = deliverables.stream()
+          .filter(a -> a.isActive() && ((a.getDeliverableInfo(this.getActualPhase()).getStatus() == null
             || (a.getDeliverableInfo(this.getActualPhase()).getStatus() == Integer
               .parseInt(ProjectStatusEnum.Ongoing.getStatusId())
               && a.getDeliverableInfo(this.getActualPhase()).getYear() >= this.getActualPhase().getYear())
@@ -327,7 +327,8 @@ public class ValidateProjectSectionAction extends BaseAction {
 
       case HIGHLIGHT:
         List<ProjectHighlight> highlights = project.getProjectHighligths().stream()
-          .filter(d -> d.isActive() && d.getYear().intValue() == this.getActualPhase().getYear())
+          .filter(d -> d.isActive()
+            && d.getProjectHighlightInfo(this.getActualPhase()).getYear().intValue() == this.getActualPhase().getYear())
           .collect(Collectors.toList());
 
         section = new HashMap<String, Object>();

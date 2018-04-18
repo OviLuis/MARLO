@@ -3,10 +3,10 @@
 [#assign currentSectionString = "project-${actionName?replace('/','-')}-${deliverableID}-phase-${(actualPhase.id)!}" /]
 [#assign pageLibs = ["select2","font-awesome","dropzone","blueimp-file-upload","jsUri"] /]
 [#assign customJS = [
-  "${baseUrlMedia}/js/projects/deliverables/deliverableQualityCheck.js",
-  "${baseUrlMedia}/js/projects/deliverables/deliverableDataSharing.js",
   "${baseUrlMedia}/js/projects/deliverables/deliverableInfo.js",
   "${baseUrlMedia}/js/projects/deliverables/deliverableDissemination.js", 
+  "${baseUrlMedia}/js/projects/deliverables/deliverableQualityCheck.js",
+  "${baseUrlMedia}/js/projects/deliverables/deliverableDataSharing.js",
   "${baseUrl}/global/js/autoSave.js",
   "${baseUrl}/global/js/fieldsValidation.js"
 ] /]
@@ -82,10 +82,13 @@
             [#--  Deliverable Menu  --] 
             <ul class="nav nav-tabs" role="tablist"> 
                 <li role="presentation" class="[#if indexTab==1 || indexTab==0]active[/#if]"><a index="1" href="#deliverable-mainInformation" aria-controls="info" role="tab" data-toggle="tab">[@s.text name="project.deliverable.generalInformation.titleTab" /]</a></li>
+                
                 [#if reportingActive]
                 <li role="presentation" class="[#if indexTab==2]active[/#if]"><a index="2" href="#deliverable-disseminationMetadata" aria-controls="metadata" role="tab" data-toggle="tab">Dissemination & Metadata</a></li>
-                [#assign isRequiredQuality = deliverable.deliverableInfo.requeriedFair() || (deliverable.deliverableType?? && (deliverable.deliverableType.id==51 || deliverable.deliverableType.id==74)) /]
+                
+                [#assign isRequiredQuality = deliverable.deliverableInfo.requeriedFair() || ((action.hasDeliverableRule(deliverable.deliverableInfo, deliverableComplianceCheck))!false) /]
                 <li role="presentation" class="[#if indexTab==3]active[/#if]" style="display:${isRequiredQuality?string('block','none')};"><a index="3" href="#deliverable-qualityCheck" aria-controls="quality" role="tab" data-toggle="tab">Quality check</a></li>
+                
                 [#assign isRequiredDataSharing = (deliverable.dissemination.alreadyDisseminated)!false /]
                 <li role="presentation" class="dataSharing [#if indexTab==4]active[/#if]" style="display:${isRequiredDataSharing?string('none','block')};"><a index="4" href="#deliverable-dataSharing" aria-controls="datasharing" role="tab" data-toggle="tab">Data Sharing</a></li>
                 [/#if]
@@ -115,7 +118,8 @@
               </div>
               [#-- Deliverable qualityCheck --]
               <div id="deliverable-qualityCheck" role="tabpanel" class="tab-pane fade [#if indexTab==3]in active[/#if]">
-                <div id="complianceCheck" style="display:[#if deliverable.deliverableType?? && (deliverable.deliverableType.id==51 || deliverable.deliverableType.id==74)]block [#else]none[/#if];">
+                [#--  Database/Dataset/Data documentation -- Maps/Geospatial data --]
+                <div id="complianceCheck" style="display:${deliverableMacros.displayDeliverableRule(deliverable, deliverableComplianceCheck)!};">
                   [#-- Compliance check (Data products only) --]
                   [@deliverableMacros.complianceCheck /]
                 </div>
@@ -140,6 +144,34 @@
 </section>
 [/#if]
 
+[#-- ----------------------------------- Deliverable Type Rules ------------------------------------------------]
+[#--  Publication Metadata 
+      49 -> Articles and Books --]
+[@setDeliverableRule element=deliverable ruleName=(deliverablePublicationMetadata)!'' /]
+
+[#--  Computer License
+      52 -> Data portal/Tool/Model code/Computer software --]
+[@setDeliverableRule element=deliverable ruleName=(deliverableComputerLicense)!'' /]
+
+[#--  DataLicense
+      52 -> Data portal/Tool/Model code/Computer software 
+      74 -> Maps/Geospatial data --]
+[@setDeliverableRule element=deliverable ruleName=(deliverableDataLicense)!'' /]
+
+[#--  Compliance Check
+      51 -> Database/Dataset/Data documentation
+      74 -> Maps/Geospatial data --]
+[@setDeliverableRule element=deliverable ruleName=(deliverableComplianceCheck)!'' /]
+
+[#--  Peer-review Journal Articles
+      63 -> Journal Article (peer reviewed) --]
+[@setDeliverableRule element=deliverable ruleName=(deliverableJournalArticles)!'' /]
+
+
+[#macro setDeliverableRule element ruleName]
+  <input type="hidden" id="hasDeliverableRule-${ruleName}" value="${((action.hasDeliverableRule(element.deliverableInfo, ruleName))!false)?string}" />
+  <input type="hidden" id="getDeliverableTypesByRule-${ruleName}" value="${(action.getDeliverableTypesByRule(ruleName)?replace("[", "")?replace("]", "") )!}" />
+[/#macro]
 [#-- Funding Source list template --]
 <ul style="display:none">
   <li id="fsourceTemplate" class="fundingSources clearfix" style="display:none;">

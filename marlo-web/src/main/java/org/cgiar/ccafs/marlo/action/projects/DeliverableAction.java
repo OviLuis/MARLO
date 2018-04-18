@@ -21,6 +21,7 @@ import org.cgiar.ccafs.marlo.data.manager.AuditLogManager;
 import org.cgiar.ccafs.marlo.data.manager.CrossCuttingScoringManager;
 import org.cgiar.ccafs.marlo.data.manager.CrpClusterKeyOutputManager;
 import org.cgiar.ccafs.marlo.data.manager.CrpPandrManager;
+import org.cgiar.ccafs.marlo.data.manager.CrpProgramManager;
 import org.cgiar.ccafs.marlo.data.manager.DeliverableCrpManager;
 import org.cgiar.ccafs.marlo.data.manager.DeliverableDataSharingFileManager;
 import org.cgiar.ccafs.marlo.data.manager.DeliverableDisseminationManager;
@@ -50,7 +51,7 @@ import org.cgiar.ccafs.marlo.data.manager.RepositoryChannelManager;
 import org.cgiar.ccafs.marlo.data.model.CrossCuttingScoring;
 import org.cgiar.ccafs.marlo.data.model.CrpClusterKeyOutput;
 import org.cgiar.ccafs.marlo.data.model.CrpClusterKeyOutputOutcome;
-import org.cgiar.ccafs.marlo.data.model.CrpPandr;
+import org.cgiar.ccafs.marlo.data.model.CrpProgram;
 import org.cgiar.ccafs.marlo.data.model.Deliverable;
 import org.cgiar.ccafs.marlo.data.model.DeliverableCrp;
 import org.cgiar.ccafs.marlo.data.model.DeliverableDataSharingFile;
@@ -71,9 +72,9 @@ import org.cgiar.ccafs.marlo.data.model.FundingSource;
 import org.cgiar.ccafs.marlo.data.model.GenderType;
 import org.cgiar.ccafs.marlo.data.model.GlobalUnit;
 import org.cgiar.ccafs.marlo.data.model.Institution;
-import org.cgiar.ccafs.marlo.data.model.IpProgram;
 import org.cgiar.ccafs.marlo.data.model.LicensesTypeEnum;
 import org.cgiar.ccafs.marlo.data.model.PartnerDivision;
+import org.cgiar.ccafs.marlo.data.model.ProgramType;
 import org.cgiar.ccafs.marlo.data.model.Project;
 import org.cgiar.ccafs.marlo.data.model.ProjectBudget;
 import org.cgiar.ccafs.marlo.data.model.ProjectFocus;
@@ -197,6 +198,7 @@ public class DeliverableAction extends BaseAction {
   // Managers
   private DeliverableTypeManager deliverableTypeManager;
   private List<DeliverableType> deliverableTypeParent;
+  private CrpProgramManager crpProgramManager;
 
 
   private DeliverableValidator deliverableValidator;
@@ -283,7 +285,7 @@ public class DeliverableAction extends BaseAction {
     DeliverableDisseminationManager deliverableDisseminationManager, CrpPandrManager crpPandrManager,
     IpProgramManager ipProgramManager, PartnerDivisionManager partnerDivisionManager,
     RepositoryChannelManager repositoryChannelManager, DeliverableInfoManager deliverableInfoManager,
-    CrossCuttingScoringManager crossCuttingManager) {
+    CrossCuttingScoringManager crossCuttingManager, CrpProgramManager crpProgramManager) {
     super(config);
     this.deliverableManager = deliverableManager;
     this.deliverableTypeManager = deliverableTypeManager;
@@ -317,6 +319,7 @@ public class DeliverableAction extends BaseAction {
     this.partnerDivisionManager = partnerDivisionManager;
     this.repositoryChannelManager = repositoryChannelManager;
     this.crossCuttingManager = crossCuttingManager;
+    this.crpProgramManager = crpProgramManager;
   }
 
 
@@ -1051,8 +1054,9 @@ public class DeliverableAction extends BaseAction {
       }
 
       if (deliverable.getDeliverableQualityChecks() != null) {
-        List<DeliverableQualityCheck> checks = new ArrayList<>(
-          deliverable.getDeliverableQualityChecks().stream().filter(qc -> qc.isActive()).collect(Collectors.toList()));
+        List<DeliverableQualityCheck> checks = new ArrayList<>(deliverable.getDeliverableQualityChecks().stream()
+          .filter(qc -> qc.isActive() && qc.getPhase() != null && qc.getPhase().equals(this.getActualPhase()))
+          .collect(Collectors.toList()));
         if (!checks.isEmpty()) {
           deliverable.setQualityCheck(checks.get(0));
         }
@@ -1115,16 +1119,13 @@ public class DeliverableAction extends BaseAction {
         if (deliverable.getCrps() != null) {
           for (DeliverableCrp deliverableCrp : deliverable.getCrps()) {
             if (deliverableCrp != null) {
-
-              if (deliverableCrp.getIpProgram() == null || deliverableCrp.getIpProgram().getId() == null
-                || deliverableCrp.getIpProgram().getId().intValue() == -1) {
-                deliverableCrp.setCrpPandr(crpPandrManager.getCrpPandrById(deliverableCrp.getCrpPandr().getId()));
-
+              if (deliverableCrp.getCrpProgram() == null || deliverableCrp.getCrpProgram().getId() == null
+                || deliverableCrp.getCrpProgram().getId().intValue() == -1) {
+                deliverableCrp.setGlobalUnit(crpManager.getGlobalUnitById(deliverableCrp.getGlobalUnit().getId()));
               } else {
-                deliverableCrp.setIpProgram(ipProgramManager.getIpProgramById(deliverableCrp.getIpProgram().getId()));
-                deliverableCrp.setCrpPandr(crpPandrManager.getCrpPandrById(3));
+                deliverableCrp
+                  .setCrpProgram(crpProgramManager.getCrpProgramById(deliverableCrp.getCrpProgram().getId()));
               }
-
             }
           }
         }
@@ -1209,7 +1210,7 @@ public class DeliverableAction extends BaseAction {
           if (deliverable.getDeliverableDisseminations() != null) {
             deliverable.setDisseminations(new ArrayList<>(deliverable.getDeliverableDisseminations().stream()
               .filter(c -> c.getPhase().equals(this.getActualPhase())).collect(Collectors.toList())));
-            if (deliverable.getDeliverableDisseminations().size() > 0) {
+            if (deliverable.getDisseminations().size() > 0) {
               deliverable.setDissemination(deliverable.getDisseminations().get(0));
             } else {
               deliverable.setDissemination(new DeliverableDissemination());
@@ -1363,15 +1364,20 @@ public class DeliverableAction extends BaseAction {
         genderLevels.add(projectStatusEnum);
       }
       crps = new HashMap<>();
-      for (CrpPandr crp : crpPandrManager.findAll().stream().filter(c -> c.getId() != 3 && c.isActive())
+      for (GlobalUnit crp : crpManager.findAll().stream()
+        .filter(c -> c.getId() != this.getLoggedCrp().getId() && c.isActive()
+          && c.getGlobalUnitType().getId() != APConstants.GLOBAL_UNIT_CENTER_TYPE
+          && c.getGlobalUnitType().getId() != APConstants.GLOBAL_UNIT_CGIAR_CENTER_TYPE)
         .collect(Collectors.toList())) {
-        crps.put(crp.getId().toString(), crp.getName());
+        crps.put(crp.getId().toString(), crp.getAcronym());
       }
 
       programs = new HashMap<>();
-      for (IpProgram program : ipProgramManager.findAll().stream().filter(c -> c.getIpProgramType().getId() == 4)
+      for (CrpProgram program : crpProgramManager.findAll().stream()
+        .filter(c -> c.isActive() && c.getProgramType() == ProgramType.FLAGSHIP_PROGRAM_TYPE.getValue()
+          && c.getCrp() != null && c.getCrp().equals(this.getLoggedCrp()))
         .collect(Collectors.toList())) {
-        programs.put(program.getId().toString(), program.getAcronym());
+        programs.put(program.getId().toString(), program.getComposedName());
       }
 
       deliverableTypeParent = new ArrayList<>(deliverableTypeManager.findAll().stream()
@@ -1615,12 +1621,12 @@ public class DeliverableAction extends BaseAction {
           deliverable.getGenderLevels().clear();
         }
 
-        if (deliverable.getQualityCheck() != null) {
-          deliverable.getQualityCheck().setFileAssurance(null);
-          deliverable.getQualityCheck().setFileDictionary(null);
-          deliverable.getQualityCheck().setFileTools(null);
-        }
+        deliverable.setQualityCheck(null);
         deliverable.getDeliverableInfo(this.getActualPhase()).setCrpClusterKeyOutput(null);
+        if (deliverable.getDisseminations() != null) {
+          deliverable.getDisseminations().clear();
+        }
+        deliverable.setDissemination(null);
       }
 
       try {
@@ -1734,7 +1740,7 @@ public class DeliverableAction extends BaseAction {
       // The next three statements, could possibly be merged into a single mapping class.
       Deliverable deliverableManagedState = this.updateDeliverable();
       this.updateDeliverableInReportingPhase(deliverableManagedState);
-      this.updateDeliverableInPlanningPhase(deliverableManagedState);
+      this.updateDeliverableFSInPlanningPhase(deliverableManagedState);
 
       // Set CrpClusterKeyOutput to null if has an -1 id
       if (deliverableManagedState.getDeliverableInfo(this.getActualPhase()).getCrpClusterKeyOutput() != null
@@ -1844,9 +1850,9 @@ public class DeliverableAction extends BaseAction {
 
   public void saveCrps() {
     if (deliverable.getCrps() == null) {
-
       deliverable.setCrps(new ArrayList<>());
     }
+    /* Delete */
     Deliverable deliverableDB = deliverableManager.getDeliverableById(deliverableID);
     for (DeliverableCrp deliverableCrp : deliverableDB.getDeliverableCrps().stream()
       .filter(c -> c.isActive() && c.getPhase().equals(this.getActualPhase())).collect(Collectors.toList())) {
@@ -1855,28 +1861,18 @@ public class DeliverableAction extends BaseAction {
       }
     }
 
+    /* Save */
     for (DeliverableCrp deliverableCrp : deliverable.getCrps()) {
-
       if (deliverableCrp.getId() == null || deliverableCrp.getId().intValue() == -1) {
         deliverableCrp.setId(null);
         deliverableCrp.setDeliverable(deliverable);
-
-        if (deliverableCrp.getCrpPandr() != null) {
-          if (deliverableCrp.getCrpPandr().getId() == null) {
-            deliverableCrp.setCrpPandr(null);
-          } else {
-            if (deliverableCrp.getCrpPandr().getId().intValue() == -1) {
-              deliverableCrp.setCrpPandr(null);
-            }
-          }
-        }
-
-        if (deliverableCrp.getCrpPandr() == null) {
-          deliverableCrp.setCrpPandr(crpPandrManager.getCrpPandrById(new Long(3)));
-        } else {
-          deliverableCrp.setIpProgram(null);
-        }
         deliverableCrp.setPhase(this.getActualPhase());
+        if (deliverableCrp.getGlobalUnit() != null && deliverableCrp.getGlobalUnit().getId() != null
+          && deliverableCrp.getGlobalUnit().getId() != -1) {
+          deliverableCrp.setCrpProgram(null);
+        } else {
+          deliverableCrp.setGlobalUnit(null);
+        }
         deliverableCrpManager.saveDeliverableCrp(deliverableCrp);
       }
     }
@@ -2181,7 +2177,10 @@ public class DeliverableAction extends BaseAction {
     }
 
     if (deliverable.getQualityCheck().getFileAssurance() != null) {
-      if (deliverable.getQualityCheck().getFileAssurance().getId() != null) {
+      if (deliverable.getQualityCheck().getFileAssurance().getId() != null
+        && deliverable.getQualityCheck().getQualityAssurance() != null
+        && Integer.valueOf(deliverable.getQualityCheck().getQualityAssurance().getId().intValue())
+          .equals(APConstants.DELIVERABLE_QUALITY_ANSWER_YES)) {
         FileDB fileDb;
         // Set FileDB to null if an exception occurs (-1 id)
         try {
@@ -2204,7 +2203,10 @@ public class DeliverableAction extends BaseAction {
 
 
     if (deliverable.getQualityCheck().getFileDictionary() != null) {
-      if (deliverable.getQualityCheck().getFileDictionary().getId() != null) {
+      if (deliverable.getQualityCheck().getFileDictionary().getId() != null
+        && deliverable.getQualityCheck().getFileDictionary() != null
+        && Integer.valueOf(deliverable.getQualityCheck().getFileDictionary().getId().intValue())
+          .equals(APConstants.DELIVERABLE_QUALITY_ANSWER_YES)) {
         FileDB fileDb;
         // Set FileDB to null if an exception occurs (-1 id)
         try {
@@ -2226,7 +2228,10 @@ public class DeliverableAction extends BaseAction {
     }
 
     if (deliverable.getQualityCheck().getFileTools() != null) {
-      if (deliverable.getQualityCheck().getFileTools().getId() != null) {
+      if (deliverable.getQualityCheck().getFileTools().getId() != null
+        && deliverable.getQualityCheck().getDataTools() != null
+        && Integer.valueOf(deliverable.getQualityCheck().getDataTools().getId().intValue())
+          .equals(APConstants.DELIVERABLE_QUALITY_ANSWER_YES)) {
         FileDB fileDb;
         // Set FileDB to null if an exception occurs (-1 id)
         try {
@@ -2531,18 +2536,8 @@ public class DeliverableAction extends BaseAction {
    * 
    * @param deliverablePrew
    */
-  private void updateDeliverableInPlanningPhase(Deliverable deliverablePrew) {
+  private void updateDeliverableFSInPlanningPhase(Deliverable deliverablePrew) {
     if (this.isPlanningActive()) {
-      if (deliverable.getDeliverableInfo(this.getActualPhase()).getCrpClusterKeyOutput() != null
-        && deliverable.getDeliverableInfo(this.getActualPhase()).getCrpClusterKeyOutput().getId() != null
-        && deliverable.getDeliverableInfo(this.getActualPhase()).getCrpClusterKeyOutput().getId().longValue() != -1) {
-        CrpClusterKeyOutput keyOutput = crpClusterKeyOutputManager.getCrpClusterKeyOutputById(
-          deliverable.getDeliverableInfo(this.getActualPhase()).getCrpClusterKeyOutput().getId());
-
-        deliverablePrew.getDeliverableInfo(this.getActualPhase()).setCrpClusterKeyOutput(keyOutput);
-      } else {
-        deliverablePrew.getDeliverableInfo(this.getActualPhase()).setCrpClusterKeyOutput(null);
-      }
 
       if (deliverable.getFundingSources() != null) {
         if (deliverablePrew.getDeliverableFundingSources() != null

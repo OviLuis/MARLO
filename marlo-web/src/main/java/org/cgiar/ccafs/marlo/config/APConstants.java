@@ -191,6 +191,7 @@ public final class APConstants {
   public static final String LIASON_INSTITUTION_ID = "liasonInstitutionID";
   public static final String PHASE_ID = "phaseID";
   public static final String POWB_SYNTHESIS_ID = "powbSynthesisID";
+  public static final int PHASE_ONE_YEAR = 2016;
 
   public static final String LOC_ELEMENT_ID = "locElementID";
   public static final String LOCATION_PARENT_ID_PARAMETER = "parentId";
@@ -555,6 +556,16 @@ public final class APConstants {
 
   public static final String SUPPORTINGDOCS_DOCUMENTS_RALATION =
     "java.util.Set(org.cgiar.ccafs.marlo.data.model.CapdevSupportingDocs.capdevSuppDocsDocuments)";
+
+  public static final String DELIVERABLE_RULE_PUBLICATION_METADATA = "publicationMetadata";
+  public static final String DELIVERABLE_RULE_COMPUTER_LICENSE = "computerLicense";
+  public static final String DELIVERABLE_RULE_DATA_LICENSE = "dataLicense";
+  public static final String DELIVERABLE_RULE_COMPILANCE_CHECK = "complianceCheck";
+  public static final String DELIVERABLE_RULE_JORNAL_ARTICLES = "journalArticles";
+
+
+  public static final long GLOBAL_UNIT_CENTER_TYPE = 2;
+  public static final long GLOBAL_UNIT_CGIAR_CENTER_TYPE = 4;
 
   public static String getFilterBy() {
     return FILTER_BY;

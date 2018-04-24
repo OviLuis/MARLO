@@ -138,7 +138,7 @@ public class EditHighLightInterceptor extends AbstractInterceptor implements Ser
       // Check the permission if user want to edit or save the form
       if (editParameter || parameters.get("save") != null) {
         hasPermissionToEdit = ((baseAction.canAccessSuperAdmin() || baseAction.canEditCrpAdmin())) ? true : baseAction
-          .hasPermission(baseAction.generatePermission(Permission.PROJECT_DELIVERABLE_LIST_EDIT_PERMISSION, params));
+          .hasPermission(baseAction.generatePermission(Permission.PROJECT_HIGH_LIGHTS_EDIT_PERMISSION, params));
       }
 
       if (baseAction.hasPermission(baseAction.generatePermission(Permission.PROJECT__SWITCH, params))) {

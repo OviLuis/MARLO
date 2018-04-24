@@ -18,26 +18,20 @@
   [#-- PUBLICATIONS REPORTING - ALL --]
   { 'slug': 'publications', 'name': 'menu.publications',      'namespace': '/publications',       'action': '${(crpSession)!}/publicationsList',    'visible': logged && reportingActive && !centerGlobalUnit, 'active': action.canAcessPublications() , 'help': true },
   [#-- SYNTHESIS PLANNING - CRP --]
-  { 'slug': 'synthesis', 'name': 'menu.synthesis',      'namespace': '/${reportingActive?string("synthesis","powb")}',       'action': '${(crpSession)!}/adjustmentsChanges',  'visible': logged && action.canAcessPOWB() && !reportingActive && !centerGlobalUnit, 'active': true,    
+  { 'slug': 'synthesis', 'name': 'menu.synthesis',      'namespace': '/powb',       'action': '${(crpSession)!}/adjustmentsChanges',  'visible': logged && action.canAcessPOWB() && !reportingActive && !centerGlobalUnit, 'active': true,    
     'subItems' : [
       { 'slug': 'powbReport', 'name': 'menu.synthesis.powbReport', 'namespace': '/powb',  'action': '${(crpSession)!}/adjustmentsChanges',  'visible': logged, 'active':  action.canAcessPOWB() }
     ]
   },
   [#-- SYNTHESIS REPORTING - CRP --]
-  { 'slug': 'synthesis', 'name': 'menu.synthesis',      'namespace': '/${reportingActive?string("synthesis","powb")}',       'action': '${(crpSession)!}/crpIndicators',    'visible': logged && action.canAcessPOWB() && reportingActive && !centerGlobalUnit, 'active': true,    
+  { 'slug': 'synthesis', 'name': 'menu.synthesis',      'namespace': '/annualReport',       'action': '${(crpSession)!}/crpProgress',    'visible': logged && action.canAcessPOWB() && reportingActive && !centerGlobalUnit, 'active': true,    
     'subItems' : [
-      { 'slug': 'crpIndicators', 'name': 'menu.synthesis.crpIndicators', 'namespace': '/synthesis',  'action': '${(crpSession)!}/crpIndicators',  'visible': logged, 'active': action.canAcessCrp()},
-      [#-- Phase 1 --]
-      { 'slug': 'outcomeSynthesis', 'name': 'menu.synthesis.outcomeSynthesis', 'namespace': '/synthesis',  'action': '${(crpSession)!}/outcomeSynthesisPandR',  'visible': logged && phaseOne, 'active': action.canAcessSynthesisMog() },
-      { 'slug': 'synthesisByMog', 'name': 'menu.synthesis.synthesisByMog', 'namespace': '/synthesis',  'action': '${(crpSession)!}/synthesisByMog',  'visible': logged && phaseOne, 'active': action.canAcessSynthesisMog() },
-      [#-- Phase 2 --]
-      { 'slug': 'outcomeSynthesis', 'name': 'menu.synthesis.outcomeSynthesis', 'namespace': '/synthesis',  'action': '${(crpSession)!}/outcomeSynthesis',  'visible': logged && (!phaseOne), 'active': action.canAcessCrpAdmin() },
-      { 'slug': 'coasSynthesis', 'name': 'menu.synthesis.coasSynthesis', 'namespace': '/synthesis',  'action': '${(crpSession)!}/coasSynthesis',  'visible': logged && (!phaseOne), 'active': action.canAcessCrpAdmin() },
+      { 'slug': 'annualReport', 'name': 'menu.synthesis.annualReport', 'namespace': '/annualReport',  'action': '${(crpSession)!}/crpProgress',  'visible': logged, 'active': action.canAcessCrp()},
       { 'slug': 'projectsEvaluation', 'name': 'menu.synthesis.projectsEvaluation', 'namespace': '/synthesis',  'action': '${(crpSession)!}/projectsEvaluation',  'visible': logged, 'active': false }
     ]
   },
   [#-- Cap Dev - CENTER --]
-  { 'slug': 'capdev', 'name': 'menu.capdev',      'namespace': '/capdev',       'action': '${(centerSession)!}/capdev',    'visible': logged, 'active': config.debug}, [#-- action.centerCapDevActive() --]
+  { 'slug': 'capdev', 'name': 'menu.capdev',      'namespace': '/capdev',       'action': '${(centerSession)!}/capdev',    'visible': logged && centerGlobalUnit, 'active': config.debug}, [#-- action.centerCapDevActive() --]
   [#-- SUMMARIES - ALL --]
   { 'slug': 'summaries', 'name': 'menu.summaries',      'namespace': '/summaries',       'action': '${(crpSession)!}/summaries',    'visible': logged && !centerGlobalUnit, 'active': true }
 

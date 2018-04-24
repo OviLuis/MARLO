@@ -49,12 +49,13 @@ public class ProjectHighligthCountryManagerImpl implements ProjectHighligthCount
   @Override
   public void deleteProjectHighligthCountry(long projectHighligthCountryId) {
 
-
     ProjectHighlightCountry projectHighlightCountry = this.getProjectHighligthCountryById(projectHighligthCountryId);
+
     if (projectHighlightCountry.getPhase().getNext() != null) {
       this.deleteProjectHighligthCountryPhase(projectHighlightCountry.getPhase().getNext(),
         projectHighlightCountry.getProjectHighligth().getId(), projectHighlightCountry);
     }
+
     projectHighligthCountryDAO.deleteProjectHighligthCountry(projectHighligthCountryId);
 
   }
@@ -109,7 +110,7 @@ public class ProjectHighligthCountryManagerImpl implements ProjectHighligthCount
 
     List<ProjectHighlightCountry> projectHighlightCountries = phase.getProjectHighlightCountries().stream()
       .filter(c -> c.getProjectHighligth().getId().longValue() == projectHighlightid
-        && projectHighlightCountry.getLocElement().getId().equals(projectHighlightCountry.getLocElement().getId()))
+        && c.getLocElement().getId().equals(projectHighlightCountry.getLocElement().getId()))
       .collect(Collectors.toList());
     if (projectHighlightCountries.isEmpty()) {
 

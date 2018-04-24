@@ -31,6 +31,7 @@ import org.cgiar.ccafs.marlo.data.model.DeliverableActivity;
 import org.cgiar.ccafs.marlo.data.model.DeliverableDataSharingFile;
 import org.cgiar.ccafs.marlo.data.model.DeliverableDissemination;
 import org.cgiar.ccafs.marlo.data.model.DeliverableFile;
+import org.cgiar.ccafs.marlo.data.model.DeliverableIntellectualAsset;
 import org.cgiar.ccafs.marlo.data.model.DeliverablePartnership;
 import org.cgiar.ccafs.marlo.data.model.DeliverablePartnershipTypeEnum;
 import org.cgiar.ccafs.marlo.data.model.DeliverableQualityCheck;
@@ -55,7 +56,8 @@ import org.cgiar.ccafs.marlo.data.model.ProjectOutcome;
 import org.cgiar.ccafs.marlo.data.model.ProjectPartner;
 import org.cgiar.ccafs.marlo.data.model.ProjectPartnerContribution;
 import org.cgiar.ccafs.marlo.data.model.ProjectPartnerLocation;
-import org.cgiar.ccafs.marlo.data.model.ProjectPartnerOverall;
+import org.cgiar.ccafs.marlo.data.model.ProjectPartnerPartnership;
+import org.cgiar.ccafs.marlo.data.model.ProjectPartnerPartnershipLocation;
 import org.cgiar.ccafs.marlo.data.model.ProjectScope;
 import org.cgiar.ccafs.marlo.data.model.ProjectSectionStatusEnum;
 import org.cgiar.ccafs.marlo.data.model.ProjectStatusEnum;
@@ -633,7 +635,16 @@ public class ProjectSectionValidator<T extends BaseAction> extends BaseValidator
           } else {
             deliverable.setDissemination(new DeliverableDissemination());
           }
+        }
 
+        if (deliverable.getDeliverableIntellectualAssets() != null) {
+          List<DeliverableIntellectualAsset> intellectualAssets =
+            new ArrayList<>(deliverable.getDeliverableIntellectualAssets());
+          if (deliverable.getDeliverableIntellectualAssets().size() > 0) {
+            deliverable.setIntellectualAsset(intellectualAssets.get(0));
+          } else {
+            deliverable.setIntellectualAsset(new DeliverableIntellectualAsset());
+          }
         }
 
         if (deliverable.getDeliverableDataSharingFiles() != null) {
@@ -820,21 +831,25 @@ public class ProjectSectionValidator<T extends BaseAction> extends BaseValidator
     for (ProjectPartner projectPartner : project.getPartners()) {
       List<ProjectPartnerContribution> contributors = new ArrayList<>();
 
-      if (action.isReportingActive()) {
-
-        List<ProjectPartnerOverall> overalls = projectPartner.getProjectPartnerOveralls().stream()
-          .filter(c -> c.isActive() && c.getYear() == action.getReportingYear()).collect(Collectors.toList());
-        if (!overalls.isEmpty()) {
-          project.setOverall(overalls.get(0).getOverall());
-
-        }
-      }
       List<ProjectPartnerContribution> partnerContributions =
         projectPartner.getProjectPartnerContributions().stream().filter(c -> c.isActive()).collect(Collectors.toList());
       for (ProjectPartnerContribution projectPartnerContribution : partnerContributions) {
-        contributors.add(projectPartnerContribution);
+        projectPartner.getPartnerContributors().add(projectPartnerContribution);
       }
-      projectPartner.setPartnerContributors(contributors);
+      List<ProjectPartnerPartnership> partnerPartnerships =
+        projectPartner.getProjectPartnerPartnerships().stream().filter(c -> c.isActive()).collect(Collectors.toList());
+      if (partnerPartnerships.size() > 0) {
+        projectPartner.setProjectPartnerPartnership(partnerPartnerships.get(0));
+        List<ProjectPartnerPartnershipLocation> partnerPartnershipLocations =
+          projectPartner.getProjectPartnerPartnership().getProjectPartnerPartnershipLocations().stream()
+            .filter(p -> p.isActive()).collect(Collectors.toList());
+        for (ProjectPartnerPartnershipLocation projectPartnerPartnershipLocation : partnerPartnershipLocations) {
+          projectPartner.getProjectPartnerPartnership().getPartnershipLocationsIsos()
+            .add(projectPartnerPartnershipLocation.getLocation().getIsoAlpha2());
+        }
+
+      }
+
       projectPartner.setPartnerPersons(
         projectPartner.getProjectPartnerPersons().stream().filter(c -> c.isActive()).collect(Collectors.toList()));
       projectPartner.setSelectedLocations(new ArrayList<>());

@@ -83,7 +83,6 @@ public class ProjectHighlightAction extends BaseAction {
 
   // GlobalUnit Manager
   private GlobalUnitManager crpManager;
-
   private GlobalUnit loggedCrp;
   private ProjectHighLightValidator highLightValidator;
 
@@ -194,10 +193,19 @@ public class ProjectHighlightAction extends BaseAction {
       + "hightlihts" + File.separator;
   }
 
+  /**
+   * The name of the autosave file is constructed and the path is searched
+   * 
+   * @return Auto save file path
+   */
   private Path getAutoSaveFilePath() {
+    // get the class simple name
     String composedClassName = highlight.getClass().getSimpleName();
+    // get the action name and replace / for _
     String actionFile = this.getActionName().replace("/", "_");
-    String autoSaveFile = highlight.getId() + "_" + composedClassName + "_" + actionFile + ".json";
+    // concatane name and add the .json extension
+    String autoSaveFile = highlight.getId() + "_" + composedClassName + "_" + this.getActualPhase().getDescription()
+      + "_" + this.getActualPhase().getYear() + "_" + actionFile + ".json";
 
     return Paths.get(config.getAutoSaveFolder() + autoSaveFile);
   }
@@ -368,6 +376,8 @@ public class ProjectHighlightAction extends BaseAction {
             highlight.getProjectHighlightInfo(this.getActualPhase()).setFile(null);
           }
         }
+
+
         if (highlight.getCountriesIdsText() != null) {
           String[] countriesText = highlight.getCountriesIdsText().replace("[", "").replace("]", "").split(",");
           List<Long> countries = new ArrayList<>();
@@ -376,6 +386,8 @@ public class ProjectHighlightAction extends BaseAction {
           }
           highlight.setCountriesIds(countries);
         }
+
+
         if (highlight.getTypesidsText() != null) {
           String[] countriesText = highlight.getTypesidsText().trim().replace("[", "").replace("]", "").split(",");
 
@@ -464,6 +476,7 @@ public class ProjectHighlightAction extends BaseAction {
     allYears.clear();
     allYears.addAll(listYears);
 
+
     // Getting countries list
     countries = locElementManager.findAll().stream().filter(c -> c.getLocElementType().getId().intValue() == 2)
       .collect(Collectors.toList());
@@ -501,7 +514,6 @@ public class ProjectHighlightAction extends BaseAction {
       DateFormat dateformatter = new SimpleDateFormat(APConstants.DATE_FORMAT);
 
       Path path = this.getAutoSaveFilePath();
-
 
       highlight.setProject(project);
 
@@ -589,14 +601,21 @@ public class ProjectHighlightAction extends BaseAction {
 
         List<ProjectHighlightCountry> countries =
           projectHighligthCountryManager.getHighlightCountrybyPhase(highlight.getId(), this.getActualPhase().getId());
-
+        List<ProjectHighlightCountry> countriesSave = new ArrayList<>();
         for (Long countryIds : highlight.getCountriesIds()) {
           ProjectHighlightCountry countryHigh = new ProjectHighlightCountry();
           countryHigh.setLocElement(locElementManager.getLocElementById(countryIds));
           countryHigh.setProjectHighligth(highlight);
           countryHigh.setPhase(this.getActualPhase());
-          if (!highlightDB.getProjectHighlightCountries().contains(countryHigh)) {
+          countriesSave.add(countryHigh);
+          if (!countries.contains(countryHigh)) {
             projectHighligthCountryManager.saveProjectHighligthCountry(countryHigh);
+          }
+        }
+
+        for (ProjectHighlightCountry projectHighlightCountry : countries) {
+          if (!countriesSave.contains(projectHighlightCountry)) {
+            projectHighligthCountryManager.deleteProjectHighligthCountry(projectHighlightCountry.getId());
           }
         }
 

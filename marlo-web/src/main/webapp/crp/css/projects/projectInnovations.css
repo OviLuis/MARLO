@@ -41,6 +41,10 @@ table ul {
   padding-left: 15px;
 }
 
+.subHeader th{
+  text-align: center;
+}
+
 /** MARLO Responsibe Tables */
 .table-responsive table {
   min-width: 1500px;
@@ -68,4 +72,9 @@ form .form-group.margin-panel {
 }
 .table-border-powb tr:nth-child(even) {
   background-color: #fcfcfc;
+}
+
+.addInnovation a {
+  color: #fff;
+  text-decoration: initial;
 }

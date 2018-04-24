@@ -46,7 +46,7 @@ select.input-sm {
 
 .container {
   position: relative;
-  /* width: 1100px; */
+  width: 1100px;
 }
 
 a:hover {
@@ -802,7 +802,7 @@ img.icon {
 }
 
 .removeElement.sm {
-  padding: 10px 11px;
+  padding: 9px 10px;
 }
 
 .removeIcon {
@@ -1110,14 +1110,14 @@ select#partnerSave_activityPartner_partner_type_id {
 }
 
 .panel.tertiary .panel-body {
-    padding: 5px 3px 3px 3px; 
+    padding: 5px 3px 3px 3px;
     border-left: 4px solid #E7E6E6;
     margin-left: 1px;
 }
 
 .panel.tertiary .panel-body > ul.list > li {
     list-style: none;
-    padding: 1px 4px 0px 6px;
+    padding: 1px 24px 0px 6px;
     background-color: #F7F7F7;
     border: 1px solid #E0E0E0 !important;
     box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1);
@@ -1494,7 +1494,7 @@ a#userLogOut {
 
 #mainMenu .menuContent ul a{
  text-decoration: none;
- padding: 0px 18px;
+ padding: 0px 14px;
  color: #fff;
 } 
 #mainMenu .menuContent ul a p{
@@ -1507,7 +1507,7 @@ a#userLogOut {
   color: #FFFFFF;
   position: relative;
   display: inline-block;
-  font-size: 0.95em;
+  font-size: 0.925em;
 }
 
 #mainMenu .menuContent ul li:hover {

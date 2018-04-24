@@ -30,8 +30,10 @@ public final class APConstants {
   public static final String CRP_PARTNERS_OFFICE = "crp_partners_office";
   public static final String PARTNER_ID = "partnerId";
 
+  public static final String INNOVATION_REQUEST_ID = "innovationID";
   public static final String BUDGET_TYPE_REQUEST_ID = "budgetTypeID";
   public static final String CASE_STUDY_REQUEST_ID = "caseStudyID";
+  public static final String STUDY_REQUEST_ID = "studyID";
   public static final String CLASS_NAME = "className";
   public static final String CRP_ACTIVITES_MODULE = "crp_activities_module";
   public static final String CRP_ADMIN_ACTIVE = "crp_admin_active";
@@ -51,6 +53,7 @@ public final class APConstants {
   public static final String CRP_EMAIL_FUNDING_SOURCE = "crp_email_funding_source";
   public static final String CRP_FPL_ROLE = "crp_fpl_rol";
   public static final String CRP_FPM_ROLE = "crp_fpm_rol";
+  public static final String CRP_REPORT_DELIVERABLE_PPA_FILTER = "crp_report_deliverable_ppa_filter";
 
   public static final String CRP_HAS_REGIONS = "crp_has_regions";
   public static final String CRP_ID = "crpID";
@@ -264,6 +267,8 @@ public final class APConstants {
 
   public static final String PROJECT_DELIVERABLE_DISEMINATIONS =
     "java.util.Set(org.cgiar.ccafs.marlo.data.model.Deliverable.deliverableDisseminations)";
+  public static final String PROJECT_DELIVERABLES_INTELLECTUAL_RELATION =
+    "java.util.Set(org.cgiar.ccafs.marlo.data.model.Deliverable.deliverableIntellectualAssets)";
   public static final String PROJECT_DELIVERABLE_FUNDING_RELATION =
     "java.util.Set(org.cgiar.ccafs.marlo.data.model.Deliverable.deliverableFundingSources)";
 
@@ -348,7 +353,20 @@ public final class APConstants {
     "java.util.Set(org.cgiar.ccafs.marlo.data.model.ProjectHighlight.projectHighligthCountries)";
   public static final String PROJECT_PROJECT_HIGHLIGTH_TYPE_RELATION =
     "java.util.Set(org.cgiar.ccafs.marlo.data.model.ProjectHighlight.projectHighligthsTypes)";
+  public static final String PROJECT_PARTNER_PARTNERSHIP_COUNTRY_RELATION =
+    "java.util.Set(org.cgiar.ccafs.marlo.data.model.ProjectPartnerPartnership.projectPartnerPartnershipLocations)";
 
+  // Project innovations Relations
+  public static final String PROJECT_INNOVATION_COUNTRY_RELATION =
+    "java.util.Set(org.cgiar.ccafs.marlo.data.model.ProjectInnovation.projectInnovationCountries)";
+  public static final String PROJECT_INNOVATION_ORGANIZATION_RELATION =
+    "java.util.Set(org.cgiar.ccafs.marlo.data.model.ProjectInnovation.projectInnovationOrganizations)";
+  public static final String PROJECT_INNOVATION_CRP_RELATION =
+    "java.util.Set(org.cgiar.ccafs.marlo.data.model.ProjectInnovation.projectInnovationCrps)";
+  public static final String PROJECT_DELIVERABLE_CRP_RELATION =
+    "java.util.Set(org.cgiar.ccafs.marlo.data.model.ProjectInnovation.projectInnovationDeliverables)";
+
+  // End
   public static final String PROJECT_REQUEST_ID = "projectID";
   public static final String PROJECT_SCAPE_GLOBAL = "3";
 
@@ -529,6 +547,8 @@ public final class APConstants {
   public static final String SUMMARY_FORMAT_PDF = "PDF";
   public static final String SUMMARY_PARTNER_TYPE = "partnerType";
 
+  public static final String SUMMARY_DELIVERABLE_PPA = "ppaPartnerID";
+
   public static final String CRP_HAS_SPECIFIC_MANAGEMENT_DELIVERABLE_TYPES =
     "crp_has_specific_management_deliverable_type";
 
@@ -562,6 +582,12 @@ public final class APConstants {
   public static final String DELIVERABLE_RULE_DATA_LICENSE = "dataLicense";
   public static final String DELIVERABLE_RULE_COMPILANCE_CHECK = "complianceCheck";
   public static final String DELIVERABLE_RULE_JORNAL_ARTICLES = "journalArticles";
+
+  public static final long PROJECT_PARTNER_PARTNERSHIP_GLOBAL = 1;
+  public static final long PROJECT_PARTNER_PARTNERSHIP_REGIONAL = 2;
+  public static final long PROJECT_PARTNER_PARTNERSHIP_MULTI_NATIONAL = 3;
+  public static final long PROJECT_PARTNER_PARTNERSHIP_NATIONAL = 4;
+  public static final long PROJECT_PARTNER_PARTNERSHIP_SUB_NATIONAL = 5;
 
 
   public static final long GLOBAL_UNIT_CENTER_TYPE = 2;

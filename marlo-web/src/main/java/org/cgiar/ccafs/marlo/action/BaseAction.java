@@ -2884,14 +2884,25 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
   public List<Submission> getPowbSynthesisSubmissions(long powbSynthesisID) {
     PowbSynthesis powbSynthesis = powbSynthesisManager.getPowbSynthesisById(powbSynthesisID);
-    List<Submission> submissions = powbSynthesis
-      .getSubmissions().stream().filter(c -> c.getCycle().equals(this.getCurrentCycle())
+    List<Submission> submissions = powbSynthesis.getSubmissions()
+      .stream().filter(c -> c.getCycle().equals(this.getCurrentCycle())
         && c.getYear().intValue() == this.getCurrentCycleYear() && (c.isUnSubmit() == null || !c.isUnSubmit()))
       .collect(Collectors.toList());
     if (submissions.isEmpty()) {
       return new ArrayList<>();
     }
     return submissions;
+  }
+
+
+  public List<CrpPpaPartner> getPpaPartners() {
+    List<CrpPpaPartner> crpPpaPartners = phaseManager.getPhaseById(this.getActualPhase().getId()).getCrpPpaPartner()
+      .stream().filter(c -> c.isActive() && c.getCrp().equals(this.getCurrentCrp())).collect(Collectors.toList());
+    if (crpPpaPartners != null && !crpPpaPartners.isEmpty()) {
+      return crpPpaPartners;
+    } else {
+      return new ArrayList<>();
+    }
   }
 
   public SectionStatus getProjectOutcomeStatus(long projectOutcomeID) {
@@ -2979,8 +2990,8 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
       }
       if (clazz == CrpMilestone.class) {
         CrpMilestone crpMilestone = crpMilestoneManager.getCrpMilestoneById(id);
-        List<ProjectMilestone> projectMilestones = crpMilestone
-          .getProjectMilestones().stream().filter(c -> c.isActive() && c.getProjectOutcome().getPhase() != null
+        List<ProjectMilestone> projectMilestones = crpMilestone.getProjectMilestones()
+          .stream().filter(c -> c.isActive() && c.getProjectOutcome().getPhase() != null
             && c.getProjectOutcome().isActive() && c.getProjectOutcome().getPhase().equals(this.getActualPhase()))
           .collect(Collectors.toList());
         Set<Project> projectsSet = new HashSet<>();
@@ -3118,7 +3129,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
         returnValue = true;
         break;
 
-      case HIGHLIGHT:
+      case HIGHLIGHTS:
         project = projectManager.getProjectById(projectID);
         List<ProjectHighlight> highlights = project.getProjectHighligths().stream()
           .filter(d -> d.getProjectHighlightInfo(this.getActualPhase()) != null && d.isActive()
@@ -3326,8 +3337,8 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
   public List<Submission> getProjectSubmissions(long projectID) {
     Project project = projectManager.getProjectById(projectID);
-    List<Submission> submissions = project
-      .getSubmissions().stream().filter(c -> c.getCycle().equals(this.getCurrentCycle())
+    List<Submission> submissions = project.getSubmissions()
+      .stream().filter(c -> c.getCycle().equals(this.getCurrentCycle())
         && c.getYear().intValue() == this.getCurrentCycleYear() && (c.isUnSubmit() == null || !c.isUnSubmit()))
       .collect(Collectors.toList());
     if (submissions.isEmpty()) {
@@ -3366,6 +3377,26 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     }
 
     return "---";
+  }
+
+  public long getReportingIndGeographicScopeGlobal() {
+    return APConstants.PROJECT_PARTNER_PARTNERSHIP_GLOBAL;
+  }
+
+  public long getReportingIndGeographicScopeMultiNational() {
+    return APConstants.PROJECT_PARTNER_PARTNERSHIP_MULTI_NATIONAL;
+  }
+
+  public long getReportingIndGeographicScopeNational() {
+    return APConstants.PROJECT_PARTNER_PARTNERSHIP_NATIONAL;
+  }
+
+  public long getReportingIndGeographicScopeRegional() {
+    return APConstants.PROJECT_PARTNER_PARTNERSHIP_REGIONAL;
+  }
+
+  public long getReportingIndGeographicScopeSubNational() {
+    return APConstants.PROJECT_PARTNER_PARTNERSHIP_SUB_NATIONAL;
   }
 
   public int getReportingYear() {
@@ -4380,7 +4411,7 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
                 }
                 break;
 
-              case HIGHLIGHT:
+              case HIGHLIGHTS:
                 if (highlightSection == 0) {
                   highlightSection = 1;
                   totalSections++;
@@ -4781,8 +4812,8 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
   public boolean isPowbSynthesisSubmitted(long powbSynthesisID) {
     PowbSynthesis powbSynthesis = powbSynthesisManager.getPowbSynthesisById(powbSynthesisID);
-    List<Submission> submissions = powbSynthesis
-      .getSubmissions().stream().filter(c -> c.getCycle().equals(this.getCurrentCycle())
+    List<Submission> submissions = powbSynthesis.getSubmissions()
+      .stream().filter(c -> c.getCycle().equals(this.getCurrentCycle())
         && c.getYear().intValue() == this.getCurrentCycleYear() && (c.isUnSubmit() == null || !c.isUnSubmit()))
       .collect(Collectors.toList());
     if (submissions.isEmpty()) {
@@ -4857,8 +4888,8 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
 
   public boolean isProjectSubmitted(long projectID) {
     Project project = projectManager.getProjectById(projectID);
-    List<Submission> submissions = project
-      .getSubmissions().stream().filter(c -> c.getCycle().equals(this.getCurrentCycle())
+    List<Submission> submissions = project.getSubmissions()
+      .stream().filter(c -> c.getCycle().equals(this.getCurrentCycle())
         && c.getYear().intValue() == this.getCurrentCycleYear() && (c.isUnSubmit() == null || !c.isUnSubmit()))
       .collect(Collectors.toList());
     if (submissions.isEmpty()) {
@@ -5888,4 +5919,5 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
     }
 
   }
+
 }

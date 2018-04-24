@@ -29,7 +29,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 
-import javax.inject.Inject;
 import javax.inject.Named;
 
 
@@ -42,7 +41,7 @@ public class ProjectHighLightValidator extends BaseValidator {
   private final GlobalUnitManager crpManager;
   private BaseAction baseAction;
 
-  @Inject
+
   public ProjectHighLightValidator(GlobalUnitManager crpManager) {
     super();
     this.crpManager = crpManager;
@@ -65,11 +64,11 @@ public class ProjectHighLightValidator extends BaseValidator {
 
   }
 
-  private Path getAutoSaveFilePath(Project project, long crpID, BaseAction action) {
+  private Path getAutoSaveFilePath(ProjectHighlight highLigths, long crpID, BaseAction action) {
     GlobalUnit crp = crpManager.getGlobalUnitById(crpID);
-    String composedClassName = project.getClass().getSimpleName();
-    String actionFile = ProjectSectionStatusEnum.DESCRIPTION.getStatus().replace("/", "_");
-    String autoSaveFile = project.getId() + "_" + composedClassName + "_" + action.getActualPhase().getDescription()
+    String composedClassName = highLigths.getClass().getSimpleName();
+    String actionFile = ProjectSectionStatusEnum.HIGHLIGHT.getStatus().replace("/", "_");
+    String autoSaveFile = highLigths.getId() + "_" + composedClassName + "_" + action.getActualPhase().getDescription()
       + "_" + action.getActualPhase().getYear() + "_" + crp.getAcronym() + "_" + actionFile + ".json";
 
     return Paths.get(config.getAutoSaveFolder() + autoSaveFile);
@@ -80,7 +79,7 @@ public class ProjectHighLightValidator extends BaseValidator {
     action.setInvalidFields(new HashMap<>());
     baseAction = action;
     if (!saving) {
-      Path path = this.getAutoSaveFilePath(project, action.getCrpID(), action);
+      Path path = this.getAutoSaveFilePath(highLigths, action.getCrpID(), action);
 
       if (path.toFile().exists()) {
         action.addMissingField("draft");
@@ -101,8 +100,8 @@ public class ProjectHighLightValidator extends BaseValidator {
         " " + action.getText("saving.missingFields", new String[] {action.getValidationMessage().toString()}));
     }
 
-    this.saveMissingFields(project, action.getActualPhase().getDescription(), action.getActualPhase().getYear(),
-      ProjectSectionStatusEnum.HIGHLIGHT.getStatus(), action);
+    this.saveMissingFields(project, highLigths, action.getActualPhase().getDescription(),
+      action.getActualPhase().getYear(), ProjectSectionStatusEnum.HIGHLIGHTS.getStatus(), action);
 
   }
 

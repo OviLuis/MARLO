@@ -264,5 +264,6 @@
     <mapping resource="xmls/ProjectInnovationCrps.hbm.xml"/>    
     <mapping resource="xmls/DeliverableIntellectualAssets.hbm.xml"/>    
     
+    <mapping resource="xmls/BiPermissions.hbm.xml"/>
 	</session-factory>
 </hibernate-configuration>

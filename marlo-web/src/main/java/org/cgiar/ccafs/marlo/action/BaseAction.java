@@ -512,6 +512,22 @@ public class BaseAction extends ActionSupport implements Preparable, SessionAwar
   }
 
 
+  public boolean canAccessBiAnalytics() {
+    if (this.hasPermission(Permission.BI_ANALYTICS_PERMISSION)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  public boolean canAccessBiDashboard() {
+    if (this.hasPermission(Permission.BI_DASHBOARD_PERMISSION)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   public boolean canAccessSuperAdmin() {
     return this.securityContext.hasAllPermissions(Permission.FULL_PRIVILEGES);
   }

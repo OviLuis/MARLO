@@ -101,6 +101,11 @@
 				<artifactId>marlo-web</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			 <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>marlo-bi-filter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
 			<dependency>
 				<groupId>org.apache.struts</groupId>
 				<artifactId>struts2-core</artifactId>

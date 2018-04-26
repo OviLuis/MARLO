@@ -17,14 +17,16 @@
   <div id="superadminBlock">
     <div class="container">
       <ul>
+        [#if action.canAccessBiDashboard() || action.canAccessBiAnalytics()]
         [#--  BI Menu --]
         <li class="[#if currentSection?? && currentSection != 'superadmin' ]currentSection[/#if]"> 
           <a href="[@s.url namespace="/bi" action='${(crpSession)!}/dashboard'][/@s.url]">Business Intelligence</a>
           <ul class="subMenu">
-            <li><a href="[@s.url namespace="/bi" action='${(crpSession)!}/dashboard'][/@s.url]">BI Dashboard </a></li>
-            <li><a href="[@s.url namespace="/bi" action='${(crpSession)!}/anaytics'][/@s.url]">BI Analytics </a></li>
+            [#if action.canAccessBiDashboard()] <li><a href="[@s.url namespace="/bi" action='${(crpSession)!}/dashboard'][/@s.url]">BI Dashboard </a></li>[/#if]
+            [#if action.canAccessBiAnalytics()]<li><a href="[@s.url namespace="/bi" action='${(crpSession)!}/anaytics'][/@s.url]">BI Analytics </a></li>[/#if]
           </ul>
         </li>
+        [/#if]
         
         [#-- Sytem Admin & Admin Menu --]
         [#list superAdminMenu as item]

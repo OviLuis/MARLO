@@ -195,4 +195,9 @@ public class Permission {
   public static final String CRPS_UPDATE_REST_API_PERMISSION = "api:crps:update";
   public static final String CRPS_DELETE_REST_API_PERMISSION = "api:crps:delete";
   public static final String CRPS_FULL_REST_API_PERMISSION = "api:crps:*";
+
+  // BI
+  public static final String BI_DASHBOARD_PERMISSION = "crp:{0}:Bi:Dashboard";
+  public static final String BI_ANALYTICS_PERMISSION = "crp:{0}:Bi:Analytics";
+
 }

@@ -593,6 +593,14 @@ public final class APConstants {
   public static final long GLOBAL_UNIT_CENTER_TYPE = 2;
   public static final long GLOBAL_UNIT_CGIAR_CENTER_TYPE = 4;
 
+  /************************************************************************************************
+   * BI CONSTANTS
+   ************************************************************************************************/
+
+  public static final String ANALYTICS_TYPE = "1";
+
+  public static final String DASHBOARD_TYPE = "2";
+
   public static String getFilterBy() {
     return FILTER_BY;
   }

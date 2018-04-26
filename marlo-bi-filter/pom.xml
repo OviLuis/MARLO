@@ -1,0 +1,60 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.cgiar.ccafs</groupId>
+    <artifactId>marlo-parent</artifactId>
+    <version>4.2.5-SNAPSHOT</version>
+    <relativePath>../marlo-parent/pom.xml</relativePath>
+  </parent>  
+  <artifactId>marlo-bi-filter</artifactId>
+  <developers>
+      <developer>
+         <name>Julian Rodriguez Calderon</name>
+         <email>julian.rodriguez@cgiar.org</email>
+      </developer>    
+  </developers>
+   
+   <issueManagement>
+      <system>Github issue tracker</system>
+      <url>https://github.com/CCAFS/ccafs-ap/issues</url>
+   </issueManagement>
+
+  <name>marlo-bi-filter</name>
+  <url>http://maven.apache.org</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+		<!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
+		<dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>javax.servlet-api</artifactId>        
+        <scope>provided</scope>
+      </dependency> 
+  </dependencies>
+   <build>
+    <plugins>
+      <plugin>
+        <!--To support checkstyle goals. For example: "mvn checkstyle:checkstyle" -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+      </plugin>
+    </plugins>
+   </build>
+   <licenses>
+    <license>
+      <name>GNU General Public License (GPL)</name>
+      <url>http://www.gnu.org/licenses/gpl.txt</url>
+      <distribution>manual</distribution>
+    </license>
+  </licenses>
+  
+</project>

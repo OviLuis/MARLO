@@ -10,6 +10,7 @@
    <modules>
     <module>marlo-parent</module>
     <module>marlo-utils</module>	
-   	<module>marlo-web</module>	
+   	<module>marlo-web</module>
+   	<module>marlo-bi-filter</module>
    </modules>
 </project>

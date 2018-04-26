@@ -17,6 +17,13 @@
 package org.cgiar.ccafs.marlo.action.bi;
 
 import org.cgiar.ccafs.marlo.action.BaseAction;
+import org.cgiar.ccafs.marlo.config.APConstants;
+import org.cgiar.ccafs.marlo.data.manager.BiPermissionsManager;
+import org.cgiar.ccafs.marlo.data.manager.GlobalUnitManager;
+import org.cgiar.ccafs.marlo.data.model.BiPermissions;
+import org.cgiar.ccafs.marlo.data.model.GlobalUnit;
+import org.cgiar.ccafs.marlo.data.model.User;
+import org.cgiar.ccafs.marlo.security.Permission;
 import org.cgiar.ccafs.marlo.utils.APConfig;
 import org.cgiar.ccafs.marlo.utils.MD5Convert;
 
@@ -38,32 +45,53 @@ public class BiDashboard extends BaseAction {
 
   private static final long serialVersionUID = 1L;
 
+  private GlobalUnitManager crpManager;
+  private BiPermissionsManager biManager;
+
   private String urlDashboard;
+  private GlobalUnit loggedCrp;
+  private BiPermissions biPermissions;
 
   @Inject
-  public BiDashboard(APConfig config) {
+  public BiDashboard(APConfig config, GlobalUnitManager crpManager, BiPermissionsManager biManager) {
     super(config);
+    this.crpManager = crpManager;
+    this.biManager = biManager;
   }
 
 
   @Override
   public String execute() throws Exception {
-    Date today;
-    String dateOut;
-    SimpleDateFormat dateFormatter;
-    dateFormatter = new SimpleDateFormat("dd-MM-yyyy", this.getLocale());
 
-    today = new Date();
+    if (this.hasPermission(Permission.BI_DASHBOARD_PERMISSION)) {
+      Date today;
+      String dateOut;
+      SimpleDateFormat dateFormatter;
+      dateFormatter = new SimpleDateFormat("dd-MM-yyyy", this.getLocale());
 
-    dateOut = dateFormatter.format(today);
+      today = new Date();
 
-    // In the future, the destination will depend of the user and crp
-    // create a token of the date (dd-MM-yyyy) + SomeExtraText + destination form. which understands the .jar that does
-    // the bypass to Pentaho.
-    String token = MD5Convert.stringToMD5(dateOut + "SomeExtraText" + "destination_2");
+      dateOut = dateFormatter.format(today);
 
-    // create the url with the bypass
-    this.urlDashboard = this.getText("bi.serverurl") + token + "&dst=destination_2";
+      // create a token of the date (dd-MM-yyyy) + SomeExtraText + destination form. which understands the .jar that
+      // does
+      // the bypass to Pentaho.
+
+      String biUrl = null;
+
+      if (this.biPermissions != null) {
+        biUrl = this.biPermissions.getUrlbi();
+
+
+        String token = MD5Convert.stringToMD5(dateOut + "SomeExtraText" + biUrl);
+
+        // create the url with the bypass
+        this.urlDashboard = this.getText("bi.serverurl") + token + "&dst=" + biUrl + "&urlUser="
+          + this.biPermissions.getUserBi() + "&urlPass=" + this.biPermissions.getUserPass();
+
+      }
+
+    }
 
     return SUCCESS;
   }
@@ -77,6 +105,12 @@ public class BiDashboard extends BaseAction {
   @Override
   public void prepare() throws Exception {
     // In the future here will validate the roles and the security.
+    loggedCrp = (GlobalUnit) this.getSession().get(APConstants.SESSION_CRP);
+    loggedCrp = crpManager.getGlobalUnitById(loggedCrp.getId());
+    User user = (User) this.getSession().get(APConstants.SESSION_USER);
+
+    this.biPermissions =
+      biManager.searchPermissionByUserAndType(user.getId(), Long.parseLong(APConstants.DASHBOARD_TYPE));
   }
 
 

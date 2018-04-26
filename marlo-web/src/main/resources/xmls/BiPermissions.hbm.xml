@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Generated Apr 10, 2018 10:49:04 AM by Hibernate Tools 5.2.5.Final -->
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" 
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="org.cgiar.ccafs.marlo.data.model.BiPermissions" optimistic-lock="version"  table="bi_permissions">
+        <id name="id" type="java.lang.Long">
+            <column name="id"/>
+            <generator class="identity"/>
+        </id>
+        <property name="type" type="java.lang.Long">
+            <column name="type"/>
+        </property>
+        <property name="user" type="java.lang.Long">
+            <column name="user"/>
+        </property>
+        <property name="urlbi" type="string">
+            <column length="65535" name="urlbi"/>
+        </property>
+         <property name="userBi" type="string">
+            <column length="65535" name="userBi"/>
+        </property>
+         <property name="userPass" type="string">
+            <column length="65535" name="userPass"/>
+        </property>
+        <property name="isActive" type="boolean">
+            <column name="is_active" not-null="true"/>
+        </property>
+    </class>
+</hibernate-mapping>

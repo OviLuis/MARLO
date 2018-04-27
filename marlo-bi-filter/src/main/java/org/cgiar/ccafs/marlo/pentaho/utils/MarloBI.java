@@ -52,6 +52,9 @@ public class MarloBI extends HttpServlet {
     String dst = request.getParameter("dst");
     String urlBI = prop.getProperty(dst);
 
+    System.out.println("La direccion " + dst + " redirigiendo a " + urlBI);
+    System.out.println("Los parametros son  " + request.getQueryString());
+
     if (urlBI.indexOf("?") > 0) {
       urlBI = urlBI + request.getQueryString();
     } else {

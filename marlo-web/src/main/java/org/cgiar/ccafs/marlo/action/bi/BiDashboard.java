@@ -86,8 +86,8 @@ public class BiDashboard extends BaseAction {
         String token = MD5Convert.stringToMD5(dateOut + "SomeExtraText" + biUrl);
 
         // create the url with the bypass
-        this.urlDashboard = this.getText("bi.serverurl") + token + "&dst=" + biUrl + "&urlUser="
-          + this.biPermissions.getUserBi() + "&urlPass=" + this.biPermissions.getUserPass();
+        this.urlDashboard = this.getText("bi.serverurl") + token + "&dst=" + biUrl + "&userid="
+          + this.biPermissions.getUserBi() + "&password=" + this.biPermissions.getUserPass();
 
       }
 

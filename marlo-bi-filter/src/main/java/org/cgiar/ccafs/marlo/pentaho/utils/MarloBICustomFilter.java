@@ -33,11 +33,13 @@ import javax.servlet.http.HttpServletRequest;
 
 public class MarloBICustomFilter implements Filter {
 
+  @Override
   public void destroy() {
     // TODO Auto-generated method stub
 
   }
 
+  @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
     throws IOException, ServletException {
 
@@ -46,7 +48,7 @@ public class MarloBICustomFilter implements Filter {
     String dst = request.getParameter("dst");
     String myToken = request.getParameter("token");
     String usr = request.getParameter("userid");
-    String usrPass = request.getParameter("userPass");
+    String usrPass = request.getParameter("password");
     String password = date + "SomeExtraText" + dst;
 
     MessageDigest md;
@@ -75,6 +77,7 @@ public class MarloBICustomFilter implements Filter {
 
   }
 
+  @Override
   public void init(FilterConfig arg0) throws ServletException {
     // TODO Auto-generated method stub
 
